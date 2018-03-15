@@ -31,19 +31,22 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".SignUpActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity"></activity>
+
+        <service
+            android:name=".RadarService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
-</manifest>
-
-<!--
+</manifest><!--
     todo 00: 使用流程、定位Service驗證
     todo 01: Server 資料庫建立
     todo 02: Http 溝通 Server 的設計 (因為這方面有經驗，略過驗證)
@@ -51,5 +54,4 @@
     todo 04: 登入帳號Activity
     todo 05: 定位Service
     todo 01: Server 資料庫建立
-
 -->
