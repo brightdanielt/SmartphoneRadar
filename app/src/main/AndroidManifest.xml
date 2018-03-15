@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cauliflower.danielt.smartphoneradar">
+
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -15,6 +16,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -36,6 +38,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SignUpActivity"></activity>
     </application>
 
 </manifest>
+
+<!--
+    todo 00: 使用流程、定位Service驗證
+    todo 01: Server 資料庫建立
+    todo 02: Http 溝通 Server 的設計 (因為這方面有經驗，略過驗證)
+    todo 03: 註冊帳號Activity
+    todo 04: 登入帳號Activity
+    todo 05: 定位Service
+    todo 01: Server 資料庫建立
+
+-->
