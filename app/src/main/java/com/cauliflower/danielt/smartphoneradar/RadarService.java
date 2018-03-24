@@ -17,11 +17,18 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class RadarService extends Service {
 
+    private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
     LocationRequest locationRequest;
 
-    public RadarService() {}
+    public RadarService() {
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -31,8 +38,8 @@ public class RadarService extends Service {
 
     private void createLocationRequest() {
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000);
-        locationRequest.setFastestInterval(2000);
+        locationRequest.setInterval(20000);
+        locationRequest.setFastestInterval(20000);
         locationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -52,15 +59,50 @@ public class RadarService extends Service {
                 new LocationCallback() {
                     @Override
                     public void onLocationResult(LocationResult locationResult) {
-                        Location location = locationResult.getLastLocation();
-                        Log.i("UPDATE", location.toString());
+                        final Location location = locationResult.getLastLocation();
+                        Log.i("local location UPDATE", location.toString());
 //                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
 //                                new LatLng(location.getLatitude(),
 //                                        location.getLongitude())
 //                                , 15));
+                        new Thread(new Runnable() {
+                            @SuppressLint("LongLogTag")
+                            @Override
+                            public void run() {
+                                try {
+                                    SimpleDateFormat s =new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
+                                    String time = s.format(new Date());
+                                    updateLocation(
+                                            "daniel", "daniel", time,
+                                            location.getLatitude(), location.getLongitude());
+                                } catch (UnsupportedEncodingException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }).start();
                     }
                 }
                 , null);
+    }
+
+    public String updateLocation(String username, String password, String time, double latitude, double longitude) throws
+            UnsupportedEncodingException {
+        ConnectDb connectDb = new ConnectDb();
+
+        // change to your WebAPI Address
+
+        String params = "account=" + URLEncoder.encode(username, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&time=" + URLEncoder.encode(time, "UTF-8") +
+                "&latitude=" + URLEncoder.encode(String.valueOf(latitude), "UTF-8") +
+                "&longitude=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8") +
+                "&action=" + URLEncoder.encode("updateLocation", "UTF-8") +
+                "&";
+        Log.i("PARAMS", params);
+        String response = connectDb.sendHttpRequest(AUTHENTICATION_SERVER_ADDRESS, params);
+        Log.i("response", response);
+        return response;
+
     }
 
 }

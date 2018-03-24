@@ -8,6 +8,7 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:allowBackup="true"
@@ -46,9 +47,12 @@
             android:exported="true" />
     </application>
 
-</manifest><!--
-    todo 00: 使用流程、定位Service驗證
-    todo 01: Server 資料庫建立
+</manifest>
+
+    <!--
+    todo 00: User story、使用流程、定位Service驗證
+    todo 01: Server 資料庫建立 (完成)
+    todo 02: PHP 查詢 DB (完成)
     todo 02: Http 溝通 Server 的設計 (因為這方面有經驗，略過驗證)
     todo 03: 註冊帳號Activity
     todo 04: 登入帳號Activity
