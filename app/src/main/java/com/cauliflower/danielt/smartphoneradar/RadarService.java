@@ -24,7 +24,6 @@ import java.util.Date;
 
 public class RadarService extends Service {
 
-    private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
     LocationRequest locationRequest;
 
     public RadarService() {
@@ -57,10 +56,12 @@ public class RadarService extends Service {
                 LocationServices.getFusedLocationProviderClient(RadarService.this);
         client.requestLocationUpdates(locationRequest,
                 new LocationCallback() {
+                    @SuppressLint("LongLogTag")
                     @Override
                     public void onLocationResult(LocationResult locationResult) {
                         final Location location = locationResult.getLastLocation();
                         Log.i("local location UPDATE", location.toString());
+                        Log.i("local location UPDATE getTime:", String.valueOf(location.getTime()));
 //                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
 //                                new LatLng(location.getLatitude(),
 //                                        location.getLongitude())
@@ -70,7 +71,7 @@ public class RadarService extends Service {
                             @Override
                             public void run() {
                                 try {
-                                    SimpleDateFormat s =new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
+                                    SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
                                     String time = s.format(new Date());
                                     updateLocation(
                                             "daniel", "daniel", time,
@@ -87,9 +88,6 @@ public class RadarService extends Service {
 
     public String updateLocation(String username, String password, String time, double latitude, double longitude) throws
             UnsupportedEncodingException {
-        ConnectDb connectDb = new ConnectDb();
-
-        // change to your WebAPI Address
 
         String params = "account=" + URLEncoder.encode(username, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
@@ -99,7 +97,10 @@ public class RadarService extends Service {
                 "&action=" + URLEncoder.encode("updateLocation", "UTF-8") +
                 "&";
         Log.i("PARAMS", params);
-        String response = connectDb.sendHttpRequest(AUTHENTICATION_SERVER_ADDRESS, params);
+
+        ConnectDb connectDb = new ConnectDb();
+        String response = connectDb.sendHttpRequest(params);
+
         Log.i("response", response);
         return response;
 
