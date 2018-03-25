@@ -3,6 +3,7 @@ package com.cauliflower.danielt.smartphoneradar;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -11,7 +12,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
 
@@ -45,4 +58,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    //這邊的設計有問題，要改成執行緒重複執行、自訂時間間隔、自動更新地標
+    //帳密從何而來也要再設計
+    private void getLatLngFromServer() throws UnsupportedEncodingException {
+        ConnectDb connectDb = new ConnectDb();
+        String params = "account=" + URLEncoder.encode("", "UTF-8") +
+                "&password=" + URLEncoder.encode("", "UTF-8") +
+                "&time=" + URLEncoder.encode("", "UTF-8") +
+                "&action=" + URLEncoder.encode("getLocation", "UTF-8") +
+                "&";
+
+        Log.i("PARAMS", params);
+        String response = connectDb.sendHttpRequest(params);
+
+        try {
+            SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
+            sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void updateData(List<SimpleLocation> locations) {
+        for (int i = 0; i < locations.size(); i++) {
+            LatLng latLng = new LatLng(
+                    locations.get(i).getLatitude(),
+                    locations.get(i).getLongitude());
+
+            mMap.addMarker(new MarkerOptions().
+                    position(latLng).
+                    title(locations.get(i).getTime()));
+        }
+    }
 }
