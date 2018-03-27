@@ -1,26 +1,15 @@
-package com.cauliflower.danielt.smartphoneradar;
+package com.cauliflower.danielt.smartphoneradar.UI;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.Service.RadarService;
 /*
 * 考慮使用 FB 做為登入媒介
 * 但 FB 也是綁定手機的，當手機遺失時，在其他手機登入 FB，需要原手機取得驗證，

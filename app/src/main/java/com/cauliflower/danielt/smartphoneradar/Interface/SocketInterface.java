@@ -1,4 +1,4 @@
-package com.cauliflower.danielt.smartphoneradar;
+package com.cauliflower.danielt.smartphoneradar.Interface;
 
 /**
  * Created by danielt on 2018/3/19.

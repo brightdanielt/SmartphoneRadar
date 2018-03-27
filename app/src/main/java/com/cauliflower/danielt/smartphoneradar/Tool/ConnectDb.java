@@ -1,4 +1,6 @@
-package com.cauliflower.danielt.smartphoneradar;
+package com.cauliflower.danielt.smartphoneradar.Tool;
+
+import com.cauliflower.danielt.smartphoneradar.Interface.SocketInterface;
 
 import java.io.BufferedReader;
 import java.io.IOException;

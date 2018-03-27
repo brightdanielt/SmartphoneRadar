@@ -1,10 +1,14 @@
-package com.cauliflower.danielt.smartphoneradar;
+package com.cauliflower.danielt.smartphoneradar.UI;
 
-import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
+import com.cauliflower.danielt.smartphoneradar.Tool.HandlerXML;
+import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
+import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.Obj.SimpleLocation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
