@@ -1,4 +1,23 @@
 <resources>
     <string name="app_name">SmartphoneRadar</string>
     <string name="title_activity_maps">Map</string>
+
+    //Response code
+    <string name="INSERT_USER_SUCCESS">INSERT USER SUCCESS</string>
+
+    <string name="INSERT_PHONE_INFO_SUCCESS">INSERT PHONE INFO SUCCESS</string>
+
+    <string name="UPDATE_LOCATION_SUCCESS">UPDATE LOCATION SUCCESS</string>
+
+    <string name="PARAMETER_ERROR">PARAMETER ERROR</string>
+
+    <string name="USER_ALREADY_EXISTS">USER ALREADY EXISTS</string>
+
+    <string name="INSERT_USER_ERROR">INSERT USER ERROR</string>
+
+    <string name="INSERT_PHONE_INFO_ERROR">INSERT PHONE INFO ERROR</string>
+
+    <string name="UPDATE_LOCATION_ERROR">UPDATE LOCATION ERROR</string>
+
+
 </resources>

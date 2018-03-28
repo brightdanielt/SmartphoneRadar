@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -35,10 +36,11 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText edTxt_account, edTxt_password;
     private Button btn_signUp;
 
+    private MyDbHelper dbHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sign_up);
 
 //        if (ActivityCompat.checkSelfPermission(this,
 //                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -49,6 +51,7 @@ public class SignUpActivity extends AppCompatActivity {
 //            startRadar();
 //        }
 
+        setContentView(R.layout.activity_sign_up);
         findView();
 
     }
@@ -61,23 +64,29 @@ public class SignUpActivity extends AppCompatActivity {
         btn_signUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 String account = edTxt_account.getText().toString();
                 String password = edTxt_password.getText().toString();
+
                 if (account == null || password == null) {
                     Toast.makeText(SignUpActivity.this, "請輸入帳密", Toast.LENGTH_SHORT).show();
                 } else {
                     try {
+                        //向 Server 註冊該帳密
                         String response_code = signUp(account, password);
-                        ResponseCode responseCode = new ResponseCode(SignUpActivity.this,response_code);
 
+                        ResponseCode responseCode = new ResponseCode(SignUpActivity.this, response_code);
+                        //根據回傳值，得知目的成功與否
                         if (responseCode.checkCode()) {
                             ContentValues values = new ContentValues();
                             values.put("account", account);
                             values.put("password", password);
                             MyDbHelper dbHelper = new MyDbHelper(
-                                    SignUpActivity.this, "SmartphoneRadar", null, 1);
+                                    SignUpActivity.this, "SmartphoneRadar.db", null, 1);
                             long id = dbHelper.getWritableDatabase().insert("user", null, values);
                             Log.i("Insert user", id + "");
+                        } else {
+                            //註冊帳密失敗
                         }
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
