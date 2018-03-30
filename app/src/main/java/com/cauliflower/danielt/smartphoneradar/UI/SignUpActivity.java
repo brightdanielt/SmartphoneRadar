@@ -36,8 +36,6 @@ public class SignUpActivity extends AppCompatActivity {
     private EditText edTxt_account, edTxt_password;
     private Button btn_signUp;
 
-    private MyDbHelper dbHelper;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

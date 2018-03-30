@@ -1,5 +1,6 @@
 package com.cauliflower.danielt.smartphoneradar.UI;
 
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,8 @@ import javax.xml.parsers.SAXParserFactory;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
+    private Handler handler;
+    private Runnable runnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +43,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    getLatLngFromServer();
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        handler = new Handler();
+        //每 20 秒查詢一次位置
+        handler.postDelayed(runnable, 20000);
     }
 
 
@@ -56,14 +74,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-    //這邊的設計有問題，要改成執行緒重複執行、自訂時間間隔、自動更新地標
-    //帳密從何而來也要再設計
     private void getLatLngFromServer() throws UnsupportedEncodingException {
         ConnectDb connectDb = new ConnectDb();
         String params = "account=" + URLEncoder.encode("", "UTF-8") +
@@ -95,9 +107,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     locations.get(i).getLatitude(),
                     locations.get(i).getLongitude());
 
+            // Add a marker in new latLng and move the camera
             mMap.addMarker(new MarkerOptions().
                     position(latLng).
                     title(locations.get(i).getTime()));
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
 }
