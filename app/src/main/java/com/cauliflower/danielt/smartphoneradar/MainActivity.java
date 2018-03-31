@@ -21,8 +21,16 @@ import com.cauliflower.danielt.smartphoneradar.UI.SignUpActivity;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_ACCOUNT;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_PASSWORD;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_USEDFOR;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.TABLE_USER;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION;
+
 public class MainActivity extends AppCompatActivity {
     private MyDbHelper dbHelper;
+    private ConnectDb connectDb;
     private EditText edTxt_account, edTxt_password;
     private Button btn_enter;
     private RadioButton radioBtn_logIn, radioBtn_signUp, radioBtn_getLocation;
@@ -32,13 +40,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        dbHelper = new MyDbHelper(
-                MainActivity.this, "SmartphoneRadar.db", null, 1);
+        connectDb = new ConnectDb(MainActivity.this);
+
+        dbHelper = new MyDbHelper(MainActivity.this);
         //查詢是否已註冊
         Cursor cursor = dbHelper.getReadableDatabase().query(
-                "user", null, "_id=?", new String[]{"1"}, null, null, null);
-        int index_account = cursor.getColumnIndex("account");
-        int index_password = cursor.getColumnIndex("password");
+                TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_SENDLOCATION},
+                null, null, null);
+        int index_account = cursor.getColumnIndex(COLUMN_USER_ACCOUNT);
+        int index_password = cursor.getColumnIndex(COLUMN_USER_PASSWORD);
         String account = cursor.getString(index_account);
         String password = cursor.getString(index_password);
 
@@ -46,21 +56,48 @@ public class MainActivity extends AppCompatActivity {
         if (account != null && password != null) {
             try {
                 //要求 Server 驗證該組帳密
-                String code = logIn(account, password);
+                String code = connectDb.logIn(account, password);
                 ResponseCode responseCode = new ResponseCode(MainActivity.this, code);
                 //根據回傳值，得知目的成功與否
                 if (responseCode.checkCode()) {
                     //帳密存在，轉跳追蹤設定頁面
                 } else {
-                    //帳密不存在，應登入、查詢手機位置或註冊
-
+                    //帳密不存在，應重新輸入帳密以登入、查詢手機位置或註冊
+                    findView();
                 }
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
         } else {
+            //若未註冊，檢查是否查詢過其他手機位置
+            Cursor cursor_getLocation = dbHelper.getReadableDatabase().query(
+                    TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_GETLOCATION},
+                    null, null, null);
+            int index_account_getLocation = cursor_getLocation.getColumnIndex(COLUMN_USER_ACCOUNT);
+            int index_password_getLocation = cursor_getLocation.getColumnIndex(COLUMN_USER_PASSWORD);
+            String account_getLocation = cursor_getLocation.getString(index_account_getLocation);
+            String password_getLocation = cursor_getLocation.getString(index_password_getLocation);
+            try {
+                //要求 Server 驗證該組帳密
+                String code = connectDb.logIn(account_getLocation, password_getLocation);
+                ResponseCode responseCode = new ResponseCode(MainActivity.this, code);
+                //根據回傳值，得知目的成功與否
+                if (responseCode.checkCode()) {
+                    //帳密存在，轉跳google Map追蹤頁面
+                    Intent i = new Intent();
+                    i.putExtra(COLUMN_USER_ACCOUNT, account_getLocation);
+                    i.putExtra(COLUMN_USER_PASSWORD, password_getLocation);
+                    i.setClass(MainActivity.this, MapsActivity.class);
+                    startActivity(i);
+                } else {
+                    //帳密不存在，應重新輸入帳密以登入、查詢手機位置或註冊
+                    findView();
+                }
 
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -87,51 +124,31 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         if (radioBtn_logIn.isSelected()) {
                             //向 Server 驗證該帳密
-                            String response_code = logIn(account, password);
+                            String response_code = connectDb.logIn(account, password);
                             ResponseCode responseCode = new ResponseCode(MainActivity.this, response_code);
                             //根據回傳值，得知目的成功與否
                             if (responseCode.checkCode()) {
-                                ContentValues values = new ContentValues();
-                                values.put("account", account);
-                                values.put("password", password);
-                                MyDbHelper dbHelper = new MyDbHelper(
-                                        MainActivity.this, "SmartphoneRadar.db", null, 1);
-                                long id = dbHelper.getWritableDatabase().insert("user", null, values);
-                                Log.i("Insert user", id + "");
-
+                                dbHelper.addUser(account, password, VALUE_USER_USEDFOR_SENDLOCATION);
                             } else {
                                 //驗證帳密失敗
                             }
                         } else if (radioBtn_signUp.isSelected()) {
                             //向 Server 註冊該帳密
-                            String response_code = signUp(account, password);
+                            String response_code = connectDb.signUp(account, password);
                             ResponseCode responseCode = new ResponseCode(MainActivity.this, response_code);
                             //根據回傳值，得知目的成功與否
                             if (responseCode.checkCode()) {
-                                ContentValues values = new ContentValues();
-                                values.put("account", account);
-                                values.put("password", password);
-                                MyDbHelper dbHelper = new MyDbHelper(
-                                        MainActivity.this, "SmartphoneRadar.db", null, 1);
-                                long id = dbHelper.getWritableDatabase().insert("user", null, values);
-                                Log.i("Insert user", id + "");
+                                dbHelper.addUser(account, password, VALUE_USER_USEDFOR_SENDLOCATION);
                             } else {
                                 //註冊帳密失敗
                             }
                         } else if (radioBtn_getLocation.isSelected()) {
                             //向 Server 驗證該帳密
-                            String response_code = logIn(account, password);
+                            String response_code = connectDb.logIn(account, password);
                             ResponseCode responseCode = new ResponseCode(MainActivity.this, response_code);
                             //根據回傳值，得知目的成功與否
                             if (responseCode.checkCode()) {
-                                ContentValues values = new ContentValues();
-                                values.put("account", account);
-                                values.put("password", password);
-                                MyDbHelper dbHelper = new MyDbHelper(
-                                        MainActivity.this, "SmartphoneRadar.db", null, 1);
-                                long id = dbHelper.getWritableDatabase().insert("user", null, values);
-                                Log.i("Insert user", id + "");
-
+                                dbHelper.addUser(account, password, VALUE_USER_USEDFOR_GETLOCATION);
                                 startActivity(new Intent(MainActivity.this, MapsActivity.class));
                             } else {
                                 //驗證帳密失敗
@@ -145,39 +162,4 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public String signUp(String account, String password) throws
-            UnsupportedEncodingException {
-
-        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
-                "&password=" + URLEncoder.encode(password, "UTF-8") +
-                "&action=" + URLEncoder.encode("signUp", "UTF-8") +
-                "&";
-        Log.i("PARAMS", params);
-
-        ConnectDb connectDb = new ConnectDb();
-        String response = connectDb.sendHttpRequest(params);
-
-        Log.i("response", response);
-        return response;
-
-    }
-
-    //logIn 用於驗證該組帳密是否存在
-    public String logIn(String account, String password) throws
-            UnsupportedEncodingException {
-
-
-        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
-                "&password=" + URLEncoder.encode(password, "UTF-8") +
-                "&action=" + URLEncoder.encode("login", "UTF-8") +
-                "&";
-        Log.i("PARAMS", params);
-
-        ConnectDb connectDb = new ConnectDb();
-        String response = connectDb.sendHttpRequest(params);
-
-        Log.i("response", response);
-        return response;
-
-    }
 }

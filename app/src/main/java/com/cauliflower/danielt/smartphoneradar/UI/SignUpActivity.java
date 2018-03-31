@@ -69,46 +69,11 @@ public class SignUpActivity extends AppCompatActivity {
                 if (account == null || password == null) {
                     Toast.makeText(SignUpActivity.this, "請輸入帳密", Toast.LENGTH_SHORT).show();
                 } else {
-                    try {
-                        //向 Server 註冊該帳密
-                        String response_code = signUp(account, password);
+                    //向 Server 註冊該帳密
 
-                        ResponseCode responseCode = new ResponseCode(SignUpActivity.this, response_code);
-                        //根據回傳值，得知目的成功與否
-                        if (responseCode.checkCode()) {
-                            ContentValues values = new ContentValues();
-                            values.put("account", account);
-                            values.put("password", password);
-                            MyDbHelper dbHelper = new MyDbHelper(
-                                    SignUpActivity.this, "SmartphoneRadar.db", null, 1);
-                            long id = dbHelper.getWritableDatabase().insert("user", null, values);
-                            Log.i("Insert user", id + "");
-                        } else {
-                            //註冊帳密失敗
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         });
-    }
-
-    public String signUp(String account, String password) throws
-            UnsupportedEncodingException {
-
-        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
-                "&password=" + URLEncoder.encode(password, "UTF-8") +
-                "&action=" + URLEncoder.encode("signUp", "UTF-8") +
-                "&";
-        Log.i("PARAMS", params);
-
-        ConnectDb connectDb = new ConnectDb();
-        String response = connectDb.sendHttpRequest(params);
-
-        Log.i("response", response);
-        return response;
-
     }
 
 

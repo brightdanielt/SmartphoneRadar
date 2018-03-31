@@ -1,15 +1,19 @@
 package com.cauliflower.danielt.smartphoneradar.UI;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.cauliflower.danielt.smartphoneradar.MainActivity;
 import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
 import com.cauliflower.danielt.smartphoneradar.Tool.HandlerXML;
 import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.Obj.SimpleLocation;
+import com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,11 +33,21 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_ACCOUNT;
+import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_PASSWORD;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
+    //用於遠端 DB
+    private ConnectDb connectDb;
+    //用於手機 DB
+    private MyDbHelper dbHelper;
+
     private Handler handler;
     private Runnable runnable;
+
+    private String account, password;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,20 +58,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    getLatLngFromServer();
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
+        Intent i = getIntent();
+        account = i.getStringExtra(COLUMN_USER_ACCOUNT);
+        password = i.getStringExtra(COLUMN_USER_PASSWORD);
 
-        handler = new Handler();
-        //每 20 秒查詢一次位置
-        handler.postDelayed(runnable, 20000);
+        if (account != null && password != null) {
+            connectDb = new ConnectDb(MapsActivity.this);
+            dbHelper = new MyDbHelper(MapsActivity.this);
+
+            runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        connectDb.getLatLngFromServer(account, password);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            handler = new Handler();
+            //每 20 秒查詢一次位置
+            handler.postDelayed(runnable, 20000);
+        }
+
     }
 
 
@@ -76,42 +100,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    private void getLatLngFromServer() throws UnsupportedEncodingException {
-        ConnectDb connectDb = new ConnectDb();
-        String params = "account=" + URLEncoder.encode("", "UTF-8") +
-                "&password=" + URLEncoder.encode("", "UTF-8") +
-                "&time=" + URLEncoder.encode("", "UTF-8") +
-                "&action=" + URLEncoder.encode("getLocation", "UTF-8") +
-                "&";
-
-        Log.i("PARAMS", params);
-        String response = connectDb.sendHttpRequest(params);
-
-        try {
-            SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
-            sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (SAXException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     @Override
     public void updateData(List<SimpleLocation> locations) {
         for (int i = 0; i < locations.size(); i++) {
-            LatLng latLng = new LatLng(
-                    locations.get(i).getLatitude(),
-                    locations.get(i).getLongitude());
+
+            double latitude, longitude;
+            String time;
+
+            latitude = locations.get(i).getLatitude();
+            longitude = locations.get(i).getLongitude();
+            time = locations.get(i).getTime();
+
+            LatLng latLng = new LatLng(latitude, longitude);
+
+            dbHelper.addLocation(account, latitude, longitude, time);
 
             // Add a marker in new latLng and move the camera
             mMap.addMarker(new MarkerOptions().
-                    position(latLng).
-                    title(locations.get(i).getTime()));
+                    position(latLng).title(time));
             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         }
     }
+
 }

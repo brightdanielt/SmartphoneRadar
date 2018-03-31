@@ -1,14 +1,28 @@
 package com.cauliflower.danielt.smartphoneradar.Tool;
 
+import android.content.Context;
+import android.util.Log;
+
 import com.cauliflower.danielt.smartphoneradar.Interface.SocketInterface;
+import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
+import com.cauliflower.danielt.smartphoneradar.UI.MapsActivity;
+
+import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 /**
  * Created by danielt on 2018/3/19.
@@ -20,7 +34,10 @@ public class ConnectDb implements SocketInterface {
 
     private static final String HTTP_REQUEST_FAILED = null;
 
-    public ConnectDb() {
+    private Context context;
+
+    public ConnectDb(Context context) {
+        this.context = context;
     }
 
     @Override
@@ -78,5 +95,63 @@ public class ConnectDb implements SocketInterface {
     @Override
     public int getListeningPort() {
         return 0;
+    }
+
+
+    public String signUp(String account, String password) throws
+            UnsupportedEncodingException {
+
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&action=" + URLEncoder.encode("signUp", "UTF-8") +
+                "&";
+        Log.i("PARAMS", params);
+
+        String response = sendHttpRequest(params);
+
+        Log.i("response", response);
+        return response;
+
+    }
+
+    //logIn 用於驗證該組帳密是否存在
+    public String logIn(String account, String password) throws
+            UnsupportedEncodingException {
+
+
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&action=" + URLEncoder.encode("login", "UTF-8") +
+                "&";
+        Log.i("PARAMS", params);
+
+        String response = sendHttpRequest(params);
+
+        Log.i("response", response);
+        return response;
+
+    }
+
+    public void getLatLngFromServer(String account, String password) throws UnsupportedEncodingException {
+        String params = "account=" + URLEncoder.encode("", "UTF-8") +
+                "&password=" + URLEncoder.encode("", "UTF-8") +
+                "&time=" + URLEncoder.encode("", "UTF-8") +
+                "&action=" + URLEncoder.encode("getLocation", "UTF-8") +
+                "&";
+
+        Log.i("PARAMS", params);
+        String response = sendHttpRequest(params);
+
+        try {
+            SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
+            sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML((Updater) context));
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
