@@ -40,18 +40,20 @@ public class MyDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TABLE_USER + " (" +
-                COLUMN_USER_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_USER_ACCOUNT + " VARCHAR PRIMARY KEY NOT NULL, " +
-                COLUMN_USER_PASSWORD + " VARCHAR PRIMARY KEY NOT NULL, " +
-                COLUMN_USER_USEDFOR + " VARCHAR NOT NULL) "
+                COLUMN_USER_ID + " INTEGER, " +
+                COLUMN_USER_ACCOUNT + " VARCHAR NOT NULL, " +
+                COLUMN_USER_PASSWORD + " VARCHAR NOT NULL, " +
+                COLUMN_USER_USEDFOR + " VARCHAR NOT NULL, " +
+                "PRIMARY KEY( " + COLUMN_USER_ACCOUNT + "," + COLUMN_USER_PASSWORD + ") ) "
         );
 
         db.execSQL("CREATE TABLE " + TABLE_LOCATION + " (" +
-                COLUMN_LOCATION_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_LOCATION_ACCOUNT + " VARCHAR PRIMARY KEY NOT NULL, " +
+                COLUMN_LOCATION_ID + " INTEGER, " +
+                COLUMN_LOCATION_ACCOUNT + " VARCHAR NOT NULL, " +
                 COLUMN_LOCATION_LATITUDE + " REAL NOT NULL, " +
                 COLUMN_LOCATION_LONGITUDE + " REAL NOT NULL, " +
-                COLUMN_LOCATION_TIME + " DATETIME PRIMARY KEY NOT NULL) "
+                COLUMN_LOCATION_TIME + " DATETIME NOT NULL, " +
+                "PRIMARY KEY( " + COLUMN_LOCATION_ACCOUNT + "," + COLUMN_LOCATION_TIME + ") ) "
         );
     }
 
@@ -62,7 +64,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addUser(String account, String password,String usedFor) {
+    public void addUser(String account, String password, String usedFor) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ACCOUNT, account);
         values.put(COLUMN_USER_PASSWORD, password);

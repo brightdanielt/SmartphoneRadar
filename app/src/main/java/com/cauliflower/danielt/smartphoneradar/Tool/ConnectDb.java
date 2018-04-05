@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.Interface.SocketInterface;
 import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
-import com.cauliflower.danielt.smartphoneradar.UI.MapsActivity;
 
 import org.xml.sax.SAXException;
 
@@ -41,40 +40,45 @@ public class ConnectDb implements SocketInterface {
     }
 
     @Override
-    public String sendHttpRequest(String params) {
-        URL url;
-        String result = new String();
-        try {
-            url = new URL(AUTHENTICATION_SERVER_ADDRESS);
-            HttpURLConnection connection;
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
+    public String sendHttpRequest(final String params) {
+        final String[] result = new String[]{""};
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                URL url;
+                try {
+                    url = new URL(AUTHENTICATION_SERVER_ADDRESS);
+                    HttpURLConnection connection;
+                    connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoOutput(true);
 
-            PrintWriter out = new PrintWriter(connection.getOutputStream());
+                    PrintWriter out = new PrintWriter(connection.getOutputStream());
 
-            out.println(params);
-            out.close();
+                    out.println(params);
+                    out.close();
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(
-                            connection.getInputStream()));
-            String inputLine;
+                    BufferedReader in = new BufferedReader(
+                            new InputStreamReader(
+                                    connection.getInputStream()));
+                    String inputLine;
 
-            while ((inputLine = in.readLine()) != null) {
-                result = result.concat(inputLine);
+                    while ((inputLine = in.readLine()) != null) {
+                        result[0] = result[0].concat(inputLine);
+                    }
+                    in.close();
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                if (result[0].length() == 0) {
+                    result[0] = HTTP_REQUEST_FAILED;
+                }
             }
-            in.close();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }).start();
 
-        if (result.length() == 0) {
-            result = HTTP_REQUEST_FAILED;
-        }
-
-        return result;
+        return result[0];
     }
 
     @Override
@@ -98,18 +102,20 @@ public class ConnectDb implements SocketInterface {
     }
 
 
-    public String signUp(String account, String password) throws
+    public String signUp(String account, String password,String model,String imei_1) throws
             UnsupportedEncodingException {
 
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&model=" + URLEncoder.encode(model, "UTF-8") +
+                "&imei_1=" + URLEncoder.encode(imei_1, "UTF-8") +
                 "&action=" + URLEncoder.encode("signUp", "UTF-8") +
                 "&";
         Log.i("PARAMS", params);
 
         String response = sendHttpRequest(params);
 
-        Log.i("response", response);
+//        Log.i("response", response);
         return response;
 
     }
@@ -127,7 +133,7 @@ public class ConnectDb implements SocketInterface {
 
         String response = sendHttpRequest(params);
 
-        Log.i("response", response);
+//        Log.i("response", response);
         return response;
 
     }

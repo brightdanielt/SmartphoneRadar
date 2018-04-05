@@ -9,6 +9,8 @@
 
     <string name="UPDATE_LOCATION_SUCCESS">UPDATE LOCATION SUCCESS</string>
 
+    <string name="LOGIN_SUCCESS">LOGIN SUCCESS</string>
+
     <string name="PARAMETER_ERROR">PARAMETER ERROR</string>
 
     <string name="USER_ALREADY_EXISTS">USER ALREADY EXISTS</string>
@@ -18,6 +20,8 @@
     <string name="INSERT_PHONE_INFO_ERROR">INSERT PHONE INFO ERROR</string>
 
     <string name="UPDATE_LOCATION_ERROR">UPDATE LOCATION ERROR</string>
+
+    <string name="LOGIN_ERROR">LOGIN ERROR</string>
 
 
 </resources>

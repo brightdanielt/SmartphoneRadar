@@ -32,6 +32,7 @@
                 android:id="@+id/radioBtn_signUp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:checked="true"
                 android:text="註冊以開始追蹤正在使用的這支手機" />
 
             <RadioButton

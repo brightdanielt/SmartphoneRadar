@@ -18,20 +18,4 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
     }
 
-    public String login(String account, String password) throws
-            UnsupportedEncodingException {
-
-        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
-                "&password=" + URLEncoder.encode(password, "UTF-8") +
-                "&action=" + URLEncoder.encode("login", "UTF-8") +
-                "&";
-        Log.i("PARAMS", params);
-
-        ConnectDb connectDb = new ConnectDb();
-        String response = connectDb.sendHttpRequest(params);
-
-        Log.i("response", response);
-        return response;
-
-    }
 }

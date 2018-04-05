@@ -95,7 +95,7 @@ public class RadarService extends Service {
                 "&";
         Log.i("PARAMS", params);
 
-        ConnectDb connectDb = new ConnectDb();
+        ConnectDb connectDb = new ConnectDb(RadarService.this);
         String response = connectDb.sendHttpRequest(params);
 
         Log.i("response", response);
