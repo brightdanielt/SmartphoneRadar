@@ -59,7 +59,7 @@
     todo 03: 註冊帳號 Activity
     todo 04: 登入帳號 Activity
     todo 05: 定位 Service
-    todo 06: 設定頁面：有關 sendLocation 的設定
+    todo 06: 設定頁面：有關 sendLocation 的設定，使用 PreferenceFragment 實作該功能
                 開始定位這支手機 ON/OFF（關閉定位時需要輸入帳密）
                 更新位置間隔（每隔幾秒更新一次手機的位置）
                 手機的資訊

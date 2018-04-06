@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <SwitchPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_position"
+        android:title="@string/pref_title_position"/>
+    <ListPreference
+        android:defaultValue="true"
+        android:key="@string/pref_key_updateFrequency"
+        android:title="@string/pref_title_updateFrequency"
+        android:entries="@array/pref_entries_updateFrequency"
+        android:entryValues="@array/pref_entryValues_updateFrequency"/>
+</PreferenceScreen>

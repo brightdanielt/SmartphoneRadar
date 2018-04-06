@@ -23,5 +23,18 @@
 
     <string name="LOGIN_ERROR">LOGIN ERROR</string>
 
+    //Preference
+    <string name="pref_title_position">定位該裝置</string>
+    <string name="pref_key_position">position</string>
+    <string name="pref_positioning">定位中</string>
+    <string name="pref_not_positioning">未定位</string>
+
+    <string name="pref_title_updateFrequency">定位頻率</string>
+    <string name="pref_key_updateFrequency">updateFrequency</string>
+    <string name="pref_label_updateFrequency_5s">5秒</string>
+    <string name="pref_label_updateFrequency_10s">10秒</string>
+    <string name="pref_label_updateFrequency_30s">30秒</string>
+    <string name="pref_label_updateFrequency_60s">60秒</string>
+
 
 </resources>
