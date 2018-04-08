@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--<PreferenceCategory-->
+        <!--android:title="@string/pref_title_position">-->
 
-    <SwitchPreference
-        android:defaultValue="true"
-        android:key="@string/pref_key_position"
-        android:title="@string/pref_title_position"/>
-    <ListPreference
-        android:defaultValue="true"
-        android:key="@string/pref_key_updateFrequency"
-        android:title="@string/pref_title_updateFrequency"
-        android:entries="@array/pref_entries_updateFrequency"
-        android:entryValues="@array/pref_entryValues_updateFrequency"/>
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_position"
+            android:title="@string/pref_title_position"
+            android:summary=""/>
+    <!--</PreferenceCategory>-->
+
+    <!--<PreferenceCategory-->
+        <!--android:title="@string/pref_title_updateFrequency">-->
+        <ListPreference
+            android:defaultValue="@string/pref_label_updateFrequency_30s"
+            android:entries="@array/pref_entries_updateFrequency"
+            android:entryValues="@array/pref_entries_updateFrequency"
+            android:key="@string/pref_key_updateFrequency"
+            android:title="@string/pref_title_updateFrequency"
+            android:summary="@string/pref_label_updateFrequency_30s" />
+    <!--</PreferenceCategory>-->
+
 </PreferenceScreen>

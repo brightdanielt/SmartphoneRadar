@@ -1,4 +1,4 @@
-package com.cauliflower.danielt.smartphoneradar.Service;
+package com.cauliflower.danielt.smartphoneradar.service;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
@@ -7,7 +7,7 @@ import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;

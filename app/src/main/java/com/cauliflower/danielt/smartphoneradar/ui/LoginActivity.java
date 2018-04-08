@@ -1,14 +1,9 @@
-package com.cauliflower.danielt.smartphoneradar.UI;
+package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 public class LoginActivity extends AppCompatActivity {
 

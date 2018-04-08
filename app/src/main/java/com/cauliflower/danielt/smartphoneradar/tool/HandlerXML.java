@@ -1,9 +1,9 @@
-package com.cauliflower.danielt.smartphoneradar.Tool;
+package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
-import com.cauliflower.danielt.smartphoneradar.Obj.SimpleLocation;
+import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
+import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

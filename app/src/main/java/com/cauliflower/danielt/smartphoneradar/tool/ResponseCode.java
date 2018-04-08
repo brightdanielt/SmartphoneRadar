@@ -1,4 +1,4 @@
-package com.cauliflower.danielt.smartphoneradar.Tool;
+package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.content.Context;
 import android.widget.Toast;

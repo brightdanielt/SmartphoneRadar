@@ -1,7 +1,6 @@
 package com.cauliflower.danielt.smartphoneradar;
 
 import android.Manifest;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,28 +10,26 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper;
-import com.cauliflower.danielt.smartphoneradar.Tool.ResponseCode;
-import com.cauliflower.danielt.smartphoneradar.UI.MapsActivity;
-import com.cauliflower.danielt.smartphoneradar.UI.SignUpActivity;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
+import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
+import com.cauliflower.danielt.smartphoneradar.tool.ResponseCode;
+import com.cauliflower.danielt.smartphoneradar.ui.MapsActivity;
+import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_ACCOUNT;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_PASSWORD;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_USEDFOR;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.TABLE_USER;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_PASSWORD;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_USEDFOR;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.TABLE_USER;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION;
 
 public class MainActivity extends AppCompatActivity {
     private MyDbHelper dbHelper;
@@ -75,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
                     if (responseCode.checkCode(code)) {
                         //帳密存在，轉跳追蹤設定頁面
                         Toast.makeText(MainActivity.this, "帳密存在，轉跳追蹤設定頁面", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, SettingsActivity.class));
                     } else {
                         //帳密不存在，應重新輸入帳密以登入、查詢手機位置或註冊
                     }
@@ -119,13 +117,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void findView() {
-        radioBtn_logIn = findViewById(R.id.radioBtn_logIn);
-        radioBtn_signUp = findViewById(R.id.radioBtn_signUp);
-        radioBtn_getLocation = findViewById(R.id.radioBtn_getLocation);
+        radioBtn_logIn = (RadioButton) findViewById(R.id.radioBtn_logIn);
+        radioBtn_signUp = (RadioButton) findViewById(R.id.radioBtn_signUp);
+        radioBtn_getLocation = (RadioButton) findViewById(R.id.radioBtn_getLocation);
 
-        edTxt_account = findViewById(R.id.edTxt_account);
-        edTxt_password = findViewById(R.id.edTxt_password);
-        btn_enter = findViewById(R.id.btn_enter);
+        edTxt_account = (EditText) findViewById(R.id.edTxt_account);
+        edTxt_password = (EditText) findViewById(R.id.edTxt_password);
+        btn_enter = (Button) findViewById(R.id.btn_enter);
 
         btn_enter.setOnClickListener(new View.OnClickListener() {
             @Override

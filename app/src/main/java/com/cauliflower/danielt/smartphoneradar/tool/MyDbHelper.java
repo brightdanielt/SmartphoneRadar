@@ -1,13 +1,10 @@
-package com.cauliflower.danielt.smartphoneradar.Tool;
+package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import com.cauliflower.danielt.smartphoneradar.MainActivity;
-import com.cauliflower.danielt.smartphoneradar.UI.MapsActivity;
 
 /**
  * Created by danielt on 2018/3/27.

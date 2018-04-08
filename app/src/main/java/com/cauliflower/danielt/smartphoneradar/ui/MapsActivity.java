@@ -1,19 +1,15 @@
-package com.cauliflower.danielt.smartphoneradar.UI;
+package com.cauliflower.danielt.smartphoneradar.ui;
 
-import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.MainActivity;
-import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.Tool.HandlerXML;
-import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
+import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.Obj.SimpleLocation;
-import com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper;
+import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
+import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,20 +17,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.xml.sax.SAXException;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_ACCOUNT;
-import static com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper.COLUMN_USER_PASSWORD;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
+import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_PASSWORD;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Updater {
 

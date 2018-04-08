@@ -1,10 +1,10 @@
-package com.cauliflower.danielt.smartphoneradar.Tool;
+package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.content.Context;
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.Interface.SocketInterface;
-import com.cauliflower.danielt.smartphoneradar.Interface.Updater;
+import com.cauliflower.danielt.smartphoneradar.interfacer.SocketInterface;
+import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 
 import org.xml.sax.SAXException;
 

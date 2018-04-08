@@ -1,4 +1,4 @@
-package com.cauliflower.danielt.smartphoneradar.Obj;
+package com.cauliflower.danielt.smartphoneradar.obj;
 
 /**
  * Created by danielt on 2018/3/25.

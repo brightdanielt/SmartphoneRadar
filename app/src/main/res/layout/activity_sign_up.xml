@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
-    tools:context="com.cauliflower.danielt.smartphoneradar.UI.SignUpActivity">
+    tools:context="com.cauliflower.danielt.smartphoneradar.ui.SignUpActivity">
 
     <TextView
         android:layout_width="match_parent"

@@ -1,29 +1,17 @@
-package com.cauliflower.danielt.smartphoneradar.UI;
+package com.cauliflower.danielt.smartphoneradar.ui;
 
-import android.Manifest;
-import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.Service.RadarService;
-import com.cauliflower.danielt.smartphoneradar.Tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.Tool.MyDbHelper;
-import com.cauliflower.danielt.smartphoneradar.Tool.ResponseCode;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 /*
 * 考慮使用 FB 做為登入媒介
 * 但 FB 也是綁定手機的，當手機遺失時，在其他手機登入 FB，需要原手機取得驗證，
@@ -55,9 +43,9 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void findView() {
-        edTxt_account = findViewById(R.id.edTxt_account);
-        edTxt_password = findViewById(R.id.edTxt_password);
-        btn_signUp = findViewById(R.id.btn_signUp);
+        edTxt_account = (EditText) findViewById(R.id.edTxt_account);
+        edTxt_password = (EditText) findViewById(R.id.edTxt_password);
+        btn_signUp = (Button) findViewById(R.id.btn_signUp);
 
         btn_signUp.setOnClickListener(new View.OnClickListener() {
             @Override

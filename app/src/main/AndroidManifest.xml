@@ -9,7 +9,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:allowBackup="true"
@@ -32,17 +32,21 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".UI.MapsActivity"
+            android:name=".ui.MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".UI.SignUpActivity"/>
+        <activity android:name=".ui.SignUpActivity" />
 
         <service
-            android:name=".Service.RadarService"
+            android:name=".service.RadarService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".UI.LoginActivity" />
+        <activity android:name=".ui.LoginActivity" />
         <activity android:name=".MainActivity">
+
+        </activity>
+
+        <activity android:name=".ui.SettingsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -65,5 +69,4 @@
                 手機的資訊
                 使用指南
                 查詢其他手機位置（按鈕）
-
 -->
