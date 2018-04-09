@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
+import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -33,9 +35,10 @@ public class RadarService extends Service {
     }
 
     private void createLocationRequest() {
+        String frequency = PositionPreferences.getUpdateFrequency(RadarService.this);
         locationRequest = new LocationRequest();
-        locationRequest.setInterval(20000);
-        locationRequest.setFastestInterval(20000);
+        locationRequest.setInterval(Integer.valueOf(frequency));
+        locationRequest.setFastestInterval(Integer.valueOf(frequency));
         locationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
@@ -45,6 +48,8 @@ public class RadarService extends Service {
         super.onCreate();
         createLocationRequest();
         fuseLocationRequest();
+        Toast.makeText(this,"onCreate",Toast.LENGTH_SHORT).show();
+
     }
 
     @SuppressLint("MissingPermission")
@@ -103,4 +108,9 @@ public class RadarService extends Service {
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Toast.makeText(this,"onDestroy",Toast.LENGTH_SHORT).show();
+    }
 }

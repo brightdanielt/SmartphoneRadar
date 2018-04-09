@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <integer name="pref_updateFrequency_5s">5000</integer>
-    <integer name="pref_updateFrequency_10s">10000</integer>
-    <integer name="pref_updateFrequency_30s">30000</integer>
-    <integer name="pref_updateFrequency_60s">60000</integer>
-</resources>

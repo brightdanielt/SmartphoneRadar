@@ -7,10 +7,10 @@
         <item>@string/pref_label_updateFrequency_60s</item>
     </string-array>
 
-    <integer-array name="pref_entryValues_updateFrequency">
-        <item>@integer/pref_updateFrequency_5s</item>
-        <item>@integer/pref_updateFrequency_10s</item>
-        <item>@integer/pref_updateFrequency_30s</item>
-        <item>@integer/pref_updateFrequency_60s</item>
-    </integer-array>
+    <string-array name="pref_entryValues_updateFrequency">
+        <item>@string/pref_value_updateFrequency_5s</item>
+        <item>@string/pref_value_updateFrequency_10s</item>
+        <item>@string/pref_value_updateFrequency_30s</item>
+        <item>@string/pref_value_updateFrequency_60s</item>
+    </string-array>
 </resources>

@@ -10,6 +10,7 @@ import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 
 //import android.support.v7.preference.CheckBoxPreference;
 //import android.support.v7.preference.ListPreference;
@@ -46,7 +47,6 @@ public class SettingsFragment extends PreferenceFragment implements
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.pref_general);
-
     }
 
     // Unregister SettingsFragment (this) as a SharedPreferenceChangedListener in onStop
@@ -74,7 +74,16 @@ public class SettingsFragment extends PreferenceFragment implements
         if (null != preference) {
             if (!(preference instanceof SwitchPreference)) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
+            } else {
+                if (sharedPreferences.getBoolean(key, false)) {
+                    PositionPreferences.startRadarService(getActivity());
+                } else {
+                    PositionPreferences.stopRadarService(getActivity());
+                }
             }
         }
     }
+
+
+
 }

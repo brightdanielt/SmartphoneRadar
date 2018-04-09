@@ -4,18 +4,18 @@
         <!--android:title="@string/pref_title_position">-->
 
         <SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="@bool/pref_defaultValue_position"
             android:key="@string/pref_key_position"
             android:title="@string/pref_title_position"
-            android:summary=""/>
+            android:summary="@string/pref_positioning"/>
     <!--</PreferenceCategory>-->
 
     <!--<PreferenceCategory-->
         <!--android:title="@string/pref_title_updateFrequency">-->
         <ListPreference
-            android:defaultValue="@string/pref_label_updateFrequency_30s"
+            android:defaultValue="@string/pref_defaultValue_updateFrequency"
             android:entries="@array/pref_entries_updateFrequency"
-            android:entryValues="@array/pref_entries_updateFrequency"
+            android:entryValues="@array/pref_entryValues_updateFrequency"
             android:key="@string/pref_key_updateFrequency"
             android:title="@string/pref_title_updateFrequency"
             android:summary="@string/pref_label_updateFrequency_30s" />

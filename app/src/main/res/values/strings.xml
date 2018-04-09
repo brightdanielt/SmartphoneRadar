@@ -28,6 +28,8 @@
     <string name="pref_key_position">position</string>
     <string name="pref_positioning">定位中</string>
     <string name="pref_not_positioning">未定位</string>
+    <bool name="pref_defaultValue_position">true</bool>
+
 
     <string name="pref_title_updateFrequency">定位頻率</string>
     <string name="pref_key_updateFrequency">updateFrequency</string>
@@ -35,6 +37,13 @@
     <string name="pref_label_updateFrequency_10s">10秒</string>
     <string name="pref_label_updateFrequency_30s">30秒</string>
     <string name="pref_label_updateFrequency_60s">60秒</string>
+
+    <string name="pref_value_updateFrequency_5s">5000</string>
+    <string name="pref_value_updateFrequency_10s">10000</string>
+    <string name="pref_value_updateFrequency_30s">30000</string>
+    <string name="pref_value_updateFrequency_60s">60000</string>
+    <string name="pref_defaultValue_updateFrequency">30000</string>
+
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->

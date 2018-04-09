@@ -15,11 +15,15 @@
  */
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
 
 /**
  * SettingsActivity is responsible for displaying the {@link SettingsFragment}. It is also
@@ -33,6 +37,9 @@ import com.cauliflower.danielt.smartphoneradar.R;
  * MainActivity when the user clicks the up button from the SettingsActivity.
  */
 public class SettingsActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_ACCESS_FINE_LOCATION = 100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,5 +56,28 @@ public class SettingsActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        RequestPermission.accessFineLocation(this, REQUEST_CODE_ACCESS_FINE_LOCATION);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ACCESS_FINE_LOCATION:
+                if (grantResults.length > 0 &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                        PositionPreferences.getPositionEnable(SettingsActivity.this)) {
+                    //使用者允許權限
+                } else {
+                    //使用者拒絕授權
+                    finish();
+                }
+                break;
+        }
     }
 }

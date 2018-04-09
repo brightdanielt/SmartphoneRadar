@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 /*
 * 考慮使用 FB 做為登入媒介
@@ -79,7 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
             case REQUEST_LOCATION:
                 if (grantResults.length > 0
                         && grantResults[0] ==
-                        PackageManager.PERMISSION_GRANTED) {
+                        PackageManager.PERMISSION_GRANTED && PositionPreferences.getPositionEnable(SignUpActivity.this)) {
                     //使用者允許權限
                     startRadar();
                 } else {
