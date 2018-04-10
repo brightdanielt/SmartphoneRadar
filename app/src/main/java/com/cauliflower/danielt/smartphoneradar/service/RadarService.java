@@ -23,7 +23,8 @@ import java.util.Date;
 
 public class RadarService extends Service {
 
-    LocationRequest locationRequest;
+    private LocationRequest locationRequest;
+    private String TAG = RadarService.class.getSimpleName();
 
     public RadarService() {
     }
@@ -41,6 +42,7 @@ public class RadarService extends Service {
         locationRequest.setFastestInterval(Integer.valueOf(frequency));
         locationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
+        Log.i(TAG, "updateFrequency:" + frequency);
     }
 
     @Override
@@ -48,7 +50,7 @@ public class RadarService extends Service {
         super.onCreate();
         createLocationRequest();
         fuseLocationRequest();
-        Toast.makeText(this,"onCreate",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
 
     }
 
@@ -62,8 +64,6 @@ public class RadarService extends Service {
                     @Override
                     public void onLocationResult(LocationResult locationResult) {
                         final Location location = locationResult.getLastLocation();
-                        Log.i("local location UPDATE", location.toString());
-                        Log.i("local location UPDATE getTime:", String.valueOf(location.getTime()));
 //                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
 //                                new LatLng(location.getLatitude(),
 //                                        location.getLongitude())
@@ -98,7 +98,7 @@ public class RadarService extends Service {
                 "&longitude=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8") +
                 "&action=" + URLEncoder.encode("updateLocation", "UTF-8") +
                 "&";
-        Log.i("PARAMS", params);
+        Log.i(TAG, "PARAM : " + params);
 
         ConnectDb connectDb = new ConnectDb(RadarService.this);
         String response = connectDb.sendHttpRequest(params);
@@ -111,6 +111,6 @@ public class RadarService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Toast.makeText(this,"onDestroy",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
     }
 }

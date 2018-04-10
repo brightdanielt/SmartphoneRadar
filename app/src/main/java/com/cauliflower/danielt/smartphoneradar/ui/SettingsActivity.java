@@ -22,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
 
 /**
@@ -39,6 +38,7 @@ import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
 public class SettingsActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_ACCESS_FINE_LOCATION = 100;
+    private static final int REQUEST_CODE_LOCATION_SETTING = 101;
 
 
     @Override
@@ -62,7 +62,7 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         RequestPermission.accessFineLocation(this, REQUEST_CODE_ACCESS_FINE_LOCATION);
-
+        RequestPermission.displayLocationSettingsRequest(this, REQUEST_CODE_LOCATION_SETTING);
     }
 
     @Override
@@ -70,8 +70,9 @@ public class SettingsActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_CODE_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED &&
-                        PositionPreferences.getPositionEnable(SettingsActivity.this)) {
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED
+//                        PositionPreferences.getPositionEnable(SettingsActivity.this)==true
+                        ) {
                     //使用者允許權限
                 } else {
                     //使用者拒絕授權
