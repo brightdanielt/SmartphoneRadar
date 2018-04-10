@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--<PreferenceCategory-->
-    <!--android:title="@string/pref_title_position">-->
+    <PreferenceCategory android:title="@string/title_activity_settings">
 
-    <SwitchPreference
-        android:defaultValue="@bool/pref_defaultValue_position"
-        android:key="@string/pref_key_position"
-        android:summary=""
-        android:title="@string/pref_title_position" />
-    <!--</PreferenceCategory>-->
-
-    <!--<PreferenceCategory-->
-    <!--android:title="@string/pref_title_updateFrequency">-->
-    <ListPreference
-        android:defaultValue="@string/pref_defaultValue_updateFrequency"
-        android:entries="@array/pref_entries_updateFrequency"
-        android:entryValues="@array/pref_entryValues_updateFrequency"
-        android:key="@string/pref_key_updateFrequency"
-        android:summary="@string/pref_label_updateFrequency_30s"
-        android:title="@string/pref_title_updateFrequency" />
-    <!--</PreferenceCategory>-->
+        <SwitchPreference
+            android:defaultValue="@bool/pref_defaultValue_position"
+            android:key="@string/pref_key_position"
+            android:summary=""
+            android:title="@string/pref_title_position" />
+        <ListPreference
+            android:defaultValue="@string/pref_defaultValue_updateFrequency"
+            android:entries="@array/pref_entries_updateFrequency"
+            android:entryValues="@array/pref_entryValues_updateFrequency"
+            android:key="@string/pref_key_updateFrequency"
+            android:summary=""
+            android:title="@string/pref_title_updateFrequency" />
+    </PreferenceCategory>
 
 </PreferenceScreen>

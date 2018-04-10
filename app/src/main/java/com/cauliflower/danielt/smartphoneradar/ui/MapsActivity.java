@@ -57,7 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public void run() {
                     try {
-                        connectDb.getLatLngFromServer(account, password);
+                        connectDb.getLocationFromServer(account, password);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }

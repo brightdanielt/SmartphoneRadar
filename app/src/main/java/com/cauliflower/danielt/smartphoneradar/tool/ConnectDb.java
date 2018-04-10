@@ -29,6 +29,8 @@ import javax.xml.parsers.SAXParserFactory;
 
 public class ConnectDb implements SocketInterface {
 
+    private static final String TAG = ConnectDb.class.getSimpleName();
+
     private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
 
     private static final String HTTP_REQUEST_FAILED = null;
@@ -102,7 +104,7 @@ public class ConnectDb implements SocketInterface {
     }
 
 
-    public String signUp(String account, String password,String model,String imei_1) throws
+    public String signUp(String account, String password, String model, String imei_1) throws
             UnsupportedEncodingException {
 
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
@@ -111,11 +113,10 @@ public class ConnectDb implements SocketInterface {
                 "&imei_1=" + URLEncoder.encode(imei_1, "UTF-8") +
                 "&action=" + URLEncoder.encode("signUp", "UTF-8") +
                 "&";
-        Log.i("PARAMS", params);
 
+        Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
-
-//        Log.i("response", response);
+        Log.i(TAG, "Response: " + response);
         return response;
 
     }
@@ -129,23 +130,40 @@ public class ConnectDb implements SocketInterface {
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
                 "&action=" + URLEncoder.encode("login", "UTF-8") +
                 "&";
-        Log.i("PARAMS", params);
 
+        Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
-
-//        Log.i("response", response);
+        Log.i(TAG, "Response: " + response);
         return response;
 
     }
 
-    public void getLatLngFromServer(String account, String password) throws UnsupportedEncodingException {
+    public String sendLocationToServer(String username, String password, String time, double latitude, double longitude) throws
+            UnsupportedEncodingException {
+
+        String params = "account=" + URLEncoder.encode(username, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&time=" + URLEncoder.encode(time, "UTF-8") +
+                "&latitude=" + URLEncoder.encode(String.valueOf(latitude), "UTF-8") +
+                "&longitude=" + URLEncoder.encode(String.valueOf(longitude), "UTF-8") +
+                "&action=" + URLEncoder.encode("updateLocation", "UTF-8") +
+                "&";
+
+        Log.i(TAG, "Params: " + params);
+        String response = sendHttpRequest(params);
+        Log.i(TAG, "Response: " + response);
+        return response;
+
+    }
+
+    public void getLocationFromServer(String account, String password) throws UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode("", "UTF-8") +
                 "&password=" + URLEncoder.encode("", "UTF-8") +
                 "&time=" + URLEncoder.encode("", "UTF-8") +
                 "&action=" + URLEncoder.encode("getLocation", "UTF-8") +
                 "&";
 
-        Log.i("PARAMS", params);
+        Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
 
         try {

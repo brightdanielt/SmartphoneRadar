@@ -42,7 +42,7 @@
     <string name="pref_value_updateFrequency_10s">10000</string>
     <string name="pref_value_updateFrequency_30s">30000</string>
     <string name="pref_value_updateFrequency_60s">60000</string>
-    <string name="pref_defaultValue_updateFrequency">30000</string>
+    <string name="pref_defaultValue_updateFrequency">5000</string>
 
     <string name="title_activity_settings">Settings</string>
 

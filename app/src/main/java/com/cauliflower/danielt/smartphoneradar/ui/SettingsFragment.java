@@ -18,7 +18,7 @@ import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 //import android.support.v7.preference.PreferenceFragmentCompat;
 //import android.support.v7.preference.PreferenceScreen;
 
-// Create SettingsFragment and extend PreferenceFragmentCompat
+// Create SettingsFragment and extend PreferenceFragment
 public class SettingsFragment extends PreferenceFragment implements
         // Implement OnSharedPreferenceChangeListener from SettingsFragment
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -26,7 +26,7 @@ public class SettingsFragment extends PreferenceFragment implements
     // Create a method called setPreferenceSummary that accepts a Preference and an Object and sets the summary of the preference
     private void setPreferenceSummary(Preference preference, Object value) {
         String stringValue = value.toString();
-        String key = preference.getKey();
+//        String key = preference.getKey();
 
         if (preference instanceof ListPreference) {
             /* For list preferences, look up the correct display value in */
@@ -65,6 +65,19 @@ public class SettingsFragment extends PreferenceFragment implements
         /* Register the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
+
+        //Set default value for enable positioning
+        Preference position = findPreference(getString(R.string.pref_key_position));
+        SwitchPreference switchPreference = (SwitchPreference) position;
+        //The default value depends on RadarService is inService or not
+//        switchPreference.setChecked(RadarService.inService);
+        switchPreference.setChecked(PositionPreferences.getPositionEnable(getActivity()));
+
+        //Set default value for updateFrequency
+        Preference frequency = findPreference(getString(R.string.pref_key_updateFrequency));
+        ListPreference listPreference = (ListPreference) frequency;
+        listPreference.setValue(PositionPreferences.getUpdateFrequency(getActivity()));
+        setPreferenceSummary(frequency, PositionPreferences.getUpdateFrequency(getActivity()));
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed
@@ -72,9 +85,10 @@ public class SettingsFragment extends PreferenceFragment implements
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Preference preference = findPreference(key);
         if (null != preference) {
-            if (!(preference instanceof SwitchPreference)) {
+            if (preference instanceof ListPreference) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             } else {
+                //Start and stop RadarService
                 if (sharedPreferences.getBoolean(key, false)) {
                     PositionPreferences.startRadarService(getActivity());
                 } else {
