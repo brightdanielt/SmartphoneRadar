@@ -80,15 +80,18 @@ public class MainActivity extends AppCompatActivity {
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
-            } else {
-                //若未註冊，檢查是否查詢過其他手機位置
-                Cursor cursor_getLocation = dbHelper.getReadableDatabase().query(
-                        TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_GETLOCATION},
-                        null, null, null);
-                int index_account_getLocation = cursor_getLocation.getColumnIndex(COLUMN_USER_ACCOUNT);
-                int index_password_getLocation = cursor_getLocation.getColumnIndex(COLUMN_USER_PASSWORD);
-                String account_getLocation = cursor_getLocation.getString(index_account_getLocation);
-                String password_getLocation = cursor_getLocation.getString(index_password_getLocation);
+            }
+        } else {
+            //若未註冊，檢查是否查詢過其他手機位置
+            Cursor cursor_user_getLocation = dbHelper.getReadableDatabase().query(
+                    TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_GETLOCATION},
+                    null, null, null);
+            if (cursor_user_getLocation.getCount() > 0) {
+                cursor_user_getLocation.moveToFirst();
+                int index_account_getLocation = cursor_user_getLocation.getColumnIndex(COLUMN_USER_ACCOUNT);
+                int index_password_getLocation = cursor_user_getLocation.getColumnIndex(COLUMN_USER_PASSWORD);
+                String account_getLocation = cursor_user_getLocation.getString(index_account_getLocation);
+                String password_getLocation = cursor_user_getLocation.getString(index_password_getLocation);
                 try {
                     //查詢過其他手機位置
                     if (account_getLocation != null && password_getLocation != null) {
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             } else {
 //                                String imei = telephonyManager.getDeviceId();
-                                String imei = "000004";
+                                String imei = "000006";
                                 String model = Build.MODEL;
 
                                 String code = null;
@@ -179,7 +182,11 @@ public class MainActivity extends AppCompatActivity {
                             //根據回傳值，得知目的成功與否
                             if (responseCode.checkCode(code)) {
                                 dbHelper.addUser(account, password, VALUE_USER_USEDFOR_GETLOCATION);
-                                startActivity(new Intent(MainActivity.this, MapsActivity.class));
+                                Intent i = new Intent();
+                                i.setClass(MainActivity.this, MapsActivity.class);
+                                i.putExtra(MyDbHelper.COLUMN_USER_ACCOUNT, account);
+                                i.putExtra(MyDbHelper.COLUMN_USER_PASSWORD, password);
+                                startActivity(i);
                             } else {
                                 //驗證帳密失敗
                             }

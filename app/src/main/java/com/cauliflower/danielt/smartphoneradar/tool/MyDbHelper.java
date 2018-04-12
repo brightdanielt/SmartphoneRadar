@@ -2,6 +2,7 @@ package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -80,5 +81,23 @@ public class MyDbHelper extends SQLiteOpenHelper {
 
         long id = getWritableDatabase().insert(TABLE_LOCATION, null, values);
         Log.i("Add location,id", id + "");
+    }
+
+    //查詢資料表 Location 的最新 time 值
+    public String searchNewTime(String account) {
+        //先查詢 Location 是否有紀錄
+        Cursor cursor = getReadableDatabase().query(
+                TABLE_LOCATION, new String[]{COLUMN_LOCATION_TIME}, COLUMN_LOCATION_TIME + ">?" + " AND " +
+                        COLUMN_LOCATION_ACCOUNT + "=?", new String[]{"1911-01-01-00:00:00", account},
+                null, null, COLUMN_LOCATION_TIME + " DESC");
+
+        //取得最新 time 值
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int index_time_to_compare = cursor.getColumnIndex(COLUMN_LOCATION_TIME);
+            String time_to_compare = cursor.getString(index_time_to_compare);
+            return time_to_compare;
+        }
+        return "1911-01-01-00:00:00";
     }
 }

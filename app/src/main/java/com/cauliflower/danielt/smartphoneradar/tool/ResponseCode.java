@@ -82,7 +82,7 @@ public class ResponseCode {
             case LOGIN_ERROR: {
                 Toast.makeText(
                         context, context.getResources().getString(R.string.LOGIN_ERROR), Toast.LENGTH_SHORT).show();
-                return true;
+                return false;
             }
 
         }

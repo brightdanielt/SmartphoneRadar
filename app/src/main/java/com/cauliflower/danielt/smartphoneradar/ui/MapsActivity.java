@@ -57,7 +57,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 public void run() {
                     try {
-                        connectDb.getLocationFromServer(account, password);
+                        String time_to_compare = dbHelper.searchNewTime(account);
+                        connectDb.getLocationFromServer(account, password, time_to_compare);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -65,8 +66,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             };
 
             handler = new Handler();
-            //每 20 秒查詢一次位置
-            handler.postDelayed(runnable, 20000);
+            //每 15 秒查詢一次位置
+            handler.postDelayed(runnable, 15000);
         }
 
     }

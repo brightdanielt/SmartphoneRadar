@@ -23,8 +23,9 @@ public class HandlerXML extends DefaultHandler {
     }
 
     public void endDocument() throws SAXException {
-
-        this.updater.updateData(locations);
+        if (locations.size() > 0) {
+            this.updater.updateData(locations);
+        }
         super.endDocument();
     }
 
@@ -75,11 +76,15 @@ public class HandlerXML extends DefaultHandler {
             }
             //用於查詢手機位置
             case "location": {
-                String time = attributes.getValue(SimpleLocation.TIME);
-                double latitude = Double.valueOf(attributes.getValue(SimpleLocation.LATITUDE));
-                double longitude = Double.valueOf(attributes.getValue(SimpleLocation.LONGITUDE));
+                if (!"".equals(attributes.getValue("code"))) {
+                    Log.i("GG", "there is no new location to get");
+                } else {
+                    String time = attributes.getValue(SimpleLocation.TIME);
+                    double latitude = Double.valueOf(attributes.getValue(SimpleLocation.LATITUDE));
+                    double longitude = Double.valueOf(attributes.getValue(SimpleLocation.LONGITUDE));
 
-                locations.add(new SimpleLocation(time, latitude, longitude));
+                    locations.add(new SimpleLocation(time, latitude, longitude));
+                }
                 break;
             }
         }

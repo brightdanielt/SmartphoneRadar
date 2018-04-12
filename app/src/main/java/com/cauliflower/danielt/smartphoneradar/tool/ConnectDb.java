@@ -43,8 +43,8 @@ public class ConnectDb implements SocketInterface {
 
     @Override
     public String sendHttpRequest(final String params) {
-        final String[] result = new String[]{""};
-        new Thread(new Runnable() {
+        final String[] result = {""};
+        Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 URL url;
@@ -78,8 +78,15 @@ public class ConnectDb implements SocketInterface {
                     result[0] = HTTP_REQUEST_FAILED;
                 }
             }
-        }).start();
-
+        });
+        thread.start();
+        try {
+            //等待 thread 執行完，得到 result
+            //否則會回傳 result = null
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return result[0];
     }
 
@@ -156,10 +163,10 @@ public class ConnectDb implements SocketInterface {
 
     }
 
-    public void getLocationFromServer(String account, String password) throws UnsupportedEncodingException {
-        String params = "account=" + URLEncoder.encode("", "UTF-8") +
-                "&password=" + URLEncoder.encode("", "UTF-8") +
-                "&time=" + URLEncoder.encode("", "UTF-8") +
+    public void getLocationFromServer(String account, String password, String time) throws UnsupportedEncodingException {
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&time_to_compare=" + URLEncoder.encode(time, "UTF-8") +
                 "&action=" + URLEncoder.encode("getLocation", "UTF-8") +
                 "&";
 
