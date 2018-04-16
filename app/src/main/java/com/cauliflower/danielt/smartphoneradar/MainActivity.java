@@ -6,9 +6,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.Button;
@@ -46,9 +46,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        connectDb = new ConnectDb(MainActivity.this);
-
         dbHelper = new MyDbHelper(MainActivity.this);
+
+        connectDb = new ConnectDb(MainActivity.this);
 
         responseCode = new ResponseCode(MainActivity.this);
 
@@ -184,8 +184,8 @@ public class MainActivity extends AppCompatActivity {
                                 dbHelper.addUser(account, password, VALUE_USER_USEDFOR_GETLOCATION);
                                 Intent i = new Intent();
                                 i.setClass(MainActivity.this, MapsActivity.class);
-                                i.putExtra(MyDbHelper.COLUMN_USER_ACCOUNT, account);
-                                i.putExtra(MyDbHelper.COLUMN_USER_PASSWORD, password);
+                                i.putExtra(COLUMN_USER_ACCOUNT, account);
+                                i.putExtra(COLUMN_USER_PASSWORD, password);
                                 startActivity(i);
                             } else {
                                 //驗證帳密失敗

@@ -100,4 +100,28 @@ public class MyDbHelper extends SQLiteOpenHelper {
         }
         return "1911-01-01-00:00:00";
     }
+
+    public void getAllLocation() {
+        Cursor cursor = getReadableDatabase().query(
+                TABLE_LOCATION, null, null, null,
+                null, null, "");
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                int index_id = cursor.getColumnIndex(COLUMN_LOCATION_ID);
+                int index_ac = cursor.getColumnIndex(COLUMN_LOCATION_ACCOUNT);
+                int index_time = cursor.getColumnIndex(COLUMN_LOCATION_TIME);
+                int index_lati = cursor.getColumnIndex(COLUMN_LOCATION_LATITUDE);
+                int index_longi = cursor.getColumnIndex(COLUMN_LOCATION_LONGITUDE);
+
+                int id = cursor.getInt(index_id);
+                String ac = cursor.getString(index_ac);
+                String time = cursor.getString(index_time);
+                String lati = cursor.getString(index_lati);
+                String longi = cursor.getString(index_longi);
+                Log.i("MainActivity", id + "\n" + ac + "\n" + time + "\n" + lati + "\n" + longi);
+            }
+        }
+    }
 }

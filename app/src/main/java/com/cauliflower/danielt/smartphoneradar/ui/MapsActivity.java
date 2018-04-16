@@ -1,22 +1,28 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterItem;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
@@ -31,8 +37,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //用於手機 DB
     private MyDbHelper dbHelper;
 
-    private Handler handler;
-    private Runnable runnable;
+    private Handler handler = new Handler();
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                String time_to_compare = dbHelper.searchNewTime(account);
+                connectDb.getLocationFromServer(account, password, time_to_compare);
+                handler.postDelayed(runnable, 15000);
+//                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
+//                sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
+//            } catch (ParserConfigurationException e) {
+//                e.printStackTrace();
+//            } catch (SAXException e) {
+//                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
 
     private String account, password;
 
@@ -53,19 +78,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             connectDb = new ConnectDb(MapsActivity.this);
             dbHelper = new MyDbHelper(MapsActivity.this);
 
-            runnable = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        String time_to_compare = dbHelper.searchNewTime(account);
-                        connectDb.getLocationFromServer(account, password, time_to_compare);
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            };
-
-            handler = new Handler();
             //每 15 秒查詢一次位置
             handler.postDelayed(runnable, 15000);
         }
@@ -85,7 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        setUpCluster();
+        mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
     }
 
     @Override
@@ -104,10 +117,75 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             dbHelper.addLocation(account, latitude, longitude, time);
 
             // Add a marker in new latLng and move the camera
-            mMap.addMarker(new MarkerOptions().
-                    position(latLng).title(time));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+//            mMap.addMarker(new MarkerOptions().
+//                    position(latLng).title(time));
+
+            MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
+            mClusterManager.addItem(offsetItem);
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+
         }
+    }
+
+    public class MyItem implements ClusterItem {
+        private final LatLng mPosition;
+        private BitmapDescriptor icon;
+        private String title;
+        private String snippet;
+
+        @Override
+        public LatLng getPosition() {
+            return mPosition;
+        }
+
+        public MyItem(BitmapDescriptor ic, Double lat, Double lng, String title, String sni) {
+            mPosition = new LatLng(lat, lng);
+            this.icon = ic;
+            this.title = title;
+            this.snippet = sni;
+        }
+
+        public BitmapDescriptor getIcon() {
+            return icon;
+        }
+
+        public String getSnippet() {
+            return snippet;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+    }
+
+    public class OwnRendering extends DefaultClusterRenderer<MyItem> {
+
+        public OwnRendering(Context context, GoogleMap map, ClusterManager<MyItem> clusterManager) {
+            super(context, map, clusterManager);
+        }
+
+        protected void onBeforeClusterItemRendered(MyItem item, MarkerOptions markerOptions) {
+            markerOptions.icon(item.getIcon());
+            markerOptions.snippet(item.getSnippet());
+            markerOptions.title(item.getTitle());
+            super.onBeforeClusterItemRendered(item, markerOptions);
+        }
+    }
+
+    // Declare a variable for the cluster manager.
+    private ClusterManager<MyItem> mClusterManager;
+
+    private void setUpCluster() {
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+
     }
 
 }

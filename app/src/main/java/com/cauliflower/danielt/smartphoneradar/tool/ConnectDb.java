@@ -172,7 +172,6 @@ public class ConnectDb implements SocketInterface {
 
         Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
-
         try {
             SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
             sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML((Updater) context));
@@ -183,6 +182,6 @@ public class ConnectDb implements SocketInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
+
 }

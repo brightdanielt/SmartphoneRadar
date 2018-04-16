@@ -72,8 +72,14 @@
     todo 05: 定位 Service
     todo 06: 設定頁面：有關 sendLocation 的設定，使用 PreferenceFragment 實作該功能
                 開始定位這支手機 ON/OFF（關閉定位時需要輸入帳密）
-                更新位置間隔（每隔幾秒更新一次手機的位置）
+                更新位置間隔（每隔幾秒更新一次手機的位置）(完成)
                 手機的資訊
                 使用指南
                 查詢其他手機位置（按鈕）
+    todo 07: MapsActivity 應該附加一些功能（現今座標透過 Cluster 顯示）
+                Cluster 座標應附加 Title(初步測試成功)
+                類似 Menu button，點擊後
+                    顯示 RecyclerView 列出所有的座標，若點擊選項則鏡頭移動至該座標
+                    顯示/隱藏歷史座標（透過 MyDbHelper 取得座標）
+                    只顯示新座標
 -->

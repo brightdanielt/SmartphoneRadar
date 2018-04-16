@@ -76,8 +76,8 @@ public class HandlerXML extends DefaultHandler {
             }
             //用於查詢手機位置
             case "location": {
-                if (!"".equals(attributes.getValue("code"))) {
-                    Log.i("GG", "there is no new location to get");
+                if ("207".equals(attributes.getValue("code"))) {
+                    Log.i(HandlerXML.class.getSimpleName(), "get no new location");
                 } else {
                     String time = attributes.getValue(SimpleLocation.TIME);
                     double latitude = Double.valueOf(attributes.getValue(SimpleLocation.LATITUDE));
