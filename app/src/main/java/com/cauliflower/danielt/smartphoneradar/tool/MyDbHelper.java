@@ -7,11 +7,17 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by danielt on 2018/3/27.
  */
 
 public class MyDbHelper extends SQLiteOpenHelper {
+    private static final String TAG = MyDbHelper.class.getSimpleName();
     public static final String DB = "SmartphoneRadar.db";
 
     public static final String TABLE_USER = "user";
@@ -69,7 +75,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         values.put(COLUMN_USER_USEDFOR, usedFor);
 
         long id = getWritableDatabase().insert(TABLE_USER, null, values);
-        Log.i("Add user, id", id + "");
+        Log.i(TAG, "Add user,id: " + id);
     }
 
     public void addLocation(String account, double latitude, double longitude, String time) {
@@ -80,7 +86,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         values.put(COLUMN_LOCATION_TIME, time);
 
         long id = getWritableDatabase().insert(TABLE_LOCATION, null, values);
-        Log.i("Add location,id", id + "");
+        Log.i(TAG, "Add location,id: " + id);
     }
 
     //查詢資料表 Location 的最新 time 值
@@ -101,10 +107,12 @@ public class MyDbHelper extends SQLiteOpenHelper {
         return "1911-01-01-00:00:00";
     }
 
-    public void getAllLocation() {
+    public List<SimpleLocation> getAllLocation(String account) {
+        List<SimpleLocation> locationList = new ArrayList<>();
+
         Cursor cursor = getReadableDatabase().query(
-                TABLE_LOCATION, null, null, null,
-                null, null, "");
+                TABLE_LOCATION, null, COLUMN_LOCATION_ACCOUNT+"=?", new String[]{account},
+                null, null, null);
 
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -112,16 +120,21 @@ public class MyDbHelper extends SQLiteOpenHelper {
                 int index_id = cursor.getColumnIndex(COLUMN_LOCATION_ID);
                 int index_ac = cursor.getColumnIndex(COLUMN_LOCATION_ACCOUNT);
                 int index_time = cursor.getColumnIndex(COLUMN_LOCATION_TIME);
-                int index_lati = cursor.getColumnIndex(COLUMN_LOCATION_LATITUDE);
-                int index_longi = cursor.getColumnIndex(COLUMN_LOCATION_LONGITUDE);
+                int index_lat = cursor.getColumnIndex(COLUMN_LOCATION_LATITUDE);
+                int index_lng = cursor.getColumnIndex(COLUMN_LOCATION_LONGITUDE);
 
                 int id = cursor.getInt(index_id);
                 String ac = cursor.getString(index_ac);
                 String time = cursor.getString(index_time);
-                String lati = cursor.getString(index_lati);
-                String longi = cursor.getString(index_longi);
-                Log.i("MainActivity", id + "\n" + ac + "\n" + time + "\n" + lati + "\n" + longi);
+                double lat = cursor.getDouble(index_lat);
+                double lng = cursor.getDouble(index_lng);
+                SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
+                locationList.add(simpleLocation);
+                Log.i(TAG, id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
+                cursor.moveToNext();
             }
+            return locationList;
         }
+        return null;
     }
 }

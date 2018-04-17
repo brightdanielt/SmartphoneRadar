@@ -4,7 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
@@ -29,13 +37,16 @@ import java.util.List;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_PASSWORD;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Updater {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
+    private RecyclerView recycler_locationList;
+
     //用於遠端 DB
     private ConnectDb connectDb;
     //用於手機 DB
     private MyDbHelper dbHelper;
+    private List<SimpleLocation> locationList;
 
     private Handler handler = new Handler();
     private Runnable runnable = new Runnable() {
@@ -99,6 +110,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
         setUpCluster();
         mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
+        findView();
     }
 
     @Override
@@ -112,17 +124,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             longitude = locations.get(i).getLongitude();
             time = locations.get(i).getTime();
 
-            LatLng latLng = new LatLng(latitude, longitude);
-
+            //手機端資料庫新增一筆 Location
             dbHelper.addLocation(account, latitude, longitude, time);
 
-            // Add a marker in new latLng and move the camera
-//            mMap.addMarker(new MarkerOptions().
-//                    position(latLng).title(time));
+            //recycler_locationList 新增一筆資料
+            locationList.add(new SimpleLocation(time, latitude, longitude));
+            recycler_locationList.notify();
 
+            //地圖新增一個標記
             MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
             mClusterManager.addItem(offsetItem);
 
+            //鏡頭移動至該新座標
+            LatLng latLng = new LatLng(latitude, longitude);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
 
         }
@@ -188,4 +202,96 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_locationList: {
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    recycler_locationList.setVisibility(View.INVISIBLE);
+
+                } else {
+                    item.setChecked(true);
+                    recycler_locationList.setVisibility(View.VISIBLE);
+                }
+                break;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maps_menu, menu);
+        return true;
+    }
+
+    private void findView() {
+        recycler_locationList = findViewById(R.id.recycler_locationList);
+
+        locationList = dbHelper.getAllLocation(account);
+        MyAdapter adapter = new MyAdapter(locationList);
+        recycler_locationList.setAdapter(adapter);
+        recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
+
+    }
+
+    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+        private List<SimpleLocation> mLocationList;
+
+        public MyAdapter(List<SimpleLocation> list) {
+            mLocationList = list;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public TextView tv_time, tv_lat, tv_lng;
+
+            public ViewHolder(View v) {
+                super(v);
+                tv_time = v.findViewById(R.id.time);
+                tv_lat = v.findViewById(R.id.lat);
+                tv_lng = v.findViewById(R.id.lng);
+            }
+
+        }
+
+        @Override
+        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            Context context = parent.getContext();
+            View view = LayoutInflater.from(context).
+                    inflate(R.layout.recycler_view_item, parent, false);
+            ViewHolder viewHolder = new ViewHolder(view);
+            return viewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, final int position) {
+            SimpleLocation location = mLocationList.get(position);
+            String time = location.getTime();
+            double lat = location.getLatitude();
+            double lng = location.getLongitude();
+
+            //將座標清單中的所有座標加入標記群集
+            MyItem offsetItem = new MyItem(null, lat, lng, time, "");
+            mClusterManager.addItem(offsetItem);
+
+            holder.tv_time.setText(time);
+            holder.tv_lat.setText(String.valueOf(lat));
+            holder.tv_lng.setText(String.valueOf(lng));
+
+            final LatLng latLng = new LatLng(lat, lng);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return mLocationList.size();
+        }
+    }
 }
