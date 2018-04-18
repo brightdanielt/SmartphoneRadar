@@ -47,6 +47,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //用於手機 DB
     private MyDbHelper dbHelper;
     private List<SimpleLocation> locationList;
+    private boolean showNewMarkOnly = false;
 
     private Handler handler = new Handler();
     private Runnable runnable = new Runnable() {
@@ -130,6 +131,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             //recycler_locationList 新增一筆資料
             locationList.add(new SimpleLocation(time, latitude, longitude));
             recycler_locationList.notify();
+
+            if (showNewMarkOnly) {
+                //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
+                mClusterManager.clearItems();
+            }
 
             //地圖新增一個標記
             MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
@@ -216,6 +222,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 break;
             }
+            case R.id.action_showNewMarkOnly: {
+                if (item.isChecked()) {
+                    item.setChecked(false);
+                    showNewMarkOnly = false;
+                    showAllMarks();
+                } else {
+                    item.setChecked(true);
+                    showNewMarkOnly = true;
+                    showNewMarkOnly();
+                }
+                break;
+            }
         }
         return true;
     }
@@ -234,6 +252,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         recycler_locationList.setAdapter(adapter);
         recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 
+    }
+
+    //在地圖顯示所有標記
+    private void showAllMarks() {
+        mClusterManager.clearItems();
+        for (int i = 0; i < locationList.size(); i++) {
+            SimpleLocation simpleLocation = locationList.get(i);
+            MyItem item = new MyItem(null,
+                    simpleLocation.getLatitude(), simpleLocation.getLongitude(), simpleLocation.getTime(), null);
+            mClusterManager.addItem(item);
+        }
+    }
+
+    //只顯示最新的標記在地圖上
+    private void showNewMarkOnly() {
+        mClusterManager.clearItems();
+        int i = locationList.size();
+        SimpleLocation location = locationList.get(i - 1);
+        MyItem item1 = new MyItem(null,
+                location.getLatitude(), location.getLongitude(), location.getTime(), null);
+        mClusterManager.addItem(item1);
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {

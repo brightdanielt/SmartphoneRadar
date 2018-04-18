@@ -67,9 +67,9 @@
     todo 01: Server 資料庫建立 (完成)
     todo 02: PHP 查詢 DB (完成)
     todo 02: Http 溝通 Server 的設計 (因為這方面有經驗，略過驗證)
-    todo 03: 註冊帳號 Activity
-    todo 04: 登入帳號 Activity
-    todo 05: 定位 Service
+    todo 03: 註冊帳號 Activity (完成)
+    todo 04: 登入帳號 Activity (完成)
+    todo 05: 定位 Service (完成)
     todo 06: 設定頁面：有關 sendLocation 的設定，使用 PreferenceFragment 實作該功能
                 開始定位這支手機 ON/OFF（關閉定位時需要輸入帳密）
                 更新位置間隔（每隔幾秒更新一次手機的位置）(完成)
@@ -82,4 +82,6 @@
                     顯示 RecyclerView 列出所有的座標，若點擊選項則鏡頭移動至該座標
                     顯示/隱藏歷史座標（透過 MyDbHelper 取得座標）
                     只顯示新座標
+                    現在在考慮有無必要設計新舊標記的顯示或隱藏，因為有清單提供所有紀錄，
+                    查詢任何標記都很方便，除非過去存在的標記過多，妨礙查看，所以保留功能：隱藏舊的座標
 -->

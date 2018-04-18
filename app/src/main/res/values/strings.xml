@@ -124,6 +124,6 @@
 
     <!--MapsActivity-->
     <string name="locationList">座標清單</string>
-
+    <string name="showNewMarkOnly">只顯示最新座標</string>
 
 </resources>

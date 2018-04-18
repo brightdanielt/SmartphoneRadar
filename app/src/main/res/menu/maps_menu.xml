@@ -4,8 +4,16 @@
     <item
         android:id="@+id/action_locationList"
         android:checkable="true"
+        android:checked="true"
         android:orderInCategory="1"
         android:title="@string/locationList"
-        app:showAsAction="never"
-        app:actionViewClass="android.widget.CheckBox"/>
+        app:actionViewClass="android.widget.CheckBox"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_showNewMarkOnly"
+        android:checkable="true"
+        android:orderInCategory="2"
+        android:title="@string/showNewMarkOnly"
+        app:actionViewClass="android.widget.CheckBox"
+        app:showAsAction="never" />
 </menu>
