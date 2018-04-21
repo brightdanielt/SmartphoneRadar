@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
@@ -41,6 +42,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private RecyclerView recycler_locationList;
+    private LinearLayout linearLayout_wrapRecyclerView;
 
     //用於遠端 DB
     private ConnectDb connectDb;
@@ -214,11 +216,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_locationList: {
                 if (item.isChecked()) {
                     item.setChecked(false);
-                    recycler_locationList.setVisibility(View.INVISIBLE);
+                    linearLayout_wrapRecyclerView.setLayoutParams(
+                            new LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT, 0, 0f
+                            )
+                    );
+
+                    linearLayout_wrapRecyclerView.setVisibility(View.INVISIBLE);
 
                 } else {
                     item.setChecked(true);
-                    recycler_locationList.setVisibility(View.VISIBLE);
+                    linearLayout_wrapRecyclerView.setLayoutParams(
+                            new LinearLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f
+                            )
+                    );
+                    linearLayout_wrapRecyclerView.setVisibility(View.VISIBLE);
                 }
                 break;
             }
@@ -246,12 +259,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void findView() {
         recycler_locationList = findViewById(R.id.recycler_locationList);
+        linearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         locationList = dbHelper.getAllLocation(account);
         MyAdapter adapter = new MyAdapter(locationList);
         recycler_locationList.setAdapter(adapter);
         recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 
+        //該功能原本能夠直接在 MyAdapter 的方法 onBindViewHolder 實現
+        //取出 listLocation 物件作為 item 的資料，同時添增標記
+        //但在 view 的 params 變動時，recyclerView再次呼叫了方法 onBindViewHolder
+        //使得標記重複添加因此改為呼叫該方法 showAllMarks
+        showAllMarks();
     }
 
     //在地圖顯示所有標記
@@ -311,8 +330,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             double lng = location.getLongitude();
 
             //將座標清單中的所有座標加入標記群集
-            MyItem offsetItem = new MyItem(null, lat, lng, time, "");
-            mClusterManager.addItem(offsetItem);
+//            MyItem offsetItem = new MyItem(null, lat, lng, time, "");
+//            mClusterManager.addItem(offsetItem);
 
             holder.tv_time.setText(time);
             holder.tv_lat.setText(String.valueOf(lat));
