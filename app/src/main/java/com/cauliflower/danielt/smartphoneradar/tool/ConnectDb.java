@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLEncoder;
 
@@ -34,6 +36,8 @@ public class ConnectDb implements SocketInterface {
     private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
 
     private static final String HTTP_REQUEST_FAILED = null;
+    public static final String NO_INTERNET = "ConnectException";
+    public static final String NO_RESPONSE = "SocketTimeoutException";
 
     private Context context;
 
@@ -53,7 +57,7 @@ public class ConnectDb implements SocketInterface {
                     HttpURLConnection connection;
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setDoOutput(true);
-
+                    connection.setConnectTimeout(7000);
                     PrintWriter out = new PrintWriter(connection.getOutputStream());
 
                     out.println(params);
@@ -70,19 +74,21 @@ public class ConnectDb implements SocketInterface {
                     in.close();
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
+                } catch (ConnectException e) {
+                    result[0] = NO_INTERNET;
+                    e.printStackTrace();
+                } catch (SocketTimeoutException e) {
+                    result[0] = NO_RESPONSE;
+                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
-
-                if (result[0].length() == 0) {
-                    result[0] = HTTP_REQUEST_FAILED;
                 }
             }
         });
         thread.start();
         try {
             //等待 thread 執行完，得到 result
-            //否則會回傳 result = null
+            //否則會回傳 result = ""
             thread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -111,7 +117,7 @@ public class ConnectDb implements SocketInterface {
     }
 
 
-    public String signUp(String account, String password, String model, String imei_1) throws
+    public String signUp(final String account, final String password, final String model, final String imei_1) throws
             UnsupportedEncodingException {
 
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
@@ -124,15 +130,14 @@ public class ConnectDb implements SocketInterface {
         Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
         Log.i(TAG, "Response: " + response);
+
         return response;
 
     }
 
     //logIn 用於驗證該組帳密是否存在
-    public String logIn(String account, String password) throws
+    public String logIn(final String account, final String password) throws
             UnsupportedEncodingException {
-
-
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
                 "&action=" + URLEncoder.encode("login", "UTF-8") +
@@ -141,6 +146,7 @@ public class ConnectDb implements SocketInterface {
         Log.i(TAG, "Params: " + params);
         String response = sendHttpRequest(params);
         Log.i(TAG, "Response: " + response);
+
         return response;
 
     }

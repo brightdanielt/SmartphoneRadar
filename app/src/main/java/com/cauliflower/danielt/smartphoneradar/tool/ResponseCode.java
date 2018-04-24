@@ -32,7 +32,9 @@ public class ResponseCode {
     //傳回 true，代表該次目的成功，如註冊帳號、查詢位置、登入等等...
     //反之，false 代表該次目的失敗
     public boolean checkCode(String code) {
-
+//        if (code == null) {
+//            return false;
+//        }
         switch (code) {
             case INSERT_USER_SUCCESS: {
                 Toast.makeText(
