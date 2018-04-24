@@ -33,6 +33,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
@@ -42,13 +43,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private RecyclerView recycler_locationList;
+    private MyAdapter adapter;
     private LinearLayout linearLayout_wrapRecyclerView;
 
     //用於遠端 DB
     private ConnectDb connectDb;
     //用於手機 DB
     private MyDbHelper dbHelper;
-    private List<SimpleLocation> locationList;
+    private List<SimpleLocation> locationList = new ArrayList<>();
     private boolean showNewMarkOnly = false;
 
     private Handler handler = new Handler();
@@ -84,18 +86,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        connectDb = new ConnectDb(MapsActivity.this);
+        dbHelper = new MyDbHelper(MapsActivity.this);
         Intent i = getIntent();
         account = i.getStringExtra(COLUMN_USER_ACCOUNT);
         password = i.getStringExtra(COLUMN_USER_PASSWORD);
-
-        if (account != null && password != null) {
-            connectDb = new ConnectDb(MapsActivity.this);
-            dbHelper = new MyDbHelper(MapsActivity.this);
-
-            //每 15 秒查詢一次位置
-            handler.postDelayed(runnable, 15000);
-        }
-
     }
 
 
@@ -113,7 +108,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         setUpCluster();
         mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
-        findView();
+
+        makeViewWork();
+
+        if (account != null && password != null) {
+            //每 15 秒查詢一次位置
+            handler.postDelayed(runnable, 3000);
+        }
     }
 
     @Override
@@ -132,7 +133,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             //recycler_locationList 新增一筆資料
             locationList.add(new SimpleLocation(time, latitude, longitude));
-            recycler_locationList.notify();
 
             if (showNewMarkOnly) {
                 //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -148,6 +148,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
 
         }
+        adapter.notifyDataSetChanged();
+
     }
 
     public class MyItem implements ClusterItem {
@@ -257,12 +259,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-    private void findView() {
+    private void makeViewWork() {
         recycler_locationList = findViewById(R.id.recycler_locationList);
         linearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
-        locationList = dbHelper.getAllLocation(account);
-        MyAdapter adapter = new MyAdapter(locationList);
+        //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
+        locationList.addAll(dbHelper.getAllLocation(account));
+        adapter = new MyAdapter(locationList);
         recycler_locationList.setAdapter(adapter);
         recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 

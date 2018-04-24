@@ -111,7 +111,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
         List<SimpleLocation> locationList = new ArrayList<>();
 
         Cursor cursor = getReadableDatabase().query(
-                TABLE_LOCATION, null, COLUMN_LOCATION_ACCOUNT+"=?", new String[]{account},
+                TABLE_LOCATION, null, COLUMN_LOCATION_ACCOUNT + "=?", new String[]{account},
                 null, null, null);
 
         if (cursor.getCount() > 0) {
@@ -133,7 +133,26 @@ public class MyDbHelper extends SQLiteOpenHelper {
                 Log.i(TAG, id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
                 cursor.moveToNext();
             }
-            return locationList;
+        }
+        return locationList;
+    }
+
+    public String[] searchUser(String usedFor) {
+        String[] user = new String[2];
+        Cursor cursor = getReadableDatabase().query(
+                TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{usedFor},
+                null, null, null);
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int index_account = cursor.getColumnIndex(COLUMN_USER_ACCOUNT);
+            int index_password = cursor.getColumnIndex(COLUMN_USER_PASSWORD);
+            user[0] = cursor.getString(index_account);
+            user[1] = cursor.getString(index_password);
+
+            //存在帳密，已註冊
+            if (user[0] != null && user[0] != null) {
+                return user;
+            }
         }
         return null;
     }

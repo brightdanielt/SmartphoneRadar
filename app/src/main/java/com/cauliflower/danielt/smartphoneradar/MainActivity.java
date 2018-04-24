@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -34,8 +33,6 @@ import static com.cauliflower.danielt.smartphoneradar.MainActivity.LoadingTask.T
 import static com.cauliflower.danielt.smartphoneradar.MainActivity.LoadingTask.TASK_SIGN_UP;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_PASSWORD;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_USEDFOR;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.TABLE_USER;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION;
 import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION;
 
@@ -57,47 +54,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
         dbHelper = new MyDbHelper(MainActivity.this);
         connectDb = new ConnectDb(MainActivity.this);
         responseCode = new ResponseCode(MainActivity.this);
 
         //先查詢是否已註冊
-        Cursor cursor = dbHelper.getReadableDatabase().query(
-                TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_SENDLOCATION},
-                null, null, null);
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            int index_account = cursor.getColumnIndex(COLUMN_USER_ACCOUNT);
-            int index_password = cursor.getColumnIndex(COLUMN_USER_PASSWORD);
-            account = cursor.getString(index_account);
-            password = cursor.getString(index_password);
-
+        String[] user = dbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION);
+        if (user != null) {
             //存在帳密，已註冊
-            if (account != null && password != null) {
-                new LoadingTask().execute(TASK_LOGIN_TO_SEND_LOCATION);
-            }
+            account = user[0];
+            password = user[1];
+            new LoadingTask().execute(TASK_LOGIN_TO_SEND_LOCATION);
         } else {
             //若未註冊，檢查是否查詢過其他手機位置
-            Cursor cursor_getLocation = dbHelper.getReadableDatabase().query(
-                    TABLE_USER, null, COLUMN_USER_USEDFOR + "=?", new String[]{VALUE_USER_USEDFOR_GETLOCATION},
-                    null, null, null);
-            if (cursor_getLocation.getCount() > 0) {
-                cursor_getLocation.moveToFirst();
-                int index_account = cursor_getLocation.getColumnIndex(COLUMN_USER_ACCOUNT);
-                int index_password = cursor_getLocation.getColumnIndex(COLUMN_USER_PASSWORD);
-                account = cursor_getLocation.getString(index_account);
-                password = cursor_getLocation.getString(index_password);
-                //查詢過其他手機位置
-                if (account != null && password != null) {
-                    new LoadingTask().execute(TASK_LOGIN_TO_GET_LOCATION);
-                }
-            }else {
-                //該帳密不存在，應重新輸入帳密以登入、查詢手機位置或註冊
-                setContentView(R.layout.activity_main);
-                makeViewWork();
+            user = dbHelper.searchUser(VALUE_USER_USEDFOR_GETLOCATION);
+            if (user != null) {
+                //存在帳密，查詢過位置
+                account = user[0];
+                password = user[1];
+                new LoadingTask().execute(TASK_LOGIN_TO_GET_LOCATION);
+            } else {
+                //手機中查無帳密，應輸入帳密以登入、查詢手機位置或註冊
             }
         }
+        makeViewWork();
     }
 
     private void makeViewWork() {
@@ -157,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPreExecute();
 
             dialog_loading = ProgressDialog.show(MainActivity.this, "",
-                    "Loading. Please wait...", true);
+                    getString(R.string.loading), true);
         }
 
         @Override
@@ -194,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
             if (response.contains("Exception")) {
                 //應該是網路或伺服器有問題，跳出對話筐，要求稍後再試試
                 MyDialogBuilder dialogBuilder = new MyDialogBuilder(MainActivity.this, response);
-                dialogBuilder.setPositiveButton("好了", new DialogInterface.OnClickListener() {
+                dialogBuilder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (whichTask) {
@@ -254,9 +236,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
             } else {
-                //該帳密不存在，應重新輸入帳密以登入、查詢手機位置或註冊
-                setContentView(R.layout.activity_main);
-                makeViewWork();
+                //Server不存在該帳密，應重新輸入帳密以登入、查詢手機位置或註冊
             }
             dialog_loading.dismiss();
 
