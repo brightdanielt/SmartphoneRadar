@@ -24,6 +24,9 @@
     <string name="LOGIN_ERROR">LOGIN ERROR</string>
 
     //Preference
+    <string name="pref_key_AccountActivity">AccountActivity</string>
+    <string name="pref_key_MapsActivity">MapsActivity</string>
+
     <string name="pref_title_position">定位該裝置</string>
     <string name="pref_key_position">position</string>
     <string name="pref_positioning">定位中</string>
@@ -130,8 +133,10 @@
     <string name="no_internet">請檢查網路是否已連線</string>
     <string name="no_response">伺服器關閉中，請聯絡開發人員</string>
     <string name="ok">好了</string>
+    <string name="cancel">取消</string>
 
     <!--ProgressDialog-->
     <string name="loading">Loading. Please wait...</string>
+    <string name="wrong_user">帳號或密碼錯誤</string>
 
 </resources>

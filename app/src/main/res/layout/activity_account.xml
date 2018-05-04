@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/default_margin"
+    android:orientation="vertical"
+    tools:context="com.cauliflower.danielt.smartphoneradar.AccountActivity">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/large_margin"
+        android:layout_marginTop="@dimen/default_margin"
+        android:gravity="center_horizontal"
+        android:text="定位用:"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
+
+
+    <ListView
+        android:id="@+id/listView_sendLocation"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="center_horizontal"
+        android:clickable="false"></ListView>
+
+    <TextView
+        android:id="@+id/tv_hint_sendLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="無" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_sendLocation_logIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="登入" />
+
+        <Button
+            android:id="@+id/btn_sendLocation_signUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="註冊" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/large_margin"
+        android:gravity="center_horizontal"
+        android:text="查詢用:"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
+
+    <TextView
+        android:id="@+id/tv_hint_getLocation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:text="無" />
+
+
+    <ListView
+        android:id="@+id/listView_getLocation"
+        android:layout_width="match_parent"
+        android:layout_height="224dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/default_margin"></ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_getLocation_logIn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="添加新的追蹤帳號" />
+
+    </LinearLayout>
+</LinearLayout>

@@ -48,9 +48,9 @@ public class ConnectDb implements SocketInterface {
     @Override
     public String sendHttpRequest(final String params) {
         final String[] result = {""};
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        Thread thread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
                 URL url;
                 try {
                     url = new URL(AUTHENTICATION_SERVER_ADDRESS);
@@ -83,16 +83,16 @@ public class ConnectDb implements SocketInterface {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            }
-        });
-        thread.start();
-        try {
-            //等待 thread 執行完，得到 result
-            //否則會回傳 result = ""
-            thread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//            }
+//        });
+//        thread.start();
+//        try {
+//            //等待 thread 執行完，得到 result
+//            //否則會回傳 result = ""
+//            thread.join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
         return result[0];
     }
 

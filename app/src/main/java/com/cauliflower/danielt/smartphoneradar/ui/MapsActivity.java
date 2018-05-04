@@ -106,8 +106,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        setUpCluster();
-        mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
 
         makeViewWork();
 
@@ -260,11 +258,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void makeViewWork() {
+        setUpCluster();
+        mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
+
         recycler_locationList = findViewById(R.id.recycler_locationList);
         linearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        locationList.addAll(dbHelper.getAllLocation(account));
+        locationList.addAll(dbHelper.searchAllLocation(account));
         adapter = new MyAdapter(locationList);
         recycler_locationList.setAdapter(adapter);
         recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
@@ -291,6 +292,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void showNewMarkOnly() {
         mClusterManager.clearItems();
         int i = locationList.size();
+        //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
         SimpleLocation location = locationList.get(i - 1);
         MyItem item1 = new MyItem(null,
                 location.getLatitude(), location.getLongitude(), location.getTime(), null);

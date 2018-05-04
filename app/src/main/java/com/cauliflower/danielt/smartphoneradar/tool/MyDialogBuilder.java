@@ -2,6 +2,10 @@ package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 
@@ -25,6 +29,52 @@ public class MyDialogBuilder extends AlertDialog.Builder {
                 break;
             }
         }
+    }
+
+    private EditText edTxt_account, edTxt_password;
+    Button btn_ok, btn_cancel;
+
+    //用於登入帳號
+    public MyDialogBuilder(Context context) {
+        super(context);
+        this.setCancelable(false);
+        this.setTitle("註冊");
+
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_login, null);
+        edTxt_account = view.findViewById(R.id.dialog_edTxt_account);
+        edTxt_password = view.findViewById(R.id.dialog_edTxt_password);
+        btn_ok = view.findViewById(R.id.dialog_btn_ok);
+        btn_cancel = view.findViewById(R.id.dialog_btn_cancel);
+
+        this.setView(view);
+    }
+
+    public String getAccount() {
+        if (edTxt_account != null) {
+            String account = edTxt_account.getText().toString();
+            if (!(account.trim()).equals("")) {
+                return account;
+            }
+        }
+        return null;
+    }
+
+    public String getPassword() {
+        if (edTxt_password != null) {
+            String password = edTxt_password.getText().toString();
+            if (!(password.trim()).equals("")) {
+                return password;
+            }
+        }
+        return null;
+    }
+
+    public void setOnOkButtonClickListener(View.OnClickListener okListener) {
+        btn_ok.setOnClickListener(okListener);
+    }
+
+    public void setOnCancelButtonClickListener(View.OnClickListener okListener) {
+        btn_cancel.setOnClickListener(okListener);
     }
 
 }
