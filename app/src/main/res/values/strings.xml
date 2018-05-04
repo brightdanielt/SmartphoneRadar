@@ -2,7 +2,7 @@
     <string name="app_name">SmartphoneRadar</string>
     <string name="title_activity_maps">Map</string>
 
-    //Response code
+    <!--Response code-->
     <string name="INSERT_USER_SUCCESS">INSERT USER SUCCESS</string>
 
     <string name="INSERT_PHONE_INFO_SUCCESS">INSERT PHONE INFO SUCCESS</string>
@@ -23,9 +23,18 @@
 
     <string name="LOGIN_ERROR">LOGIN ERROR</string>
 
-    //Preference
+    <!--Preference account-->
+    <string name="pref_category_title_AccountActivity">帳號</string>
     <string name="pref_key_AccountActivity">AccountActivity</string>
+    <string name="pref_title_AccountActivity">帳號資訊</string>
+
+    <!--Preference maps-->
+    <string name="pref_category_title_MapsActivity">查詢</string>
     <string name="pref_key_MapsActivity">MapsActivity</string>
+    <string name="pref_title_MapsActivity">查詢裝置位置</string>
+
+    <!--Preference settings position-->
+    <string name="pref_category_title_settings">設定</string>
 
     <string name="pref_title_position">定位該裝置</string>
     <string name="pref_key_position">position</string>
@@ -33,7 +42,7 @@
     <string name="pref_not_positioning">未定位</string>
     <bool name="pref_defaultValue_position">false</bool>
 
-
+    <!--Preference settings updateFrequency-->
     <string name="pref_title_updateFrequency">定位頻率</string>
     <string name="pref_key_updateFrequency">updateFrequency</string>
     <string name="pref_label_updateFrequency_5s">5秒</string>
@@ -47,7 +56,21 @@
     <string name="pref_value_updateFrequency_60s">60000</string>
     <string name="pref_defaultValue_updateFrequency">5000</string>
 
-    <string name="title_activity_settings">Settings</string>
+    <!--MapsActivity-->
+    <string name="locationList">座標清單</string>
+    <string name="showNewMarkOnly">只顯示最新座標</string>
+
+    <!--MyDialog-->
+    <string name="no_internet">請檢查網路是否已連線</string>
+    <string name="no_response">伺服器關閉中，請聯絡開發人員</string>
+    <string name="ok">好了</string>
+    <string name="cancel">取消</string>
+
+    <!--ProgressDialog-->
+    <string name="loading">Loading. Please wait...</string>
+    <string name="wrong_user">帳號或密碼錯誤</string>
+
+
 
     <!-- Strings related to Settings -->
 
@@ -111,6 +134,8 @@
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
 
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications">Notifications</string>
 
@@ -123,20 +148,5 @@
     <string name="title_activity_settings2">Settings</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-
-    <!--MapsActivity-->
-    <string name="locationList">座標清單</string>
-    <string name="showNewMarkOnly">只顯示最新座標</string>
-
-    <!--MyDialog-->
-    <string name="no_internet">請檢查網路是否已連線</string>
-    <string name="no_response">伺服器關閉中，請聯絡開發人員</string>
-    <string name="ok">好了</string>
-    <string name="cancel">取消</string>
-
-    <!--ProgressDialog-->
-    <string name="loading">Loading. Please wait...</string>
-    <string name="wrong_user">帳號或密碼錯誤</string>
 
 </resources>

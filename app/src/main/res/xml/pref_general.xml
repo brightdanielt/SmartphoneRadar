@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/title_activity_settings">
+
+    <PreferenceCategory android:title="@string/pref_category_title_AccountActivity">
+        <Preference
+            android:key="@string/pref_key_AccountActivity"
+            android:title="@string/pref_title_AccountActivity"></Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_title_MapsActivity">
+        <Preference
+            android:enabled="false"
+            android:key="@string/pref_key_MapsActivity"
+            android:title="@string/pref_title_MapsActivity"></Preference>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_category_title_settings">
 
         <SwitchPreference
             android:defaultValue="@bool/pref_defaultValue_position"
+            android:enabled="false"
             android:key="@string/pref_key_position"
             android:summary=""
             android:title="@string/pref_title_position" />
         <ListPreference
             android:defaultValue="@string/pref_defaultValue_updateFrequency"
+            android:enabled="false"
             android:entries="@array/pref_entries_updateFrequency"
             android:entryValues="@array/pref_entryValues_updateFrequency"
             android:key="@string/pref_key_updateFrequency"
