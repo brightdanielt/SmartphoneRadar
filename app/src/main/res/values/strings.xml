@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SmartphoneRadar</string>
+    <string name="app_name">Android雷達</string>
     <string name="title_activity_maps">Map</string>
 
     <!--Response code-->
@@ -65,6 +65,8 @@
     <string name="no_response">伺服器關閉中，請聯絡開發人員</string>
     <string name="ok">好了</string>
     <string name="cancel">取消</string>
+    <string name="title_signUp">註冊</string>
+    <string name="title_logIn">登入</string>
 
     <!--ProgressDialog-->
     <string name="loading">Loading. Please wait...</string>

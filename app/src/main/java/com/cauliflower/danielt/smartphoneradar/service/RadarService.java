@@ -12,7 +12,9 @@ import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
+import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -23,11 +25,13 @@ import com.google.android.gms.location.LocationServices;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class RadarService extends Service {
 
     private String TAG = RadarService.class.getSimpleName();
     public static boolean inService = false;
+    private String account_sendLocation, password_sendLocation;
 
     private FusedLocationProviderClient client;
     private LocationRequest locationRequest;
@@ -84,7 +88,7 @@ public class RadarService extends Service {
                 SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
                 String time = s.format(new Date());
                 try {
-                    connectDb.sendLocationToServer("daniel", "daniel",
+                    connectDb.sendLocationToServer(account_sendLocation, password_sendLocation,
                             time, location.getLatitude(), location.getLongitude());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -98,14 +102,28 @@ public class RadarService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        return super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand");
-        showServiceStatus();
+        MyDbHelper dbHelper = new MyDbHelper(RadarService.this);
+        List<User> userList = dbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION);
+        dbHelper.close();
+        for (User user : userList) {
+            account_sendLocation = null;
+            password_sendLocation = null;
+            account_sendLocation = user.getAccount();
+            password_sendLocation = user.getPassword();
+        }
+        if (account_sendLocation != null) {
+            inService = true;
+            showServiceStatus();
 
-        inService = true;
-        connectDb = new ConnectDb(RadarService.this);
-        createLocationRequest();
-        createLocationCallback();
-        fuseLocationRequest();
-        foregroundService();
+            connectDb = new ConnectDb(RadarService.this);
+            createLocationRequest();
+            createLocationCallback();
+            fuseLocationRequest();
+            foregroundService();
+        } else {
+            Log.i(TAG, "There is no result for search account_sendLocation so RadarService stopped");
+            this.stopSelf();
+        }
 
         return START_STICKY;
     }
@@ -136,14 +154,14 @@ public class RadarService extends Service {
 
     //為了讓 Service 活久一點，只好將 Service 推到前景
     private void foregroundService() {
-        Intent showTaskIntent = new Intent(getApplicationContext(), SettingsActivity.class);
-        showTaskIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent intent = new Intent(RadarService.this, SettingsActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent contentIntent = PendingIntent.getActivity(
-                getApplicationContext(),
+                RadarService.this,
                 0,
-                showTaskIntent,
-                PendingIntent.FLAG_NO_CREATE);
+                intent,
+                0);
 
         Notification notification = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))

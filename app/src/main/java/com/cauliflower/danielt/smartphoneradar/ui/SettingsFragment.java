@@ -80,6 +80,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             } else {
                 //Start and stop RadarService
+
                 if (sharedPreferences.getBoolean(key, false)) {
                     PositionPreferences.startRadarService(getActivity());
                 } else {
@@ -149,13 +150,13 @@ public class SettingsFragment extends PreferenceFragment implements
             String in_use = user.getIn_use();
             if (in_use.equals(MyDbHelper.VALUE_USER_IN_USE_YES)) {
                 account_getLocation = user.getAccount();
-                account_getLocation = user.getPassword();
+                password_getLocation = user.getPassword();
                 Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
                 p.setEnabled(true);
                 setPreferenceSummary(p, account_getLocation);
                 break;
             }
         }
-
+        myDbHelper.close();
     }
 }

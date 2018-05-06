@@ -257,6 +257,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
+    }
+
     private void makeViewWork() {
         setUpCluster();
         mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
@@ -280,10 +288,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //在地圖顯示所有標記
     private void showAllMarks() {
         mClusterManager.clearItems();
-        for (int i = 0; i < locationList.size(); i++) {
-            SimpleLocation simpleLocation = locationList.get(i);
+        for (SimpleLocation location : locationList) {
             MyItem item = new MyItem(null,
-                    simpleLocation.getLatitude(), simpleLocation.getLongitude(), simpleLocation.getTime(), null);
+                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
             mClusterManager.addItem(item);
         }
     }
@@ -291,12 +298,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //只顯示最新的標記在地圖上
     private void showNewMarkOnly() {
         mClusterManager.clearItems();
-        int i = locationList.size();
-        //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
-        SimpleLocation location = locationList.get(i - 1);
-        MyItem item1 = new MyItem(null,
-                location.getLatitude(), location.getLongitude(), location.getTime(), null);
-        mClusterManager.addItem(item1);
+        if (!locationList.isEmpty()) {
+            int size = locationList.size();
+            //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
+            SimpleLocation location = locationList.get(size - 1);
+            MyItem item1 = new MyItem(null,
+                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
+            mClusterManager.addItem(item1);
+        }
     }
 
     public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {

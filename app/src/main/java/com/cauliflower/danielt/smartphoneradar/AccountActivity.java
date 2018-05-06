@@ -73,9 +73,9 @@ public class AccountActivity extends AppCompatActivity {
         btn_sendLocation_signUp = findViewById(R.id.btn_sendLocation_signUp);
         btn_getLocation_logIn = findViewById(R.id.btn_getLocation_logIn);
         //按鈕註冊監聽器
-        btn_sendLocation_logIn.setOnClickListener(new MyButtonClickListener());
-        btn_sendLocation_signUp.setOnClickListener(new MyButtonClickListener());
-        btn_getLocation_logIn.setOnClickListener(new MyButtonClickListener());
+        btn_sendLocation_logIn.setOnClickListener(new MyButtonClickListener(R.string.title_logIn));
+        btn_sendLocation_signUp.setOnClickListener(new MyButtonClickListener(R.string.title_signUp));
+        btn_getLocation_logIn.setOnClickListener(new MyButtonClickListener(R.string.title_logIn));
 
         tv_hint_sendLocation = findViewById(R.id.tv_hint_sendLocation);
         tv_hint_getLocation = findViewById(R.id.tv_hint_getLocation);
@@ -223,6 +223,9 @@ public class AccountActivity extends AppCompatActivity {
         if (dialog_loading != null && dialog_loading.isShowing()) {
             dialog_loading.dismiss();
         }
+        if (dbHelper != null) {
+            dbHelper.close();
+        }
     }
 
 
@@ -263,41 +266,48 @@ public class AccountActivity extends AppCompatActivity {
             }
             convertView = v;
 
-            v.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    new AlertDialog.Builder(AccountActivity.this)
-                            .setTitle("問問你～")
-                            .setMessage(Html.fromHtml("以 <font color=\"blue\">" + account + "</font> 的身份登入嗎？"))
-                            .setCancelable(false)
-                            .setPositiveButton("是的", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    //要求 MyDbHelper 更改該 User 的 in_use 為 yes
-                                    dbHelper.updateUser_in_use(account);
-                                    updateView();
-                                }
-                            })
-                            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+            if (usedFor.equals(MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION)) {
+                v.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(AccountActivity.this)
+                                .setTitle("問問你～")
+                                .setMessage(Html.fromHtml("以 <font color=\"blue\">" + account + "</font> 的身份登入嗎？"))
+                                .setCancelable(false)
+                                .setPositiveButton("是的", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //要求 MyDbHelper 更改該 User 的 in_use 為 yes
+                                        dbHelper.updateUser_in_use(account);
+                                        updateView();
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
 
-                                }
-                            })
-                            .show();
+                                    }
+                                })
+                                .show();
 
-                }
-            });
+                    }
+                });
+            }
             return convertView;
         }
     }
 
     //AccountActivity的登入、註冊按鈕監聽器
     class MyButtonClickListener implements View.OnClickListener {
+        int resId_title;
+
+        public MyButtonClickListener(int resId_dialogTitle) {
+            resId_title = resId_dialogTitle;
+        }
 
         @Override
         public void onClick(View v) {
-            dialogBuilder_logIn = new MyDialogBuilder(AccountActivity.this);
+            dialogBuilder_logIn = new MyDialogBuilder(AccountActivity.this, resId_title);
             switch (v.getId()) {
                 case R.id.btn_sendLocation_signUp: {
                     dialogBuilder_logIn.setOnOkButtonClickListener(
@@ -371,7 +381,8 @@ public class AccountActivity extends AppCompatActivity {
                     }
                 }
             }
-
+            dialog_logIn = null;
+            dialogBuilder_logIn = null;
         }
     }
 }

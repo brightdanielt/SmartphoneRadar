@@ -35,10 +35,10 @@ public class MyDialogBuilder extends AlertDialog.Builder {
     Button btn_ok, btn_cancel;
 
     //用於登入帳號
-    public MyDialogBuilder(Context context) {
+    public MyDialogBuilder(Context context,int resId_title) {
         super(context);
         this.setCancelable(false);
-        this.setTitle("註冊");
+        this.setTitle(context.getString(resId_title));
 
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_login, null);
         edTxt_account = view.findViewById(R.id.dialog_edTxt_account);

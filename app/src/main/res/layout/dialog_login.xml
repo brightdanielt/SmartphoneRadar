@@ -6,26 +6,28 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="1">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.2"
                 android:text="帳號：" />
 
             <EditText
                 android:id="@+id/dialog_edTxt_account"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.5"
                 android:hint="輸入帳號"
                 android:inputType="text"
                 android:maxLength="@integer/length_account" />
@@ -35,17 +37,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:weightSum="1">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.2"
                 android:text="密碼：" />
 
             <EditText
                 android:id="@+id/dialog_edTxt_password"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="0.5"
                 android:hint="輸入密碼"
                 android:inputType="textPassword"
                 android:maxLength="@integer/length_password" />
@@ -54,20 +59,25 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
+            android:gravity="right"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/dialog_btn_cancel"
-                android:layout_width="wrap_content"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="@string/cancel" />
+                android:background="@null"
+
+                android:text="@string/cancel"
+                android:textColor="@color/colorAccent" />
 
             <Button
                 android:id="@+id/dialog_btn_ok"
-                android:layout_width="wrap_content"
+                android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                android:text="@string/ok" />
+                android:background="@null"
+                android:text="@string/ok"
+                android:textColor="@color/colorAccent" />
         </LinearLayout>
     </LinearLayout>
 

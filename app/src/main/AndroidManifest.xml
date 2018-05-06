@@ -26,42 +26,11 @@
              Note that the API key is linked to the encryption key used to sign the APK.
              You need a different API key for each encryption key, including the release key that is used to
              sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
-
-        <activity
-            android:name=".ui.MapsActivity"
-            android:label="@string/title_activity_maps"/>
-
-        <activity android:name=".ui.SignUpActivity" />
-
-        <service
-            android:name=".service.RadarService"
-            android:enabled="true"
-            android:exported="false"></service>
-
-        //網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService
-        <receiver android:name=".service.NetWatcher">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-            </intent-filter>
-        </receiver>
-
-        <activity android:name=".ui.LoginActivity" >
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
-        <activity android:name=".AccountActivity">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
-        </activity>
 
         <activity
             android:name=".ui.SettingsActivity"
@@ -71,39 +40,61 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".AccountActivity"
+            android:label="@string/pref_title_MapsActivity" />
+
+        <activity
+            android:name=".ui.MapsActivity"
+            android:label="@string/pref_title_MapsActivity" />
+
+        <service
+            android:name=".service.RadarService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <!--網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService-->
+        <receiver android:name=".service.NetWatcher">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest><!--
-    todo 00: User story、使用流程、定位Service驗證
-    todo 01: Server 資料庫建立 (完成)
-    todo 02: PHP 查詢 DB (完成)
-    todo 02: Http 溝通 Server 的設計 (因為這方面有經驗，略過驗證)
-    todo 03: 註冊帳號 Activity (完成)
-    todo 04: 登入帳號 Activity (完成)
-    todo 05: 定位 Service (完成)
+
+    todo 00: User story、使用流程、定位Service驗證 (done)
+    todo 01: Server 資料庫建立 (done)
+    todo 02: PHP 查詢 DB (done)
+    todo 02: Http 溝通 Server 的設計 (done)
+    todo 03: 註冊帳號 dialog (done)
+    todo 04: 帳號資訊 Activity (done)
+    todo 05: 定位 Service (done)
     todo 06: 設定頁面：有關 sendLocation 的設定，使用 PreferenceFragment 實作該功能
-                開始定位這支手機 ON/OFF（關閉定位時需要輸入帳密）
-                更新位置間隔（每隔幾秒更新一次手機的位置）(完成)
-                手機的資訊
+                開始定位這支手機 ON/OFF（done）
+                更新位置間隔（每隔幾秒更新一次手機的位置）(done)
                 使用指南
-                查詢其他手機位置（按鈕）
+                查詢其他手機位置（done）
     todo 07: MapsActivity 應該附加一些功能（現今座標透過 Cluster 顯示）
-                Cluster 座標應附加 Title(初步測試成功)
+                Cluster 座標應附加 Title(done)
                 類似 Menu button，點擊後
                     顯示 RecyclerView 列出所有的座標，若點擊選項則鏡頭移動至該座標
                     顯示/隱藏歷史座標（透過 MyDbHelper 取得座標）
                     只顯示新座標
                     現在在考慮有無必要設計新舊標記的顯示或隱藏，因為有清單提供所有紀錄，
-                    查詢任何標記都很方便，除非過去存在的標記過多，妨礙查看，所以保留功能：隱藏舊的座標
-    todo 08: LogInActivity
+                    查詢任何標記都很方便，除非過去存在的標記過多，妨礙查看，所以保留功能：隱藏舊的座標(done)
+                在沒有任何座標資料時，須做出提示
+    todo 08: AccountActivity
                 是否應該限制一隻手機只能綁定一個“定位”用帳號?
                 應該是的，但考慮到使用者移除ＡＰＰ或其資料後，忘記帳號密碼
                 應添加新功能：驗證使用者身份
                     要求使用者輸入帳號與信箱，接著傳送一組驗證碼到信箱，使用者於ＡＰＰ內輸入該驗證碼
                     若正確則使用該組驗證碼做為密碼
 
-                這個決定意味著在 LogInActivity 並不會有“定位”帳號能夠選擇以登入
-                只有“查詢”帳號能夠選擇
+                這個決定意味著在 LogInActivity 並不會有“定位”帳號清單能夠選擇以登入
+                只有“查詢”帳號能夠選擇(done)
 
 
-                    -->
+    -->
