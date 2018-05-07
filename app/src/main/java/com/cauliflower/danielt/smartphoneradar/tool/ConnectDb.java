@@ -35,7 +35,6 @@ public class ConnectDb implements SocketInterface {
 
     private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
 
-    private static final String HTTP_REQUEST_FAILED = null;
     public static final String NO_INTERNET = "ConnectException";
     public static final String NO_RESPONSE = "SocketTimeoutException";
 

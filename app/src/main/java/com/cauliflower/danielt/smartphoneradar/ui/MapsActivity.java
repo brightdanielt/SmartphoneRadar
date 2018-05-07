@@ -32,7 +32,6 @@ import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,8 +69,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            } catch (SAXException e) {
 //                e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -154,7 +151,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public class MyItem implements ClusterItem {
+    private class MyItem implements ClusterItem {
         private final LatLng mPosition;
         private BitmapDescriptor icon;
         private String title;
@@ -165,7 +162,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return mPosition;
         }
 
-        public MyItem(BitmapDescriptor ic, Double lat, Double lng, String title, String sni) {
+        MyItem(BitmapDescriptor ic, Double lat, Double lng, String title, String sni) {
             mPosition = new LatLng(lat, lng);
             this.icon = ic;
             this.title = title;
@@ -185,9 +182,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public class OwnRendering extends DefaultClusterRenderer<MyItem> {
+    class OwnRendering extends DefaultClusterRenderer<MyItem> {
 
-        public OwnRendering(Context context, GoogleMap map, ClusterManager<MyItem> clusterManager) {
+        OwnRendering(Context context, GoogleMap map, ClusterManager<MyItem> clusterManager) {
             super(context, map, clusterManager);
         }
 
@@ -312,17 +309,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+    class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private List<SimpleLocation> mLocationList;
 
-        public MyAdapter(List<SimpleLocation> list) {
+        MyAdapter(List<SimpleLocation> list) {
             mLocationList = list;
         }
 
-        public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView tv_time, tv_lat, tv_lng;
+        class ViewHolder extends RecyclerView.ViewHolder {
+            TextView tv_time, tv_lat, tv_lng;
 
-            public ViewHolder(View v) {
+            private ViewHolder(View v) {
                 super(v);
                 tv_time = v.findViewById(R.id.time);
                 tv_lat = v.findViewById(R.id.lat);
@@ -336,8 +333,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Context context = parent.getContext();
             View view = LayoutInflater.from(context).
                     inflate(R.layout.recycler_view_item, parent, false);
-            ViewHolder viewHolder = new ViewHolder(view);
-            return viewHolder;
+            return new ViewHolder(view);
         }
 
         @Override
