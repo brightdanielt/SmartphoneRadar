@@ -23,9 +23,8 @@ public class HandlerXML extends DefaultHandler {
     }
 
     public void endDocument() throws SAXException {
-        if (locations.size() > 0) {
-            this.updater.updateData(locations);
-        }
+        this.updater.updateData(locations);
+
         super.endDocument();
     }
 

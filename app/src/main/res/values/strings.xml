@@ -59,6 +59,7 @@
     <!--MapsActivity-->
     <string name="locationList">座標清單</string>
     <string name="showNewMarkOnly">只顯示最新座標</string>
+    <string name="get_no_location">查無新座標</string>
 
     <!--MyDialog-->
     <string name="no_internet">請檢查網路是否已連線</string>

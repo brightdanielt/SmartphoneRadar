@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
@@ -60,6 +61,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 String time_to_compare = dbHelper.searchNewTime(account);
                 connectDb.getLocationFromServer(account, password, time_to_compare);
+                //每 15 秒查詢一次座標
                 handler.postDelayed(runnable, 15000);
 //                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
 //                sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
@@ -110,43 +112,45 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         makeViewWork();
 
         if (account != null && password != null) {
-            //每 15 秒查詢一次位置
+            //3 秒後執行第一次座標查詢
             handler.postDelayed(runnable, 3000);
         }
     }
 
     @Override
     public void updateData(List<SimpleLocation> locations) {
-        for (int i = 0; i < locations.size(); i++) {
+        if (locations.size() > 0) {
+            for (SimpleLocation location : locations) {
+                double latitude, longitude;
+                String time;
 
-            double latitude, longitude;
-            String time;
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+                time = location.getTime();
+                //手機端資料庫新增一筆 Location
+                dbHelper.addLocation(account, latitude, longitude, time);
 
-            latitude = locations.get(i).getLatitude();
-            longitude = locations.get(i).getLongitude();
-            time = locations.get(i).getTime();
+                //recycler_locationList 新增一筆資料
+                locationList.add(new SimpleLocation(time, latitude, longitude));
 
-            //手機端資料庫新增一筆 Location
-            dbHelper.addLocation(account, latitude, longitude, time);
+                if (showNewMarkOnly) {
+                    //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
+                    mClusterManager.clearItems();
+                }
 
-            //recycler_locationList 新增一筆資料
-            locationList.add(new SimpleLocation(time, latitude, longitude));
+                //地圖新增一個標記
+                MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
+                mClusterManager.addItem(offsetItem);
 
-            if (showNewMarkOnly) {
-                //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
-                mClusterManager.clearItems();
+                //鏡頭移動至該新座標
+                LatLng latLng = new LatLng(latitude, longitude);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+
             }
-
-            //地圖新增一個標記
-            MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
-            mClusterManager.addItem(offsetItem);
-
-            //鏡頭移動至該新座標
-            LatLng latLng = new LatLng(latitude, longitude);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-
+            adapter.notifyDataSetChanged();
+        } else {
+            Toast.makeText(MapsActivity.this, R.string.get_no_location, Toast.LENGTH_SHORT).show();
         }
-        adapter.notifyDataSetChanged();
 
     }
 
