@@ -15,6 +15,8 @@ public class ResponseCode {
     public static final String INSERT_PHONE_INFO_SUCCESS = "104";
     public static final String UPDATE_LOCATION_SUCCESS = "105";
     public static final String LOGIN_SUCCESS = "106";
+    public static final String SEND_VERIFICATION_CODE_SUCCESS = "108";
+    public static final String UPDATE_PASSWORD_SUCCESS = "109";
 
     public static final String PARAMETER_ERROR = "201";
     public static final String USER_ALREADY_EXISTS = "202";
@@ -22,6 +24,8 @@ public class ResponseCode {
     public static final String INSERT_PHONE_INFO_ERROR = "204";
     public static final String UPDATE_LOCATION_ERROR = "205";
     public static final String LOGIN_ERROR = "206";
+    public static final String SEND_VERIFICATION_CODE_FAILED = "208";
+    public static final String UPDATE_PASSWORD_FAILED = "209";
 
     private Context context;
 
@@ -56,6 +60,17 @@ public class ResponseCode {
                         context, context.getResources().getString(R.string.LOGIN_SUCCESS), Toast.LENGTH_SHORT).show();
                 return true;
             }
+            case SEND_VERIFICATION_CODE_SUCCESS: {
+                Toast.makeText(
+                        context, context.getResources().getString(R.string.SEND_VERIFICATION_CODE_SUCCESS), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case UPDATE_PASSWORD_SUCCESS: {
+                Toast.makeText(
+                        context, context.getResources().getString(R.string.UPDATE_PASSWORD_SUCCESS), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
             case PARAMETER_ERROR: {
                 Toast.makeText(
                         context, context.getResources().getString(R.string.PARAMETER_ERROR), Toast.LENGTH_SHORT).show();
@@ -85,6 +100,16 @@ public class ResponseCode {
                 Toast.makeText(
                         context, context.getResources().getString(R.string.LOGIN_ERROR), Toast.LENGTH_SHORT).show();
                 return false;
+            }
+            case SEND_VERIFICATION_CODE_FAILED: {
+                Toast.makeText(
+                        context, context.getResources().getString(R.string.SEND_VERIFICATION_CODE_FAILED), Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            case UPDATE_PASSWORD_FAILED: {
+                Toast.makeText(
+                        context, context.getResources().getString(R.string.UPDATE_PASSWORD_FAILED), Toast.LENGTH_SHORT).show();
+                return true;
             }
 
         }

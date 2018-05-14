@@ -85,6 +85,15 @@ public class MyDbHelper extends SQLiteOpenHelper {
         Log.i(TAG, "Add user,id: " + id);
     }
 
+    public void updatePassword(String account, String password) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USER_PASSWORD, password);
+
+        long i = getWritableDatabase().update(
+                TABLE_USER, values, COLUMN_USER_ACCOUNT + "=?", new String[]{account});
+        Log.i(TAG, "update user column password,count:" + i);
+    }
+
     public void addLocation(String account, double latitude, double longitude, String time) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_LOCATION_ACCOUNT, account);

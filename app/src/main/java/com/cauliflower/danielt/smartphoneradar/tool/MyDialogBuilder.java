@@ -32,7 +32,7 @@ public class MyDialogBuilder extends AlertDialog.Builder {
     }
 
     private EditText edTxt_account, edTxt_password;
-    Button btn_ok, btn_cancel;
+    Button btn_ok, btn_cancel,btn_forgetPassword;
 
     //用於登入帳號
     public MyDialogBuilder(Context context,int resId_title) {
@@ -45,6 +45,7 @@ public class MyDialogBuilder extends AlertDialog.Builder {
         edTxt_password = view.findViewById(R.id.dialog_edTxt_password);
         btn_ok = view.findViewById(R.id.dialog_btn_ok);
         btn_cancel = view.findViewById(R.id.dialog_btn_cancel);
+        btn_forgetPassword = view.findViewById(R.id.dialog_btn_forgetPassword);
 
         this.setView(view);
     }
@@ -69,12 +70,10 @@ public class MyDialogBuilder extends AlertDialog.Builder {
         return null;
     }
 
-    public void setOnOkButtonClickListener(View.OnClickListener okListener) {
-        btn_ok.setOnClickListener(okListener);
-    }
-
-    public void setOnCancelButtonClickListener(View.OnClickListener okListener) {
-        btn_cancel.setOnClickListener(okListener);
+    public void setOnButtonClickListener(View.OnClickListener listener) {
+        btn_ok.setOnClickListener(listener);
+        btn_cancel.setOnClickListener(listener);
+        btn_forgetPassword.setOnClickListener(listener);
     }
 
 }

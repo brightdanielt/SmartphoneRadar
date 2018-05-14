@@ -33,7 +33,8 @@ public class ConnectDb implements SocketInterface {
 
     private static final String TAG = ConnectDb.class.getSimpleName();
 
-    private static final String AUTHENTICATION_SERVER_ADDRESS = "http://114.34.203.58/SmartphoneRadar/index.php";
+    private static final String SERVER_ADDRESS_INDEX = "http://114.34.203.58/SmartphoneRadar/index.php";
+    private static final String SERVER_ADDRESS_FORGET_PASSWORD = "http://114.34.203.58/SmartphoneRadar/forget_password.php";
 
     public static final String NO_INTERNET = "ConnectException";
     public static final String NO_RESPONSE = "SocketTimeoutException";
@@ -45,14 +46,14 @@ public class ConnectDb implements SocketInterface {
     }
 
     @Override
-    public String sendHttpRequest(final String params) {
+    public String sendHttpRequest(final String params, final String string_url) {
         final String[] result = {""};
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 URL url;
                 try {
-                    url = new URL(AUTHENTICATION_SERVER_ADDRESS);
+                    url = new URL(string_url);
                     HttpURLConnection connection;
                     connection = (HttpURLConnection) url.openConnection();
                     connection.setDoOutput(true);
@@ -127,15 +128,33 @@ public class ConnectDb implements SocketInterface {
                 "&";
 
         Log.i(TAG, "Params: " + params);
-        String response = sendHttpRequest(params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
         Log.i(TAG, "Response: " + response);
 
         return response;
 
     }
 
-    //logIn 用於驗證該組帳密是否存在
-    public String logIn(final String account, final String password) throws
+    //logIn 用於驗證該組定位帳密是否存在
+    public String logIn_sendLocation(final String account, final String password,String model,String imei) throws
+            UnsupportedEncodingException {
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&model=" + URLEncoder.encode(model, "UTF-8") +
+                "&imei=" + URLEncoder.encode(imei, "UTF-8") +
+                "&action=" + URLEncoder.encode("login", "UTF-8") +
+                "&";
+
+        Log.i(TAG, "Params: " + params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
+        Log.i(TAG, "Response: " + response);
+
+        return response;
+
+    }
+
+    //logIn 用於驗證該組查詢帳密是否存在
+    public String logIn_getLocation(final String account, final String password) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
@@ -143,7 +162,7 @@ public class ConnectDb implements SocketInterface {
                 "&";
 
         Log.i(TAG, "Params: " + params);
-        String response = sendHttpRequest(params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
         Log.i(TAG, "Response: " + response);
 
         return response;
@@ -162,7 +181,7 @@ public class ConnectDb implements SocketInterface {
                 "&";
 
         Log.i(TAG, "Params: " + params);
-        String response = sendHttpRequest(params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
         Log.i(TAG, "Response: " + response);
         return response;
 
@@ -176,7 +195,7 @@ public class ConnectDb implements SocketInterface {
                 "&";
 
         Log.i(TAG, "Params: " + params);
-        String response = sendHttpRequest(params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
         try {
             SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
             sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML((Updater) context));
@@ -187,6 +206,39 @@ public class ConnectDb implements SocketInterface {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    //驗證帳號，成功則傳送驗證碼到信箱
+    public String sendVerificationCodeToEmail(String account, String model, String imei, String email, String verification_code) throws
+            UnsupportedEncodingException {
+
+        final String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&model=" + URLEncoder.encode(model, "UTF-8") +
+                "&imei=" + URLEncoder.encode(imei, "UTF-8") +
+                "&target_email=" + URLEncoder.encode(email, "UTF-8") +
+                "&verification_code=" + URLEncoder.encode(verification_code, "UTF-8") +
+                "&action=" + URLEncoder.encode("sendVerificationCodeToEmail", "UTF-8") +
+                "&";
+
+        Log.i(TAG, "Params: " + params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_FORGET_PASSWORD);
+        Log.i(TAG, "Response: " + response);
+        return response;
+    }
+
+    //更改密碼
+    public String updatePassword(String account, String password) throws
+            UnsupportedEncodingException {
+
+        final String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+                "&password=" + URLEncoder.encode(password, "UTF-8") +
+                "&action=" + URLEncoder.encode("update_password", "UTF-8") +
+                "&";
+
+        Log.i(TAG, "Params: " + params);
+        String response = sendHttpRequest(params, SERVER_ADDRESS_FORGET_PASSWORD);
+        Log.i(TAG, "Response: " + response);
+        return response;
     }
 
 }

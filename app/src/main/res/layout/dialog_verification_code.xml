@@ -21,40 +21,18 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.15"
-                android:text="帳號：" />
+                android:text="驗證碼：" />
 
             <EditText
-                android:id="@+id/dialog_edTxt_account"
+                android:id="@+id/dialog_verificationCode"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.6"
-                android:hint="輸入帳號"
+                android:hint="輸入驗證碼"
                 android:inputType="text"
                 android:maxLength="@integer/length_account" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal"
-            android:weightSum="1">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.15"
-                android:text="密碼：" />
-
-            <EditText
-                android:id="@+id/dialog_edTxt_password"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.6"
-                android:hint="輸入密碼"
-                android:inputType="textPassword"
-                android:maxLength="@integer/length_password" />
-        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -63,16 +41,7 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/dialog_btn_forgetPassword"
-
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="忘記密碼"
-                android:textColor="@color/colorAccent"
-                android:background="@null"/>
-
-            <Button
-                android:id="@+id/dialog_btn_cancel"
+                android:id="@+id/dialog_verificationCode_btn_cancel"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:background="@null"
@@ -81,7 +50,7 @@
                 android:textColor="@color/colorAccent" />
 
             <Button
-                android:id="@+id/dialog_btn_ok"
+                android:id="@+id/dialog_verificationCode_btn_ok"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
                 android:background="@null"

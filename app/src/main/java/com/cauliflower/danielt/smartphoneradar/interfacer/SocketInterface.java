@@ -5,7 +5,7 @@ package com.cauliflower.danielt.smartphoneradar.interfacer;
  */
 
 public interface SocketInterface {
-    public String sendHttpRequest(String params);
+    public String sendHttpRequest(String params, String string_url);
 
     public int startListening(int port);
 

@@ -11,6 +11,10 @@
 
     <string name="LOGIN_SUCCESS">LOGIN SUCCESS</string>
 
+    <string name="SEND_VERIFICATION_CODE_SUCCESS">SEND_VERIFICATION_CODE_SUCCESS</string>
+
+    <string name="UPDATE_PASSWORD_SUCCESS">UPDATE_PASSWORD_SUCCESS</string>
+
     <string name="PARAMETER_ERROR">PARAMETER ERROR</string>
 
     <string name="USER_ALREADY_EXISTS">USER ALREADY EXISTS</string>
@@ -22,6 +26,10 @@
     <string name="UPDATE_LOCATION_ERROR">UPDATE LOCATION ERROR</string>
 
     <string name="LOGIN_ERROR">LOGIN ERROR</string>
+
+    <string name="SEND_VERIFICATION_CODE_FAILED">SEND_VERIFICATION_CODE_FAILED</string>
+
+    <string name="UPDATE_PASSWORD_FAILED">UPDATE_PASSWORD_FAILED</string>
 
     <!--Preference account-->
     <string name="pref_category_title_AccountActivity">帳號</string>
@@ -68,11 +76,12 @@
     <string name="cancel">取消</string>
     <string name="title_signUp">註冊</string>
     <string name="title_logIn">登入</string>
+    <string name="send_verification_code">發送驗證碼</string>
+
 
     <!--ProgressDialog-->
     <string name="loading">Loading. Please wait&#8230;</string>
     <string name="wrong_user">帳號或密碼錯誤</string>
-
 
 
     <!-- Strings related to Settings -->
