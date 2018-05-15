@@ -3,9 +3,9 @@
     <string name="title_activity_maps">Map</string>
 
     <!--Response code-->
-    <string name="INSERT_USER_SUCCESS">INSERT USER SUCCESS</string>
+    <!--<string name="INSERT_USER_SUCCESS">註冊定位用帳號成功</string>-->
 
-    <string name="INSERT_PHONE_INFO_SUCCESS">INSERT PHONE INFO SUCCESS</string>
+    <string name="INSERT_PHONE_INFO_SUCCESS">註冊定位用帳號成功</string>
 
     <string name="UPDATE_LOCATION_SUCCESS">UPDATE LOCATION SUCCESS</string>
 
@@ -17,7 +17,9 @@
 
     <string name="PARAMETER_ERROR">PARAMETER ERROR</string>
 
-    <string name="USER_ALREADY_EXISTS">USER ALREADY EXISTS</string>
+    <string name="USER_ALREADY_EXISTS">該帳號已被使用</string>
+
+    <string name="IMEI_ALREADY_EXISTS">裝置已綁定過其他帳號</string>
 
     <string name="INSERT_USER_ERROR">INSERT USER ERROR</string>
 
@@ -25,7 +27,7 @@
 
     <string name="UPDATE_LOCATION_ERROR">UPDATE LOCATION ERROR</string>
 
-    <string name="LOGIN_ERROR">LOGIN ERROR</string>
+    <string name="LOGIN_ERROR">帳號或密碼錯誤</string>
 
     <string name="SEND_VERIFICATION_CODE_FAILED">SEND_VERIFICATION_CODE_FAILED</string>
 
@@ -158,6 +160,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_settings2">Settings</string>
+
 
     <!-- TODO: Remove or change this placeholder text -->
 

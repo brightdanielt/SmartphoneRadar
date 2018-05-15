@@ -54,7 +54,7 @@ public class MyDbHelper extends SQLiteOpenHelper {
                 COLUMN_USER_PASSWORD + " VARCHAR NOT NULL, " +
                 COLUMN_USER_USEDFOR + " VARCHAR NOT NULL, " +
                 COLUMN_USER_IN_USE + " VARCHAR NOT NULL, " +
-                "PRIMARY KEY( " + COLUMN_USER_ACCOUNT + "," + COLUMN_USER_PASSWORD + ") ) "
+                "PRIMARY KEY( " + COLUMN_USER_ACCOUNT + "," + COLUMN_USER_USEDFOR + ") ) "
         );
 
         db.execSQL("CREATE TABLE " + TABLE_LOCATION + " (" +
@@ -75,23 +75,38 @@ public class MyDbHelper extends SQLiteOpenHelper {
     }
 
     public void addUser(String account, String password, String usedFor, String in_use) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USER_ACCOUNT, account);
-        values.put(COLUMN_USER_PASSWORD, password);
-        values.put(COLUMN_USER_USEDFOR, usedFor);
-        values.put(COLUMN_USER_IN_USE, in_use);
+        Cursor c = getReadableDatabase().query(TABLE_USER, new String[]{"account"},
+                COLUMN_USER_ACCOUNT + " = ? and " + COLUMN_USER_USEDFOR + " = ? ",
+                new String[]{account, usedFor}, null, null, null);
+        if (!c.moveToFirst()) {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USER_ACCOUNT, account);
+            values.put(COLUMN_USER_PASSWORD, password);
+            values.put(COLUMN_USER_USEDFOR, usedFor);
+            values.put(COLUMN_USER_IN_USE, in_use);
+            long id = getWritableDatabase().insert(TABLE_USER, null, values);
+            Log.i(TAG, "Add user,id: " + id);
+        } else {
+            Log.i(TAG, "The same account already exists ,do not add the user.");
+        }
 
-        long id = getWritableDatabase().insert(TABLE_USER, null, values);
-        Log.i(TAG, "Add user,id: " + id);
     }
 
     public void updatePassword(String account, String password) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_USER_PASSWORD, password);
+        Cursor c = getReadableDatabase().query(TABLE_USER, new String[]{"account"},
+                COLUMN_USER_ACCOUNT + " = ? and " + COLUMN_USER_PASSWORD + " = ? ",
+                new String[]{account, password}, null, null, null);
+        if (!c.moveToFirst()) {
+            c.close();
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_USER_PASSWORD, password);
 
-        long i = getWritableDatabase().update(
-                TABLE_USER, values, COLUMN_USER_ACCOUNT + "=?", new String[]{account});
-        Log.i(TAG, "update user column password,count:" + i);
+            long i = getWritableDatabase().update(
+                    TABLE_USER, values, COLUMN_USER_ACCOUNT + " = ? ", new String[]{account});
+            Log.i(TAG, "update user column password,count:" + i);
+        } else {
+            Log.i(TAG, "The same account and password already exists ,do not update the password");
+        }
     }
 
     public void addLocation(String account, double latitude, double longitude, String time) {
