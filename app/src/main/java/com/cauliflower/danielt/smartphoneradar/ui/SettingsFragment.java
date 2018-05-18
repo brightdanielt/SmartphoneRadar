@@ -142,7 +142,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 p.setEnabled(true);
                 setPreferenceSummary(p, account_sendLocation);
                 findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
-//                break;
+                break;
             }
         }
         List<User> userList_getLocation = myDbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION);

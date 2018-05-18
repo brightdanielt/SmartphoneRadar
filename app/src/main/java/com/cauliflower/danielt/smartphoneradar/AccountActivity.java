@@ -101,7 +101,7 @@ public class AccountActivity extends AppCompatActivity {
         listView_sendLocation = findViewById(R.id.listView_sendLocation);
         listView_getLocation = findViewById(R.id.listView_getLocation);
 
-//        userList_sendLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
+        userList_sendLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
         userList_getLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_GETLOCATION));
         adapter_sendLocation = new MyAdapter(userList_sendLocation);
         adapter_getLocation = new MyAdapter(userList_getLocation);
@@ -289,14 +289,14 @@ public class AccountActivity extends AppCompatActivity {
                         password_sendLocation = String.valueOf(verification_code);
                         dbHelper.addUser(account_sendLocation, password_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_YES);
                         dbHelper.updatePassword(account_forgetPassword, String.valueOf(verification_code));
-                        Toast.makeText(AccountActivity.this, account_getLocation + "更新密碼成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, account_sendLocation + "更新密碼成功", Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
                 updateView();
             } else {
                 //Server不存在該帳密，應重新輸入帳密以登入、查詢手機位置或註冊
-                Toast.makeText(AccountActivity.this, R.string.wrong_user, Toast.LENGTH_SHORT).show();
+//                Toast.makeText(AccountActivity.this, R.string.wrong_user, Toast.LENGTH_SHORT).show();
             }
             dialog_loading.dismiss();
 
@@ -528,6 +528,7 @@ public class AccountActivity extends AppCompatActivity {
                 });
                 dialog_forgetPassword.show();
             }
+            dialog_logIn.dismiss();
             dialog_logIn = null;
             dialogBuilder_logIn = null;
         }

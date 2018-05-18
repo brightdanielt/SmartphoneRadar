@@ -8,24 +8,30 @@
     android:orientation="vertical"
     tools:context="com.cauliflower.danielt.smartphoneradar.AccountActivity">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="定位用:"
-        android:textColor="@color/colorAccent" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tv_hint_sendLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="無" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/for_send_location"
+            android:textColor="@color/colorAccent" />
+
+        <TextView
+            android:id="@+id/tv_hint_sendLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/nothing" />
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listView_sendLocation"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="center_horizontal"/>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" />
 
 
     <LinearLayout
@@ -38,28 +44,37 @@
             android:id="@+id/btn_sendLocation_logIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="登入" />
+            android:layout_marginRight="@dimen/default_margin"
+            android:background="@drawable/btn_bg_custom"
+            android:text="@string/logIn" />
 
         <Button
             android:id="@+id/btn_sendLocation_signUp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="註冊" />
+            android:layout_marginLeft="@dimen/default_margin"
+            android:background="@drawable/btn_bg_custom"
+            android:text="@string/signUp" />
     </LinearLayout>
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="查詢用:"
-        android:textColor="@color/colorAccent" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tv_hint_getLocation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="無" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/for_get_location"
+            android:textColor="@color/colorAccent" />
+
+        <TextView
+            android:id="@+id/tv_hint_getLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="@string/nothing" />
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -69,15 +84,13 @@
         <ListView
             android:id="@+id/listView_getLocation"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="@dimen/default_margin"
-            android:layout_weight="0.8"/>
+            android:layout_marginBottom="@dimen/default_margin" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.2"
+            android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="horizontal">
 
@@ -86,7 +99,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="添加新的追蹤帳號" />
+                android:background="@drawable/btn_bg_custom"
+                android:padding="@dimen/default_margin"
+                android:text="@string/add_account_get_location" />
 
         </LinearLayout>
     </LinearLayout>
