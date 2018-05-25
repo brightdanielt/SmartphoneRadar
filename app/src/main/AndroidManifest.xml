@@ -18,7 +18,7 @@
         android:persistent="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/MyTheme">
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -85,13 +85,13 @@
                     只顯示新座標
                     現在在考慮有無必要設計新舊標記的顯示或隱藏，因為有清單提供所有紀錄，
                     查詢任何標記都很方便，除非過去存在的標記過多，妨礙查看，所以保留功能：隱藏舊的座標(done)
-                在沒有任何座標資料時，須做出提示
+                在沒有任何座標資料時，須做出提示(done)
     todo 08: AccountActivity
                 是否應該限制一隻手機只能綁定一個“定位”用帳號?
                 應該是的，但考慮到使用者移除ＡＰＰ或其資料後，忘記帳號密碼
                 應添加新功能：驗證使用者身份
                     要求使用者輸入帳號與信箱，接著傳送一組驗證碼到信箱，使用者於ＡＰＰ內輸入該驗證碼
-                    若正確則使用該組驗證碼做為密碼
+                    若正確則使用該組驗證碼做為密碼(done)
 
                 這個決定意味著在 LogInActivity 並不會有“定位”帳號清單能夠選擇以登入
                 只有“查詢”帳號能夠選擇(done)

@@ -8,4 +8,33 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MyTheme" parent="@style/AppTheme">
+        <!--<item name="colorPrimary">#00ff7b</item>-->
+        <item name="colorPrimaryDark">#ff6528</item>
+        <item name="android:background">#fff6df</item>
+
+        <item name="actionBarStyle">@style/MyActionBar</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="MyActionBar" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:background">@android:color/holo_orange_light</item>
+        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
+        <item name="android:backgroundStacked">@android:color/holo_green_dark</item>
+
+        <!-- Support library compatibility -->
+        <item name="background">@android:color/holo_purple</item>
+        <item name="titleTextStyle">@style/MyActionBarTitleText</item>
+        <item name="backgroundStacked">@android:color/holo_green_dark</item>
+    </style>
+
+    <!-- ActionBar title text -->
+    <style name="MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+
+
+
+
 </resources>

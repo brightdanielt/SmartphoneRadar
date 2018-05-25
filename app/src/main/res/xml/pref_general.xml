@@ -4,14 +4,14 @@
     <PreferenceCategory android:title="@string/pref_category_title_AccountActivity">
         <Preference
             android:key="@string/pref_key_AccountActivity"
-            android:title="@string/pref_title_AccountActivity"></Preference>
+            android:title="@string/pref_title_AccountActivity"/>
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/pref_category_title_MapsActivity">
         <Preference
             android:enabled="false"
             android:key="@string/pref_key_MapsActivity"
-            android:title="@string/pref_title_MapsActivity"></Preference>
+            android:title="@string/pref_title_MapsActivity"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/pref_category_title_settings">
 
