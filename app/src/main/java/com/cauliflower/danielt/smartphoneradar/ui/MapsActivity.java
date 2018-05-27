@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
@@ -58,6 +58,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public void run() {
             try {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        getSupportActionBar().setSubtitle("");
+                    }
+                }, 7500);
                 String time_to_compare = dbHelper.searchNewTime(account);
                 connectDb.getLocationFromServer(account, password, time_to_compare);
                 //每 15 秒查詢一次座標
@@ -80,6 +86,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -144,9 +152,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
 
             }
+            getSupportActionBar().setSubtitle(null);
             adapter.notifyDataSetChanged();
         } else {
-            Toast.makeText(MapsActivity.this, R.string.get_no_location, Toast.LENGTH_SHORT).show();
+            getSupportActionBar().setSubtitle(R.string.get_no_location);
         }
 
     }
@@ -214,6 +223,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home: {
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+            }
             case R.id.action_locationList: {
                 if (item.isChecked()) {
                     item.setChecked(false);
@@ -249,7 +262,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             }
         }
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

@@ -18,7 +18,7 @@
         android:persistent="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/MyTheme">
+        android:theme="@style/AppTheme">
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -43,11 +43,23 @@
 
         <activity
             android:name=".AccountActivity"
-            android:label="@string/pref_title_MapsActivity" />
+            android:label="@string/pref_title_AccountActivity"
+            android:parentActivityName=".ui.SettingsActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.SettingsActivity" />
+        </activity>
 
         <activity
             android:name=".ui.MapsActivity"
-            android:label="@string/pref_title_MapsActivity" />
+            android:label="@string/pref_title_MapsActivity"
+            android:parentActivityName=".ui.SettingsActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.SettingsActivity" />
+        </activity>
 
         <service
             android:name=".service.RadarService"
