@@ -73,6 +73,7 @@ public class ResponseCode {
                 return false;
             }
             case SEND_VERIFICATION_CODE_FAILED: {
+                Toast.makeText(context, context.getString(R.string.SEND_VERIFICATION_CODE_FAILED), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case UPDATE_PASSWORD_FAILED: {

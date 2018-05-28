@@ -274,19 +274,19 @@ public class AccountActivity extends AppCompatActivity {
                 switch (whichTask) {
                     case TASK_SIGN_UP: {
                         dbHelper.addUser(account_sendLocation, password_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_YES);
-                        Toast.makeText(AccountActivity.this, account_sendLocation + "註冊定位用帳號成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, account_sendLocation + getString(R.string.sighUp_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_SEND_LOCATION: {
                         //要判斷是否已存在該筆資料
                         //資料結構可能要調整
                         dbHelper.addUser(account_sendLocation, password_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_NO);
-                        Toast.makeText(AccountActivity.this, account_sendLocation + "登入定位用帳號成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, account_sendLocation + getString(R.string.logIn_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_GET_LOCATION: {
                         dbHelper.addUser(account_getLocation, password_getLocation, VALUE_USER_USEDFOR_GETLOCATION, VALUE_USER_IN_USE_NO);
-                        Toast.makeText(AccountActivity.this, account_getLocation + "登入查詢用帳號成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, account_getLocation + getString(R.string.logIn_getLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_SEND_VERIFICATION_CODE: {
@@ -295,7 +295,7 @@ public class AccountActivity extends AppCompatActivity {
                         edTxt_forgetPassword_verificationCode.setEnabled(true);
                         btn_forgetPassword_send_verification_code.setEnabled(false);
                         btn_forgetPassword_ok.setEnabled(true);
-                        Toast.makeText(AccountActivity.this, "請到E-mail接收驗證碼", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, getString(R.string.please_receive_verification_code), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_UPDATE_PASSWORD: {
@@ -303,7 +303,7 @@ public class AccountActivity extends AppCompatActivity {
                         password_sendLocation = String.valueOf(verification_code);
                         dbHelper.addUser(account_sendLocation, password_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_YES);
                         dbHelper.updatePassword(account_forgetPassword, String.valueOf(verification_code));
-                        Toast.makeText(AccountActivity.this, account_sendLocation + "更新密碼成功", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, account_sendLocation + getString(R.string.update_password_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                 }
