@@ -70,6 +70,10 @@ public class MyDialogBuilder extends AlertDialog.Builder {
         return null;
     }
 
+    public void setBtn_forgetPasswordVisibility(int visibility){
+        btn_forgetPassword.setVisibility(visibility);
+    }
+
     public void setOnButtonClickListener(View.OnClickListener listener) {
         btn_ok.setOnClickListener(listener);
         btn_cancel.setOnClickListener(listener);

@@ -73,6 +73,9 @@
     <string name="logIn">登入</string>
     <string name="signUp">註冊</string>
     <string name="add_account_get_location">添加新的追蹤帳號</string>
+    <string name="digits_account">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="digits_password">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="digits_email">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@."</string>
 
     <!--MapsActivity-->
     <string name="locationList">座標清單</string>

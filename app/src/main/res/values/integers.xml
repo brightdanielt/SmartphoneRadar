@@ -4,4 +4,6 @@
     <integer name="length_password">15</integer>
 
     <integer name="length_email">45</integer>
+
+    <integer name="length_verification_code">10</integer>
 </resources>

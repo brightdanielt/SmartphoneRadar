@@ -21,7 +21,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.15"
-                android:text="帳號：" />
+                android:text="帳號："/>
 
             <EditText
                 android:id="@+id/dialog_edTxt_account"
@@ -30,7 +30,8 @@
                 android:layout_weight="0.6"
                 android:hint="輸入帳號"
                 android:inputType="text"
-                android:maxLength="@integer/length_account" />
+                android:maxLength="@integer/length_account"
+                android:digits="@string/digits_account"/>
         </LinearLayout>
 
         <LinearLayout
@@ -53,6 +54,7 @@
                 android:layout_weight="0.6"
                 android:hint="輸入密碼"
                 android:inputType="textPassword"
+                android:digits="@string/digits_password"
                 android:maxLength="@integer/length_password" />
         </LinearLayout>
 
@@ -69,7 +71,8 @@
                 android:layout_height="wrap_content"
                 android:text="忘記密碼"
                 android:textColor="@color/colorAccent"
-                android:background="@null"/>
+                android:background="@null"
+                android:visibility="invisible"/>
 
             <Button
                 android:id="@+id/dialog_btn_cancel"

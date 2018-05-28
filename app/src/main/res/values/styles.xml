@@ -44,7 +44,4 @@
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle</item>
     </style>
 
-
-
-
 </resources>

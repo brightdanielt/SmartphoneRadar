@@ -295,7 +295,7 @@ public class AccountActivity extends AppCompatActivity {
                         edTxt_forgetPassword_verificationCode.setEnabled(true);
                         btn_forgetPassword_send_verification_code.setEnabled(false);
                         btn_forgetPassword_ok.setEnabled(true);
-                        Toast.makeText(AccountActivity.this, verification_code + "請到E-mail接收驗證碼", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AccountActivity.this, "請到E-mail接收驗證碼", Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_UPDATE_PASSWORD: {
@@ -427,6 +427,7 @@ public class AccountActivity extends AppCompatActivity {
                 //點擊定位用的登入按鈕
                 case R.id.btn_sendLocation_logIn: {
                     getPhoneInfo();
+                    dialogBuilder_logIn.setBtn_forgetPasswordVisibility(View.VISIBLE);
                     dialogBuilder_logIn.setOnButtonClickListener(
                             new LogInDialogButtonListener(TASK_LOGIN_TO_SEND_LOCATION));
                     break;
