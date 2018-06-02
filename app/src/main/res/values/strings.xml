@@ -66,6 +66,11 @@
     <string name="pref_value_updateFrequency_60s">60000</string>
     <string name="pref_defaultValue_updateFrequency">5000</string>
 
+    <!--Preference ContactUs-->
+    <!--<string name="pref_category_title_contactUs">聯絡我們</string>-->
+    <!--<string name="pref_key_contactUs">contactUs</string>-->
+    <!--<string name="pref_title_mailUs">寄信給我</string>-->
+
     <!--AccountActivity-->
     <string name="for_send_location">定位用:&#160;&#160;</string>
     <string name="for_get_location">查詢用:&#160;&#160;</string>
@@ -78,9 +83,6 @@
     <string name="logIn_getLocation_success">登入查詢用帳號成功</string>
     <string name="please_receive_verification_code">請到E-mail接收驗證碼</string>
     <string name="update_password_success">更新密碼成功</string>
-
-
-
 
     <string name="digits_account">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="digits_password">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>

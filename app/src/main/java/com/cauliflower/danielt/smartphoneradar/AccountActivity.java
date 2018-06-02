@@ -128,7 +128,7 @@ public class AccountActivity extends AppCompatActivity {
     private void updateView() {
         userList_sendLocation.clear();
         userList_getLocation.clear();
-//        userList_sendLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
+        userList_sendLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
         userList_getLocation.addAll(dbHelper.searchUser(VALUE_USER_USEDFOR_GETLOCATION));
 
         if (userList_sendLocation.size() > 0) {

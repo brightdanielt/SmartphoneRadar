@@ -166,7 +166,8 @@ public class RadarService extends Service {
         Notification notification = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.pref_positioning))
-                .setSmallIcon(R.mipmap.ic_launcher_hat)
+//                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.))
+                .setSmallIcon(R.drawable.ic_hat_notify)
                 .setWhen(System.currentTimeMillis())
                 .setContentIntent(contentIntent)
                 .build();
