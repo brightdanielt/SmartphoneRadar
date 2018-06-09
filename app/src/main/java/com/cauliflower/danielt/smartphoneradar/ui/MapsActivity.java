@@ -42,12 +42,12 @@ import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USE
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
-    private RecyclerView recycler_locationList;
-    private MyAdapter adapter;
-    private LinearLayout linearLayout_wrapRecyclerView;
+    private RecyclerView mRecycler_locationList;
+    private MyAdapter mAdapter;
+    private LinearLayout mLinearLayout_wrapRecyclerView;
 
     //用於遠端 DB
-    private ConnectDb connectDb;
+    private ConnectDb mConnectDb;
     //用於手機 DB
     private MyDbHelper dbHelper;
     private List<SimpleLocation> locationList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }, 7500);
                 String time_to_compare = dbHelper.searchNewTime(account);
-                connectDb.getLocationFromServer(account, password, time_to_compare);
+                mConnectDb.getLocationFromServer(account, password, time_to_compare);
                 //每 15 秒查詢一次座標
                 handler.postDelayed(runnable, 15000);
 //                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
@@ -93,7 +93,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        connectDb = new ConnectDb(MapsActivity.this);
+        mConnectDb = new ConnectDb(MapsActivity.this);
         dbHelper = new MyDbHelper(MapsActivity.this);
         Intent i = getIntent();
         account = i.getStringExtra(COLUMN_USER_ACCOUNT);
@@ -122,6 +122,61 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void makeViewWork() {
+        setUpCluster();
+
+        mRecycler_locationList = findViewById(R.id.recycler_locationList);
+        mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
+
+        //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
+        locationList.addAll(dbHelper.searchAllLocation(account));
+        mAdapter = new MyAdapter(locationList);
+        mRecycler_locationList.setAdapter(mAdapter);
+        mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
+
+        //該功能原本能夠直接在 MyAdapter 的方法 onBindViewHolder 實現
+        //取出 listLocation 物件作為 item 的資料，同時添增標記
+        //但在 view 的 params 變動時，recyclerView再次呼叫了方法 onBindViewHolder
+        //使得標記重複添加因此改為呼叫該方法 showAllMarks
+        showAllMarks();
+    }
+
+    private void setUpCluster() {
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        mClusterManager = new ClusterManager<MyItem>(this, mMap);
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
+    }
+
+    //在地圖顯示所有標記
+    private void showAllMarks() {
+        mClusterManager.clearItems();
+        for (SimpleLocation location : locationList) {
+            MyItem item = new MyItem(null,
+                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
+            mClusterManager.addItem(item);
+        }
+    }
+
+    //只顯示最新的標記在地圖上
+    private void showNewMarkOnly() {
+        mClusterManager.clearItems();
+        if (!locationList.isEmpty()) {
+            int size = locationList.size();
+            //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
+            SimpleLocation location = locationList.get(size - 1);
+            MyItem item1 = new MyItem(null,
+                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
+            mClusterManager.addItem(item1);
+        }
+    }
+
+    //處理向伺服器查詢得的位置資訊
     @Override
     public void updateData(List<SimpleLocation> locations) {
         if (locations.size() > 0) {
@@ -144,8 +199,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
 
                 //地圖新增一個標記
-                MyItem offsetItem = new MyItem(null, latitude, longitude, time, "");
-                mClusterManager.addItem(offsetItem);
+                mClusterManager.addItem(new MyItem(null, latitude, longitude, time, ""));
 
                 //鏡頭移動至該新座標
                 LatLng latLng = new LatLng(latitude, longitude);
@@ -153,7 +207,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
             getSupportActionBar().setSubtitle(null);
-            adapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
         } else {
             getSupportActionBar().setSubtitle(R.string.get_no_location);
         }
@@ -193,6 +247,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     class OwnRendering extends DefaultClusterRenderer<MyItem> {
 
+
         OwnRendering(Context context, GoogleMap map, ClusterManager<MyItem> clusterManager) {
             super(context, map, clusterManager);
         }
@@ -206,19 +261,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Declare a variable for the cluster manager.
+
     private ClusterManager<MyItem> mClusterManager;
-
-    private void setUpCluster() {
-        // Initialize the manager with the context and the map.
-        // (Activity extends context, so we can pass 'this' in the constructor.)
-        mClusterManager = new ClusterManager<MyItem>(this, mMap);
-
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
-
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -230,22 +274,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_locationList: {
                 if (item.isChecked()) {
                     item.setChecked(false);
-                    linearLayout_wrapRecyclerView.setLayoutParams(
+                    mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 0f
                             )
                     );
 
-                    linearLayout_wrapRecyclerView.setVisibility(View.INVISIBLE);
+                    mLinearLayout_wrapRecyclerView.setVisibility(View.INVISIBLE);
 
                 } else {
                     item.setChecked(true);
-                    linearLayout_wrapRecyclerView.setLayoutParams(
+                    mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f
                             )
                     );
-                    linearLayout_wrapRecyclerView.setVisibility(View.VISIBLE);
+                    mLinearLayout_wrapRecyclerView.setVisibility(View.VISIBLE);
                 }
                 break;
             }
@@ -276,49 +320,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
         if (dbHelper != null) {
             dbHelper.close();
-        }
-    }
-
-    private void makeViewWork() {
-        setUpCluster();
-        mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
-
-        recycler_locationList = findViewById(R.id.recycler_locationList);
-        linearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
-
-        //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        locationList.addAll(dbHelper.searchAllLocation(account));
-        adapter = new MyAdapter(locationList);
-        recycler_locationList.setAdapter(adapter);
-        recycler_locationList.setLayoutManager(new LinearLayoutManager(this));
-
-        //該功能原本能夠直接在 MyAdapter 的方法 onBindViewHolder 實現
-        //取出 listLocation 物件作為 item 的資料，同時添增標記
-        //但在 view 的 params 變動時，recyclerView再次呼叫了方法 onBindViewHolder
-        //使得標記重複添加因此改為呼叫該方法 showAllMarks
-        showAllMarks();
-    }
-
-    //在地圖顯示所有標記
-    private void showAllMarks() {
-        mClusterManager.clearItems();
-        for (SimpleLocation location : locationList) {
-            MyItem item = new MyItem(null,
-                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
-            mClusterManager.addItem(item);
-        }
-    }
-
-    //只顯示最新的標記在地圖上
-    private void showNewMarkOnly() {
-        mClusterManager.clearItems();
-        if (!locationList.isEmpty()) {
-            int size = locationList.size();
-            //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
-            SimpleLocation location = locationList.get(size - 1);
-            MyItem item1 = new MyItem(null,
-                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
-            mClusterManager.addItem(item1);
         }
     }
 
