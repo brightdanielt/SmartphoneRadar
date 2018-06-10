@@ -32,14 +32,12 @@ public final class PositionPreferences {
     public static void startRadarService(Context context) {
         Intent i = new Intent();
         i.setClass(context, RadarService.class);
-
         context.startService(i);
     }
 
     public static void stopRadarService(Context context) {
         Intent i = new Intent();
         i.setClass(context, RadarService.class);
-
         context.stopService(i);
     }
 }

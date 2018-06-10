@@ -49,12 +49,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //用於遠端 DB
     private ConnectDb mConnectDb;
     //用於手機 DB
-    private MyDbHelper dbHelper;
-    private List<SimpleLocation> locationList = new ArrayList<>();
-    private boolean showNewMarkOnly = false;
+    private MyDbHelper mDbHelper;
+    private List<SimpleLocation> mLocationList = new ArrayList<>();
+    private boolean mShowNewMarkOnly = false;
 
-    private Handler handler = new Handler();
-    private Runnable runnable = new Runnable() {
+    private Handler mHandler = new Handler();
+    private Runnable mRunnable = new Runnable() {
         @Override
         public void run() {
             try {
@@ -64,10 +64,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getSupportActionBar().setSubtitle("");
                     }
                 }, 7500);
-                String time_to_compare = dbHelper.searchNewTime(account);
+                String time_to_compare = mDbHelper.searchNewTime(account);
                 mConnectDb.getLocationFromServer(account, password, time_to_compare);
                 //每 15 秒查詢一次座標
-                handler.postDelayed(runnable, 15000);
+                mHandler.postDelayed(mRunnable, 15000);
 //                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
 //                sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
 //            } catch (ParserConfigurationException e) {
@@ -94,7 +94,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         mConnectDb = new ConnectDb(MapsActivity.this);
-        dbHelper = new MyDbHelper(MapsActivity.this);
+        mDbHelper = new MyDbHelper(MapsActivity.this);
         Intent i = getIntent();
         account = i.getStringExtra(COLUMN_USER_ACCOUNT);
         password = i.getStringExtra(COLUMN_USER_PASSWORD);
@@ -118,7 +118,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (account != null && password != null) {
             //3 秒後執行第一次座標查詢
-            handler.postDelayed(runnable, 3000);
+            mHandler.postDelayed(mRunnable, 3000);
         }
     }
 
@@ -129,8 +129,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        locationList.addAll(dbHelper.searchAllLocation(account));
-        mAdapter = new MyAdapter(locationList);
+        mLocationList.addAll(mDbHelper.searchAllLocation(account));
+        mAdapter = new MyAdapter(mLocationList);
         mRecycler_locationList.setAdapter(mAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 
@@ -156,7 +156,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //在地圖顯示所有標記
     private void showAllMarks() {
         mClusterManager.clearItems();
-        for (SimpleLocation location : locationList) {
+        for (SimpleLocation location : mLocationList) {
             MyItem item = new MyItem(null,
                     location.getLatitude(), location.getLongitude(), location.getTime(), null);
             mClusterManager.addItem(item);
@@ -166,10 +166,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //只顯示最新的標記在地圖上
     private void showNewMarkOnly() {
         mClusterManager.clearItems();
-        if (!locationList.isEmpty()) {
-            int size = locationList.size();
+        if (!mLocationList.isEmpty()) {
+            int size = mLocationList.size();
             //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
-            SimpleLocation location = locationList.get(size - 1);
+            SimpleLocation location = mLocationList.get(size - 1);
             MyItem item1 = new MyItem(null,
                     location.getLatitude(), location.getLongitude(), location.getTime(), null);
             mClusterManager.addItem(item1);
@@ -188,12 +188,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 longitude = location.getLongitude();
                 time = location.getTime();
                 //手機端資料庫新增一筆 Location
-                dbHelper.addLocation(account, latitude, longitude, time);
+                mDbHelper.addLocation(account, latitude, longitude, time);
 
                 //recycler_locationList 新增一筆資料
-                locationList.add(new SimpleLocation(time, latitude, longitude));
+                mLocationList.add(new SimpleLocation(time, latitude, longitude));
 
-                if (showNewMarkOnly) {
+                if (mShowNewMarkOnly) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
                     mClusterManager.clearItems();
                 }
@@ -296,11 +296,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_showNewMarkOnly: {
                 if (item.isChecked()) {
                     item.setChecked(false);
-                    showNewMarkOnly = false;
+                    mShowNewMarkOnly = false;
                     showAllMarks();
                 } else {
                     item.setChecked(true);
-                    showNewMarkOnly = true;
+                    mShowNewMarkOnly = true;
                     showNewMarkOnly();
                 }
                 break;
@@ -318,8 +318,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (dbHelper != null) {
-            dbHelper.close();
+        if (mDbHelper != null) {
+            mDbHelper.close();
         }
     }
 

@@ -30,25 +30,23 @@ import java.util.List;
 public class RadarService extends Service {
 
     private String TAG = RadarService.class.getSimpleName();
-    public static boolean inService = false;
-    private String account_sendLocation, password_sendLocation;
+    public static boolean mInService = false;
+    private String mAccount_sendLocation, mPassword_sendLocation;
 
-    private FusedLocationProviderClient client;
-    private LocationRequest locationRequest;
-    private LocationCallback locationCallback;
+    private FusedLocationProviderClient mClient;
+    private LocationRequest mLocationRequest;
+    private LocationCallback mLocationCallback;
 
-    private ConnectDb connectDb;
+    private ConnectDb mConnectDb;
 
-    Runnable task = new Runnable() {
+    private Runnable mTask_serviceStatus = new Runnable() {
         @Override
         public void run() {
-            worker.postDelayed(this, 15000);
-
-//            Toast.makeText(RadarService.this, "inService: " + inService, Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "inService: " + inService);
+            mWorker.postDelayed(this, 15000);
+            Log.d(TAG, "InService: " + mInService);
         }
     };
-    Handler worker = new Handler();
+    private Handler mWorker = new Handler();
 
     public RadarService() {
     }
@@ -69,16 +67,16 @@ public class RadarService extends Service {
 
     private void createLocationRequest() {
         String frequency = PositionPreferences.getUpdateFrequency(RadarService.this);
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(Integer.valueOf(frequency));
-        locationRequest.setFastestInterval(Integer.valueOf(frequency));
-        locationRequest.setPriority(
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(Integer.valueOf(frequency));
+        mLocationRequest.setFastestInterval(Integer.valueOf(frequency));
+        mLocationRequest.setPriority(
                 LocationRequest.PRIORITY_HIGH_ACCURACY);
         Log.i(TAG, "updateFrequency:" + frequency);
     }
 
     private void createLocationCallback() {
-        locationCallback = new LocationCallback() {
+        mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 final Location location = locationResult.getLastLocation();
@@ -88,7 +86,7 @@ public class RadarService extends Service {
                 SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
                 String time = s.format(new Date());
                 try {
-                    connectDb.sendLocationToServer(account_sendLocation, password_sendLocation,
+                    mConnectDb.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
                             time, location.getLatitude(), location.getLongitude());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -106,16 +104,16 @@ public class RadarService extends Service {
         List<User> userList = dbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION);
         dbHelper.close();
         for (User user : userList) {
-            account_sendLocation = null;
-            password_sendLocation = null;
-            account_sendLocation = user.getAccount();
-            password_sendLocation = user.getPassword();
+            mAccount_sendLocation = null;
+            mPassword_sendLocation = null;
+            mAccount_sendLocation = user.getAccount();
+            mPassword_sendLocation = user.getPassword();
         }
-        if (account_sendLocation != null) {
-            inService = true;
+        if (mAccount_sendLocation != null) {
+            mInService = true;
             showServiceStatus();
 
-            connectDb = new ConnectDb(RadarService.this);
+            mConnectDb = new ConnectDb(RadarService.this);
             createLocationRequest();
             createLocationCallback();
             fuseLocationRequest();
@@ -130,26 +128,24 @@ public class RadarService extends Service {
 
     @SuppressLint("MissingPermission")
     private void fuseLocationRequest() {
-        client = LocationServices.getFusedLocationProviderClient(RadarService.this);
-        client.requestLocationUpdates(locationRequest, locationCallback, null);
+        mClient = LocationServices.getFusedLocationProviderClient(RadarService.this);
+        mClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
     @Override
     public void onDestroy() {
-        client.removeLocationUpdates(locationCallback);
+        mClient.removeLocationUpdates(mLocationCallback);
 //        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "onDestroy");
-        worker.removeCallbacks(task);
+        mWorker.removeCallbacks(mTask_serviceStatus);
         RadarService.this.stopForeground(true);
         super.onDestroy();
 
     }
 
     private void showServiceStatus() {
-
         //每 15 秒 Log 一次
-        worker.postDelayed(task, 15000);
-
+        mWorker.postDelayed(mTask_serviceStatus, 15000);
     }
 
     //為了讓 Service 活久一點，只好將 Service 推到前景

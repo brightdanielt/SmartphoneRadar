@@ -39,10 +39,10 @@ public class ConnectDb implements SocketInterface {
     public static final String NO_INTERNET = "ConnectException";
     public static final String NO_RESPONSE = "SocketTimeoutException";
 
-    private Context context;
+    private Context mContext;
 
     public ConnectDb(Context context) {
-        this.context = context;
+        this.mContext = context;
     }
 
     @Override
@@ -56,6 +56,7 @@ public class ConnectDb implements SocketInterface {
                     url = new URL(string_url);
                     HttpURLConnection connection;
                     connection = (HttpURLConnection) url.openConnection();
+                    //HttpURLConnection 預設是false，因為要送出資料，所以改為true
                     connection.setDoOutput(true);
                     connection.setConnectTimeout(7000);
                     PrintWriter out = new PrintWriter(connection.getOutputStream());
@@ -116,7 +117,7 @@ public class ConnectDb implements SocketInterface {
         return 0;
     }
 
-
+    //註冊
     public String signUp(final String account, final String password, final String model, final String imei_1) throws
             UnsupportedEncodingException {
 
@@ -135,8 +136,8 @@ public class ConnectDb implements SocketInterface {
 
     }
 
-    //logIn 用於驗證該組定位帳密是否存在
-    public String logIn_sendLocation(final String account, final String password,String model,String imei) throws
+    //logIn 用於驗證該組定位帳密是否存在、手機型號與 IMEI 是否正確
+    public String logIn_sendLocation(final String account, final String password, String model, String imei) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
@@ -198,13 +199,15 @@ public class ConnectDb implements SocketInterface {
         String response = sendHttpRequest(params, SERVER_ADDRESS_INDEX);
         try {
             SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
-            sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML((Updater) context));
+            sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML((Updater) mContext));
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         } catch (SAXException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (ClassCastException e) {
+            throw new ClassCastException(mContext.toString() + " must implement Updater.");
         }
     }
 
@@ -212,7 +215,7 @@ public class ConnectDb implements SocketInterface {
     public String sendVerificationCodeToEmail(String account, String model, String imei, String email, String verification_code) throws
             UnsupportedEncodingException {
 
-        final String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&model=" + URLEncoder.encode(model, "UTF-8") +
                 "&imei=" + URLEncoder.encode(imei, "UTF-8") +
                 "&target_email=" + URLEncoder.encode(email, "UTF-8") +
@@ -230,7 +233,7 @@ public class ConnectDb implements SocketInterface {
     public String updatePassword(String account, String password) throws
             UnsupportedEncodingException {
 
-        final String params = "account=" + URLEncoder.encode(account, "UTF-8") +
+        String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
                 "&action=" + URLEncoder.encode("update_password", "UTF-8") +
                 "&";
