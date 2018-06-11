@@ -15,14 +15,17 @@
  */
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
+import com.cauliflower.danielt.smartphoneradar.ui.SettingsFragment;
 
 /**
  * SettingsActivity is responsible for displaying the {@link SettingsFragment}. It is also

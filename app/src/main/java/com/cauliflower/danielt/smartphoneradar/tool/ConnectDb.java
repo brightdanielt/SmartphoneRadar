@@ -118,7 +118,7 @@ public class ConnectDb implements SocketInterface {
     }
 
     //註冊
-    public String signUp(final String account, final String password, final String model, final String imei_1) throws
+    public String signUp(String account, String password, String model, String imei_1) throws
             UnsupportedEncodingException {
 
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
@@ -137,7 +137,7 @@ public class ConnectDb implements SocketInterface {
     }
 
     //logIn 用於驗證該組定位帳密是否存在、手機型號與 IMEI 是否正確
-    public String logIn_sendLocation(final String account, final String password, String model, String imei) throws
+    public String logIn_sendLocation( String account,  String password, String model, String imei) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
@@ -155,7 +155,7 @@ public class ConnectDb implements SocketInterface {
     }
 
     //logIn 用於驗證該組查詢帳密是否存在
-    public String logIn_getLocation(final String account, final String password) throws
+    public String logIn_getLocation( String account,  String password) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +

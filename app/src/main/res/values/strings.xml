@@ -78,6 +78,7 @@
     <string name="logIn">登入</string>
     <string name="signUp">註冊</string>
     <string name="add_account_get_location">添加新的追蹤帳號</string>
+    <string name="give_me_read_phone_state_permission">無法註冊，請授權電話資訊</string>
     <string name="sighUp_sendLocation_success">註冊定位用帳號成功</string>
     <string name="logIn_sendLocation_success">登入定位用帳號成功</string>
     <string name="logIn_getLocation_success">登入查詢用帳號成功</string>

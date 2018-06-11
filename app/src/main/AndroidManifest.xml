@@ -42,7 +42,7 @@
         </activity>
 
         <activity
-            android:name=".AccountActivity"
+            android:name=".ui.AccountActivity"
             android:label="@string/pref_title_AccountActivity"
             android:parentActivityName=".ui.SettingsActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->

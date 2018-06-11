@@ -64,8 +64,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getSupportActionBar().setSubtitle("");
                     }
                 }, 7500);
-                String time_to_compare = mDbHelper.searchNewTime(account);
-                mConnectDb.getLocationFromServer(account, password, time_to_compare);
+                String time_to_compare = mDbHelper.searchNewTime(mAccount);
+                mConnectDb.getLocationFromServer(mAccount, mPassword, time_to_compare);
                 //每 15 秒查詢一次座標
                 mHandler.postDelayed(mRunnable, 15000);
 //                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
@@ -80,7 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
-    private String account, password;
+    private String mAccount, mPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,8 +96,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mConnectDb = new ConnectDb(MapsActivity.this);
         mDbHelper = new MyDbHelper(MapsActivity.this);
         Intent i = getIntent();
-        account = i.getStringExtra(COLUMN_USER_ACCOUNT);
-        password = i.getStringExtra(COLUMN_USER_PASSWORD);
+        mAccount = i.getStringExtra(COLUMN_USER_ACCOUNT);
+        mPassword = i.getStringExtra(COLUMN_USER_PASSWORD);
     }
 
 
@@ -116,7 +116,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         makeViewWork();
 
-        if (account != null && password != null) {
+        if (mAccount != null && mPassword != null) {
             //3 秒後執行第一次座標查詢
             mHandler.postDelayed(mRunnable, 3000);
         }
@@ -129,7 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        mLocationList.addAll(mDbHelper.searchAllLocation(account));
+        mLocationList.addAll(mDbHelper.searchAllLocation(mAccount));
         mAdapter = new MyAdapter(mLocationList);
         mRecycler_locationList.setAdapter(mAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
@@ -188,7 +188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 longitude = location.getLongitude();
                 time = location.getTime();
                 //手機端資料庫新增一筆 Location
-                mDbHelper.addLocation(account, latitude, longitude, time);
+                mDbHelper.addLocation(mAccount, latitude, longitude, time);
 
                 //recycler_locationList 新增一筆資料
                 mLocationList.add(new SimpleLocation(time, latitude, longitude));
@@ -279,9 +279,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 0f
                             )
                     );
-
-                    mLinearLayout_wrapRecyclerView.setVisibility(View.INVISIBLE);
-
                 } else {
                     item.setChecked(true);
                     mLinearLayout_wrapRecyclerView.setLayoutParams(
@@ -289,7 +286,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f
                             )
                     );
-                    mLinearLayout_wrapRecyclerView.setVisibility(View.VISIBLE);
                 }
                 break;
             }
