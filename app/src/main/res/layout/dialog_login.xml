@@ -21,17 +21,19 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.15"
-                android:text="帳號："/>
+                android:text="帳號：" />
 
             <EditText
                 android:id="@+id/dialog_edTxt_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.6"
+                android:digits="@string/digits_account"
                 android:hint="輸入帳號"
+                android:imeOptions="actionNext"
                 android:inputType="text"
                 android:maxLength="@integer/length_account"
-                android:digits="@string/digits_account"/>
+                android:singleLine="true" />
         </LinearLayout>
 
         <LinearLayout
@@ -52,9 +54,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.6"
+                android:digits="@string/digits_password"
                 android:hint="輸入密碼"
                 android:inputType="textPassword"
-                android:digits="@string/digits_password"
                 android:maxLength="@integer/length_password" />
         </LinearLayout>
 
@@ -69,10 +71,10 @@
 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:background="@null"
                 android:text="忘記密碼"
                 android:textColor="@color/colorAccent"
-                android:background="@null"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
             <Button
                 android:id="@+id/dialog_btn_cancel"

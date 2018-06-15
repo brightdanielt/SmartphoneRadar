@@ -134,7 +134,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecycler_locationList.setAdapter(mAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 
-        //該功能原本能夠直接在 MyAdapter 的方法 onBindViewHolder 實現
+        //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
         //取出 listLocation 物件作為 item 的資料，同時添增標記
         //但在 view 的 params 變動時，recyclerView再次呼叫了方法 onBindViewHolder
         //使得標記重複添加因此改為呼叫該方法 showAllMarks
