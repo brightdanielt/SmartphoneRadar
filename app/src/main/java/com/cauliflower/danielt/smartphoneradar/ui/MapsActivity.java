@@ -17,10 +17,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -36,9 +37,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_ACCOUNT;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.COLUMN_USER_PASSWORD;
-
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, Updater {
 
     private GoogleMap mMap;
@@ -47,9 +45,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearLayout mLinearLayout_wrapRecyclerView;
 
     //用於遠端 DB
-    private ConnectDb mConnectDb;
+    private ConnectServer mConnectServer;
     //用於手機 DB
-    private MyDbHelper mDbHelper;
+    private RadarDbHelper mDbHelper;
     private List<SimpleLocation> mLocationList = new ArrayList<>();
     private boolean mShowNewMarkOnly = false;
 
@@ -65,7 +63,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                 }, 7500);
                 String time_to_compare = mDbHelper.searchNewTime(mAccount);
-                mConnectDb.getLocationFromServer(mAccount, mPassword, time_to_compare);
+                mConnectServer.getLocationFromServer(mAccount, mPassword, time_to_compare);
                 //每 15 秒查詢一次座標
                 mHandler.postDelayed(mRunnable, 15000);
 //                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
@@ -93,11 +91,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mConnectDb = new ConnectDb(MapsActivity.this);
-        mDbHelper = new MyDbHelper(MapsActivity.this);
+        mConnectServer = new ConnectServer(MapsActivity.this);
+        mDbHelper = new RadarDbHelper(MapsActivity.this);
         Intent i = getIntent();
-        mAccount = i.getStringExtra(COLUMN_USER_ACCOUNT);
-        mPassword = i.getStringExtra(COLUMN_USER_PASSWORD);
+        mAccount = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_ACCOUNT);
+        mPassword = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
     }
 
 

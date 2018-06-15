@@ -12,9 +12,10 @@ import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -37,7 +38,7 @@ public class RadarService extends Service {
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
 
-    private ConnectDb mConnectDb;
+    private ConnectServer mConnectServer;
 
     private Runnable mTask_serviceStatus = new Runnable() {
         @Override
@@ -86,7 +87,7 @@ public class RadarService extends Service {
                 SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
                 String time = s.format(new Date());
                 try {
-                    mConnectDb.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
+                    mConnectServer.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
                             time, location.getLatitude(), location.getLongitude());
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -100,8 +101,8 @@ public class RadarService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        return super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand");
-        MyDbHelper dbHelper = new MyDbHelper(RadarService.this);
-        List<User> userList = dbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION);
+        RadarDbHelper dbHelper = new RadarDbHelper(RadarService.this);
+        List<User> userList = dbHelper.searchUser(RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         dbHelper.close();
         for (User user : userList) {
             mAccount_sendLocation = null;
@@ -113,7 +114,7 @@ public class RadarService extends Service {
             mInService = true;
             showServiceStatus();
 
-            mConnectDb = new ConnectDb(RadarService.this);
+            mConnectServer = new ConnectServer(RadarService.this);
             createLocationRequest();
             createLocationCallback();
             fuseLocationRequest();

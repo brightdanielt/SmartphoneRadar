@@ -9,8 +9,8 @@ import android.widget.EditText;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 
-import static com.cauliflower.danielt.smartphoneradar.tool.ConnectDb.NO_INTERNET;
-import static com.cauliflower.danielt.smartphoneradar.tool.ConnectDb.NO_RESPONSE;
+import static com.cauliflower.danielt.smartphoneradar.tool.ConnectServer.NO_INTERNET;
+import static com.cauliflower.danielt.smartphoneradar.tool.ConnectServer.NO_RESPONSE;
 
 public class MyDialogBuilder extends AlertDialog.Builder {
 

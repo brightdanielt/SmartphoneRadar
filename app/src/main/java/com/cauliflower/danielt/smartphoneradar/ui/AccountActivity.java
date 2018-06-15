@@ -29,8 +29,8 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectDb;
-import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.cauliflower.danielt.smartphoneradar.tool.ResponseCode;
 
@@ -39,23 +39,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry;
+
 import static com.cauliflower.danielt.smartphoneradar.ui.AccountActivity.LoadingTask.TASK_LOGIN_TO_GET_LOCATION;
 import static com.cauliflower.danielt.smartphoneradar.ui.AccountActivity.LoadingTask.TASK_LOGIN_TO_SEND_LOCATION;
 import static com.cauliflower.danielt.smartphoneradar.ui.AccountActivity.LoadingTask.TASK_SEND_VERIFICATION_CODE;
 import static com.cauliflower.danielt.smartphoneradar.ui.AccountActivity.LoadingTask.TASK_SIGN_UP;
 import static com.cauliflower.danielt.smartphoneradar.ui.AccountActivity.LoadingTask.TASK_UPDATE_PASSWORD;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_IN_USE_NO;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_IN_USE_YES;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION;
-import static com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION;
 
 
 public class AccountActivity extends AppCompatActivity {
 
     public static final String TAG = AccountActivity.class.getSimpleName();
     private static final int REQUEST_CODE_READ_PHONE_STATE = 101;
-    private MyDbHelper mDbHelper;
-    private ConnectDb mConnectDb;
+    private RadarDbHelper mDbHelper;
+    private ConnectServer mConnectServer;
     private ResponseCode mResponseCode;
 
     private ProgressDialog mDialog_loading;
@@ -84,8 +82,8 @@ public class AccountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_account);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDbHelper = new MyDbHelper(AccountActivity.this);
-        mConnectDb = new ConnectDb(AccountActivity.this);
+        mDbHelper = new RadarDbHelper(AccountActivity.this);
+        mConnectServer = new ConnectServer(AccountActivity.this);
         mResponseCode = new ResponseCode(AccountActivity.this);
         makeViewWork();
 
@@ -124,8 +122,8 @@ public class AccountActivity extends AppCompatActivity {
         mListView_sendLocation = findViewById(R.id.listView_sendLocation);
         mListView_getLocation = findViewById(R.id.listView_getLocation);
 
-        mUserList_sendLocation.addAll(mDbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
-        mUserList_getLocation.addAll(mDbHelper.searchUser(VALUE_USER_USEDFOR_GETLOCATION));
+        mUserList_sendLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_SENDLOCATION));
+        mUserList_getLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_GETLOCATION));
         mAdapter_sendLocation = new AccountAdapter(mUserList_sendLocation);
         mAdapter_getLocation = new AccountAdapter(mUserList_getLocation);
         mListView_sendLocation.setAdapter(mAdapter_sendLocation);
@@ -137,8 +135,8 @@ public class AccountActivity extends AppCompatActivity {
     private void updateView() {
         mUserList_sendLocation.clear();
         mUserList_getLocation.clear();
-        mUserList_sendLocation.addAll(mDbHelper.searchUser(VALUE_USER_USEDFOR_SENDLOCATION));
-        mUserList_getLocation.addAll(mDbHelper.searchUser(VALUE_USER_USEDFOR_GETLOCATION));
+        mUserList_sendLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_SENDLOCATION));
+        mUserList_getLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_GETLOCATION));
 
         if (mUserList_sendLocation.size() > 0) {
             mTv_hint_sendLocation.setVisibility(View.GONE);
@@ -210,7 +208,7 @@ public class AccountActivity extends AppCompatActivity {
                 case TASK_SIGN_UP: {
                     try {
                         //向 Server 註冊該組帳密
-                        response = mConnectDb.signUp(mAccount_sendLocation, mPassword_sendLocation, mModel, mIMEI);
+                        response = mConnectServer.signUp(mAccount_sendLocation, mPassword_sendLocation, mModel, mIMEI);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -219,7 +217,7 @@ public class AccountActivity extends AppCompatActivity {
                 case TASK_LOGIN_TO_SEND_LOCATION: {
                     try {
                         //要求 Server 驗證該組帳密
-                        response = mConnectDb.logIn_sendLocation(
+                        response = mConnectServer.logIn_sendLocation(
                                 mAccount_sendLocation, mPassword_sendLocation, mModel, mIMEI);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -229,7 +227,7 @@ public class AccountActivity extends AppCompatActivity {
                 case TASK_LOGIN_TO_GET_LOCATION: {
                     try {
                         //要求 Server 驗證該組帳密
-                        response = mConnectDb.logIn_getLocation(mAccount_getLocation, mPassword_getLocation);
+                        response = mConnectServer.logIn_getLocation(mAccount_getLocation, mPassword_getLocation);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -240,7 +238,7 @@ public class AccountActivity extends AppCompatActivity {
                         //要求 Server 發送驗證碼到 Email
                         Random random = new Random();
                         mVerification_code = 1 + random.nextInt(10000);
-                        response = mConnectDb.sendVerificationCodeToEmail(
+                        response = mConnectServer.sendVerificationCodeToEmail(
                                 mAccount_forgetPassword, mModel, mIMEI, mEmail, String.valueOf(mVerification_code));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -250,7 +248,7 @@ public class AccountActivity extends AppCompatActivity {
                 case TASK_UPDATE_PASSWORD: {
                     try {
                         //更改密碼
-                        response = mConnectDb.updatePassword(
+                        response = mConnectServer.updatePassword(
                                 mAccount_forgetPassword, String.valueOf(mVerification_code));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
@@ -299,17 +297,17 @@ public class AccountActivity extends AppCompatActivity {
                 //根據回傳值，得知目的成功與否
                 switch (whichTask) {
                     case TASK_SIGN_UP: {
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_YES);
+                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.sighUp_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_SEND_LOCATION: {
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_NO);
+                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.logIn_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_GET_LOCATION: {
-                        mDbHelper.addUser(mAccount_getLocation, mPassword_getLocation, VALUE_USER_USEDFOR_GETLOCATION, VALUE_USER_IN_USE_NO);
+                        mDbHelper.addUser(mAccount_getLocation, mPassword_getLocation, UserEntry.USED_FOR_GETLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_getLocation + getString(R.string.logIn_getLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
@@ -325,7 +323,7 @@ public class AccountActivity extends AppCompatActivity {
                     case TASK_UPDATE_PASSWORD: {
                         mAccount_sendLocation = mAccount_forgetPassword;
                         mPassword_sendLocation = String.valueOf(mVerification_code);
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, VALUE_USER_USEDFOR_SENDLOCATION, VALUE_USER_IN_USE_YES);
+                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                         mDbHelper.updatePassword(mAccount_forgetPassword, String.valueOf(mVerification_code));
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.update_password_success), Toast.LENGTH_SHORT).show();
                         break;
@@ -391,12 +389,12 @@ public class AccountActivity extends AppCompatActivity {
             final String usedFor = userList.get(position).getUsedFor();
             String in_use = userList.get(position).getIn_use();
             tv_account.setText(account);
-            if (in_use.equals(VALUE_USER_IN_USE_YES)) {
+            if (in_use.equals(UserEntry.IN_USE_YES)) {
                 tv_account.append("  已登入");
             }
             convertView = v;
 
-            if (usedFor.equals(MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION)) {
+            if (usedFor.equals(UserEntry.USED_FOR_GETLOCATION)) {
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -407,7 +405,7 @@ public class AccountActivity extends AppCompatActivity {
                                 .setPositiveButton("是的", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        //要求 MyDbHelper 更改該 User 的 in_use 為 yes
+                                        //要求 RadarDbHelper 更改該 User 的 in_use 為 yes
                                         mDbHelper.updateUser_in_use(account);
                                         updateView();
                                     }
@@ -521,7 +519,7 @@ public class AccountActivity extends AppCompatActivity {
                         if (mAccount_getLocation != null && mPassword_getLocation != null) {
                             mDialog_signUp_logIn.dismiss();
                             new LoadingTask().execute(TASK_LOGIN_TO_GET_LOCATION);
-                        }else if (mAccount_getLocation == null || mPassword_getLocation == null) {
+                        } else if (mAccount_getLocation == null || mPassword_getLocation == null) {
                             Toast.makeText(AccountActivity.this,
                                     getString(R.string.please_complete_the_fields), Toast.LENGTH_SHORT).show();
                         }

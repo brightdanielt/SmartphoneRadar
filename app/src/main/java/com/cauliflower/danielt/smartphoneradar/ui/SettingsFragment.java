@@ -13,9 +13,9 @@ import android.support.annotation.Nullable;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.tool.MyDbHelper;
-import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
+import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 
 import java.util.List;
 
@@ -77,8 +77,8 @@ public class SettingsFragment extends PreferenceFragment implements
         if (key.equals(getString(R.string.pref_key_MapsActivity))) {
             if (mAccount_getLocation != null) {
                 Intent i = new Intent();
-                i.putExtra(MyDbHelper.COLUMN_USER_ACCOUNT, mAccount_getLocation);
-                i.putExtra(MyDbHelper.COLUMN_USER_PASSWORD, mPassword_getLocation);
+                i.putExtra(RadarContract.UserEntry.COLUMN_USER_ACCOUNT, mAccount_getLocation);
+                i.putExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD, mPassword_getLocation);
                 i.setClass(getActivity(), MapsActivity.class);
                 startActivity(i);
             }
@@ -112,13 +112,13 @@ public class SettingsFragment extends PreferenceFragment implements
 
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
-        MyDbHelper myDbHelper = new MyDbHelper(getActivity());
+        RadarDbHelper radarDbHelper = new RadarDbHelper(getActivity());
 
         //MapsActivity
-        List<User> userList_getLocation = myDbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_GETLOCATION);
+        List<User> userList_getLocation = radarDbHelper.searchUser(RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (User user : userList_getLocation) {
             String in_use = user.getIn_use();
-            if (in_use.equals(MyDbHelper.VALUE_USER_IN_USE_YES)) {
+            if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
                 mAccount_getLocation = user.getAccount();
                 mPassword_getLocation = user.getPassword();
                 Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
@@ -140,7 +140,7 @@ public class SettingsFragment extends PreferenceFragment implements
         //設定“定位開關”的開關值
         switchPreference.setChecked(PositionPreferences.getPositionEnable(getActivity()));
 //        switchPreference.setChecked(RadarService.inService);
-        List<User> userList_sendLocation = myDbHelper.searchUser(MyDbHelper.VALUE_USER_USEDFOR_SENDLOCATION);
+        List<User> userList_sendLocation = radarDbHelper.searchUser(RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList_sendLocation) {
             mAccount_sendLocation = user.getAccount();
             mPassword_sendLocation = user.getPassword();
@@ -152,7 +152,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 break;
             }
         }
-        myDbHelper.close();
+        radarDbHelper.close();
     }
 
 
