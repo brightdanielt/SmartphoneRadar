@@ -37,24 +37,25 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.AccountActivity"
             android:label="@string/pref_title_AccountActivity"
             android:parentActivityName=".ui.SettingsActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.SettingsActivity" />
         </activity>
-
         <activity
             android:name=".ui.MapsActivity"
             android:label="@string/pref_title_MapsActivity"
             android:parentActivityName=".ui.SettingsActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -66,17 +67,21 @@
             android:enabled="true"
             android:exported="false" />
 
-        <!--網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService-->
-        <receiver android:name=".service.NetWatcher">
+        <!-- 網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService -->
+        <!--<receiver android:name=".service.NetWatcher">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
+        <service
+            android:name=".service.NetWatcherService"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest><!--
-
     todo 00: User story、使用流程、定位Service驗證 (done)
     todo 01: Server 資料庫建立 (done)
     todo 02: PHP 查詢 DB (done)
@@ -107,6 +112,4 @@
 
                 這個決定意味著在 LogInActivity 並不會有“定位”帳號清單能夠選擇以登入
                 只有“查詢”帳號能夠選擇(done)
-
-
-    -->
+-->

@@ -1,8 +1,14 @@
 
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.annotation.TargetApi;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -16,6 +22,8 @@ import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
+import com.cauliflower.danielt.smartphoneradar.service.NetWatcher;
+import com.cauliflower.danielt.smartphoneradar.service.NetWatcherService;
 
 import java.util.List;
 
@@ -64,8 +72,16 @@ public class SettingsFragment extends PreferenceFragment implements
 
                 if (sharedPreferences.getBoolean(key, false)) {
                     PositionPreferences.startRadarService(getActivity());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        //Start scheduling a job to check network status
+                        scheduleRadarJob(getContext(), true);
+                    }
                 } else {
                     PositionPreferences.stopRadarService(getActivity());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        //Stop scheduling a job to check network status
+                        scheduleRadarJob(getContext(), false);
+                    }
                 }
             }
         }
@@ -155,5 +171,23 @@ public class SettingsFragment extends PreferenceFragment implements
         radarDbHelper.close();
     }
 
+    private static final int JOB_SCHEDULE_RADAR = 0;
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private static void scheduleRadarJob(Context context, boolean start) {
+
+        JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
+
+        JobInfo jobInfo = new JobInfo.Builder(
+                JOB_SCHEDULE_RADAR, new ComponentName(context, NetWatcherService.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
+                .build();
+
+        if (start) {
+            jobScheduler.schedule(jobInfo);
+        } else {
+            jobScheduler.cancel(JOB_SCHEDULE_RADAR);
+        }
+    }
 
 }
