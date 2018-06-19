@@ -1,8 +1,10 @@
 
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -10,12 +12,14 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
+import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
 
 import java.util.List;
 
@@ -49,7 +53,7 @@ public class SettingsFragment extends PreferenceFragment implements
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
 
-        initPreference();
+        new CheckServerOnlineTask().execute();
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed
@@ -153,7 +157,48 @@ public class SettingsFragment extends PreferenceFragment implements
             }
         }
         radarDbHelper.close();
+
+        if (!mServerOnline) {
+            findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(false);
+            findPreference(getString(R.string.pref_key_MapsActivity)).setEnabled(false);
+            findPreference(getString(R.string.pref_key_position)).setEnabled(false);
+
+        }
     }
 
+    private boolean mServerOnline = false;
+    private ProgressDialog mLoadingDialog;
 
+    class CheckServerOnlineTask extends AsyncTask<Void, Void, Boolean> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mServerOnline = false;
+            mLoadingDialog = new ProgressDialog(getActivity());
+            mLoadingDialog.setMessage(getString(R.string.dialog_msg_loading));
+            mLoadingDialog.setCancelable(false);
+            mLoadingDialog.show();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            return ConnectServer.checkServerOnline();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean online) {
+            super.onPostExecute(online);
+            mLoadingDialog.dismiss();
+            mServerOnline = online;
+            if (!mServerOnline) {
+                new AlertDialog.Builder(getActivity())
+                        .setTitle(R.string.dialog_title_ops)
+                        .setMessage(R.string.dialog_msg_server_closed)
+                        .setCancelable(true)
+                        .create().show();
+            }
+            initPreference();
+        }
+    }
 }

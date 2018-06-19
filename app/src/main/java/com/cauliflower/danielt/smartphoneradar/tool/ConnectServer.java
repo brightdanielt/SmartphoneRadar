@@ -19,6 +19,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -117,6 +118,28 @@ public class ConnectServer implements SocketInterface {
         return 0;
     }
 
+    /**
+     * 透過連線結果，判斷伺服器是否能連上
+     *
+     * @return {@code true} 連線成功，伺服器可連上
+     * {@code false} 連線失敗，伺服器無法連上
+     */
+    public static boolean checkServerOnline() {
+        try {
+            URL url = new URL(SERVER_ADDRESS_INDEX);
+            URLConnection connection = url.openConnection();
+            //超過5秒則連線逾時
+            connection.setConnectTimeout(5000);
+            connection.connect();
+            return true;
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     //註冊
     public String signUp(String account, String password, String model, String imei_1) throws
             UnsupportedEncodingException {
@@ -137,7 +160,7 @@ public class ConnectServer implements SocketInterface {
     }
 
     //logIn 用於驗證該組定位帳密是否存在、手機型號與 IMEI 是否正確
-    public String logIn_sendLocation( String account,  String password, String model, String imei) throws
+    public String logIn_sendLocation(String account, String password, String model, String imei) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
@@ -155,7 +178,7 @@ public class ConnectServer implements SocketInterface {
     }
 
     //logIn 用於驗證該組查詢帳密是否存在
-    public String logIn_getLocation( String account,  String password) throws
+    public String logIn_getLocation(String account, String password) throws
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
