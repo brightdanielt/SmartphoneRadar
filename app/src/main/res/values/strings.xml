@@ -35,7 +35,7 @@
 
     <!--SettingsActivity-->
     <string name="dialog_title_ops">哎呀！</string>
-    <string name="dialog_msg_server_closed">伺服器關閉中ㄝ，目前無法使用帳號、查詢及定位功能</string>
+    <string name="dialog_msg_server_closed">伺服器關閉中，目前無法使用帳號、查詢及定位功能</string>
     <string name="dialog_msg_loading">載入中</string>
 
     <!--Preference account-->

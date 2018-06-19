@@ -190,6 +190,7 @@ public class SettingsFragment extends PreferenceFragment implements
         protected void onPostExecute(Boolean online) {
             super.onPostExecute(online);
             mLoadingDialog.dismiss();
+            mLoadingDialog = null;
             mServerOnline = online;
             if (!mServerOnline) {
                 new AlertDialog.Builder(getActivity())
