@@ -37,6 +37,8 @@
     <string name="dialog_title_ops">哎呀！</string>
     <string name="dialog_msg_server_closed">伺服器關閉中，目前無法使用帳號、查詢及定位功能</string>
     <string name="dialog_msg_loading">載入中</string>
+    <string name="dialog_msg_noInternetConnected">已允許定位，但您的裝置尚未連上網路，
+        此時定位功能沒有作用，除非您連上網路</string>
 
     <!--Preference account-->
     <string name="pref_category_title_AccountActivity">帳號</string>

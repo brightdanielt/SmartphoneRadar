@@ -20,6 +20,7 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.tool.NetworkUtils;
 
 import java.util.List;
 
@@ -64,11 +65,18 @@ public class SettingsFragment extends PreferenceFragment implements
             if (preference instanceof ListPreference) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
             } else {
-                //Start and stop RadarService
-
+                //Start RadarService if turn on the switch
                 if (sharedPreferences.getBoolean(key, false)) {
+                    //If network not connected ,alert the user that position feature will not work
+                    if (!NetworkUtils.checkNetworkConnected(getActivity())) {
+                        new AlertDialog.Builder(getActivity()).setTitle(R.string.dialog_title_ops)
+                                .setMessage(R.string.dialog_msg_noInternetConnected)
+                                .setCancelable(true)
+                                .create().show();
+                    }
                     PositionPreferences.startRadarService(getActivity());
                 } else {
+                    //Stop RadarService if turn off the switch
                     PositionPreferences.stopRadarService(getActivity());
                 }
             }
@@ -167,9 +175,10 @@ public class SettingsFragment extends PreferenceFragment implements
     }
 
     private boolean mServerOnline = false;
-    private ProgressDialog mLoadingDialog;
 
+    /*檢查伺服器連線狀況*/
     class CheckServerOnlineTask extends AsyncTask<Void, Void, Boolean> {
+        ProgressDialog mLoadingDialog;
 
         @Override
         protected void onPreExecute() {
@@ -192,7 +201,9 @@ public class SettingsFragment extends PreferenceFragment implements
             mLoadingDialog.dismiss();
             mLoadingDialog = null;
             mServerOnline = online;
+            //連不上伺服器
             if (!mServerOnline) {
+                //提示使用者伺服器關閉中
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.dialog_title_ops)
                         .setMessage(R.string.dialog_msg_server_closed)
