@@ -67,7 +67,7 @@ public class SettingsFragment extends PreferenceFragment implements
             } else {
                 //Start RadarService if turn on the switch
                 if (sharedPreferences.getBoolean(key, false)) {
-                    //If network not connected ,alert the user that position feature will not work
+                    //If network not connected ,alert the user that RadarService will not work
                     if (!NetworkUtils.checkNetworkConnected(getActivity())) {
                         new AlertDialog.Builder(getActivity()).setTitle(R.string.dialog_title_ops)
                                 .setMessage(R.string.dialog_msg_enablePosition_noInternetConnected)

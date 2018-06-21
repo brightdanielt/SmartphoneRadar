@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import android.widget.Toast;
+
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
@@ -49,6 +51,9 @@ public class RadarService extends Service {
     };
     private Handler mWorker = new Handler();
 
+    private static final int NO_RESPONSE_MAXIMUM = 3;
+    private int mNoResponseCount = 0;
+
     public RadarService() {
     }
 
@@ -63,7 +68,6 @@ public class RadarService extends Service {
         super.onCreate();
         Log.i(TAG, "onCreate");
 //        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
-
     }
 
     private void createLocationRequest() {
@@ -87,8 +91,17 @@ public class RadarService extends Service {
                 SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
                 String time = s.format(new Date());
                 try {
-                    mConnectServer.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
+                    String response = mConnectServer.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
                             time, location.getLatitude(), location.getLongitude());
+                    if (response.contains(ConnectServer.NO_RESPONSE)) {
+                        mNoResponseCount++;
+                        Log.i(TAG, "Server no response times: " + mNoResponseCount);
+                        if (mNoResponseCount >= NO_RESPONSE_MAXIMUM) {
+                            Toast.makeText(RadarService.this,
+                                    getString(R.string.serverNoResponse_close_service), Toast.LENGTH_SHORT).show();
+                            RadarService.this.stopSelf();
+                        }
+                    }
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

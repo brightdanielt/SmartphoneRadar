@@ -37,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_ACCESS_FINE_LOCATION = 100;
     private static final int REQUEST_CODE_LOCATION_SETTING = 101;
-
+    private static final int REQUEST_CODE_SYSTEM_ALERT_WINDOW = 102;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     /**
-     * 點擊Menu item時呼叫 SettingsFragment的
+     * 點擊 Menu item 時呼叫 SettingsFragment 的方法
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -59,7 +59,7 @@ public class ConnectServer implements SocketInterface {
                     connection = (HttpURLConnection) url.openConnection();
                     //HttpURLConnection 預設是false，因為要送出資料，所以改為true
                     connection.setDoOutput(true);
-                    connection.setConnectTimeout(7000);
+                    connection.setConnectTimeout(5000);
                     PrintWriter out = new PrintWriter(connection.getOutputStream());
 
                     out.println(params);

@@ -25,6 +25,14 @@ import static android.content.ContentValues.TAG;
 
 public final class RequestPermission {
 
+    public static void systemAlertWindow(Activity activity, int request_code) {
+        if (ActivityCompat.checkSelfPermission(activity,
+                Manifest.permission.SYSTEM_ALERT_WINDOW) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.SYSTEM_ALERT_WINDOW}, request_code);
+        }
+    }
+
     public static void accessFineLocation(Activity activity, int request_code) {
         if (ActivityCompat.checkSelfPermission(activity,
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
