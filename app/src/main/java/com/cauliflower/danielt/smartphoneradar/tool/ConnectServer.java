@@ -125,9 +125,10 @@ public class ConnectServer implements SocketInterface {
      * {@code false} 連線失敗，伺服器無法連上
      */
     public static boolean checkServerOnline() {
+        URLConnection connection = null;
         try {
             URL url = new URL(SERVER_ADDRESS_INDEX);
-            URLConnection connection = url.openConnection();
+            connection = url.openConnection();
             //超過5秒則連線逾時
             connection.setConnectTimeout(5000);
             connection.connect();

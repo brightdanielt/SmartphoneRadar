@@ -14,7 +14,7 @@
      limitations under the License.
 --><!-- COMPLETED (7) Make the SettingsFragment the root layout for SettingsActivity -->
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/weather_settings_fragment"
+    android:id="@+id/radar_settings_fragment"
     android:name="com.cauliflower.danielt.smartphoneradar.ui.SettingsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent" />

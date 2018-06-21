@@ -15,17 +15,17 @@
  */
 package com.cauliflower.danielt.smartphoneradar.ui;
 
-import android.Manifest;
+import android.app.FragmentManager;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.tool.RequestPermission;
-import com.cauliflower.danielt.smartphoneradar.ui.SettingsFragment;
 
 /**
  * SettingsActivity is responsible for displaying the {@link SettingsFragment}. It is also
@@ -46,13 +46,23 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            onBackPressed();
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.settings_activity_menu, menu);
+        return true;
+    }
 
-        return super.onOptionsItemSelected(item);
+    /**
+     * 點擊Menu item時呼叫 SettingsFragment的
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_refreshAll) {
+            FragmentManager manager = getFragmentManager();
+            SettingsFragment settingsFragment = (SettingsFragment) manager.findFragmentById(R.id.radar_settings_fragment);
+//        settingsFragment.onOptionsItemSelected(item);
+            settingsFragment.refreshAll();
+        }
+        return true;
     }
 
     @Override

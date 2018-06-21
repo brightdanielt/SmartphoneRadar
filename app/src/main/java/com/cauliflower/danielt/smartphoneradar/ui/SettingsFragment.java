@@ -54,7 +54,7 @@ public class SettingsFragment extends PreferenceFragment implements
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
 
-        new CheckServerOnlineTask().execute();
+        refreshAll();
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed
@@ -70,11 +70,12 @@ public class SettingsFragment extends PreferenceFragment implements
                     //If network not connected ,alert the user that position feature will not work
                     if (!NetworkUtils.checkNetworkConnected(getActivity())) {
                         new AlertDialog.Builder(getActivity()).setTitle(R.string.dialog_title_ops)
-                                .setMessage(R.string.dialog_msg_noInternetConnected)
+                                .setMessage(R.string.dialog_msg_enablePosition_noInternetConnected)
                                 .setCancelable(true)
                                 .create().show();
+                    } else {
+                        PositionPreferences.startRadarService(getActivity());
                     }
-                    PositionPreferences.startRadarService(getActivity());
                 } else {
                     //Stop RadarService if turn off the switch
                     PositionPreferences.stopRadarService(getActivity());
@@ -170,7 +171,6 @@ public class SettingsFragment extends PreferenceFragment implements
             findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(false);
             findPreference(getString(R.string.pref_key_MapsActivity)).setEnabled(false);
             findPreference(getString(R.string.pref_key_position)).setEnabled(false);
-
         }
     }
 
@@ -210,6 +210,25 @@ public class SettingsFragment extends PreferenceFragment implements
                         .setCancelable(true)
                         .create().show();
             }
+            initPreference();
+        }
+    }
+
+    /**
+     * Check networkConnectivity
+     * Check server is online
+     * Reset preference enable,checked and summary
+     */
+    public void refreshAll() {
+        if (NetworkUtils.checkNetworkConnected(getActivity())) {
+            new CheckServerOnlineTask().execute();
+        } else {
+            mServerOnline = false;
+            new AlertDialog.Builder(getActivity())
+                    .setTitle(R.string.connect_server)
+                    .setMessage(R.string.connectNetwork_before_connectServer)
+                    .setCancelable(true)
+                    .create().show();
             initPreference();
         }
     }
