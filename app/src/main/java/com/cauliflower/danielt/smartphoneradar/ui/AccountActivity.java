@@ -360,7 +360,7 @@ public class AccountActivity extends AppCompatActivity {
     public class AccountAdapter extends BaseAdapter {
         List<User> userList;
 
-        public AccountAdapter(List<User> userList) {
+        AccountAdapter(List<User> userList) {
             this.userList = userList;
         }
 

@@ -125,7 +125,7 @@ public class ConnectServer implements SocketInterface {
      * {@code false} 連線失敗，伺服器無法連上
      */
     public static boolean checkServerOnline() {
-        URLConnection connection = null;
+        URLConnection connection;
         try {
             URL url = new URL(SERVER_ADDRESS_INDEX);
             connection = url.openConnection();

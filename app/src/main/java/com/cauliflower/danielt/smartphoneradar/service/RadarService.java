@@ -148,7 +148,9 @@ public class RadarService extends Service {
 
     @Override
     public void onDestroy() {
-        mClient.removeLocationUpdates(mLocationCallback);
+        if(mClient!=null){
+            mClient.removeLocationUpdates(mLocationCallback);
+        }
 //        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "onDestroy");
         mWorker.removeCallbacks(mTask_serviceStatus);

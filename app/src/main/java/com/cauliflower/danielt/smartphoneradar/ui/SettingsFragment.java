@@ -3,7 +3,9 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -19,6 +21,7 @@ import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
+import com.cauliflower.danielt.smartphoneradar.service.NetWatcher;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.tool.NetworkUtils;
 
@@ -30,6 +33,7 @@ public class SettingsFragment extends PreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener {
     String mAccount_sendLocation, mPassword_sendLocation;
     String mAccount_getLocation, mPassword_getLocation;
+    NetWatcher watcher ;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -44,6 +48,7 @@ public class SettingsFragment extends PreferenceFragment implements
         /* Unregister the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
+        unRegisterNetWatcher();
     }
 
     // Register SettingsFragment (this) as a SharedPreferenceChangedListener in onStart
@@ -53,7 +58,7 @@ public class SettingsFragment extends PreferenceFragment implements
         /* Register the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
-
+        registerNetWatcher();
         refreshAll();
     }
 
@@ -231,5 +236,24 @@ public class SettingsFragment extends PreferenceFragment implements
                     .create().show();
             initPreference();
         }
+    }
+
+    /**
+     * 當activity 結束並解除註冊NetWatcher後，
+     * 無法再接收CONNECTIVITY_ACTION
+     * 即使是透過getApplicationContext註冊
+     *
+     * 接著測試在Service or receiver內註冊CONNECTIVITY_ACTION
+     * */
+    private void registerNetWatcher() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        watcher =new NetWatcher();
+        getActivity().getApplicationContext().registerReceiver(watcher, intentFilter);
+    }
+    private void unRegisterNetWatcher() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        getActivity().getApplicationContext().unregisterReceiver(watcher);
     }
 }
