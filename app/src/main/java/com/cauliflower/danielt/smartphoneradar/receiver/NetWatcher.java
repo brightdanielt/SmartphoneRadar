@@ -1,0 +1,55 @@
+package com.cauliflower.danielt.smartphoneradar.receiver;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+
+import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
+import com.cauliflower.danielt.smartphoneradar.service.RadarService;
+
+/**
+ * Created by danielt on 2018/4/10.
+ * 監聽裝置的網路連線狀況，當定位設定已開啟且網路連接上，啟動 RadarService
+ * <p>
+ * {@link NetWatcher} will be registered in two ways:
+ * 1.<action android:name="android.net.conn.CONNECTIVITY_CHANGE" /> in Manifest and it works for
+ * </>apps targeting M and below
+ * <p>
+ * 2.Registered in {@link NetWatcherJob} programmatically and it works for apps targeting N and higher
+ */
+
+public class NetWatcher extends BroadcastReceiver {
+    private static final String TAG = NetWatcher.class.getSimpleName();
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Log.i(TAG, "onReceive");
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+
+        //若定位功能開啟
+        if (PositionPreferences.getPositionEnable(context)) {
+            if (info != null) {
+                //開啟網路時同時開啟 RadarService
+                if (info.isConnected() && !RadarService.mInService) {
+                    Intent i = new Intent(context, RadarService.class);
+                    context.getApplicationContext().startService(i);
+                } else {
+                    //關閉網路時同時停止 RadarService
+                    Intent i = new Intent(context, RadarService.class);
+                    context.stopService(i);
+                }
+            } else {
+                //關閉網路時同時停止 RadarService
+                Intent i = new Intent(context, RadarService.class);
+                context.stopService(i);
+            }
+        } else {
+            //若定位功能未開啟，則不做任何動作
+        }
+    }
+}
