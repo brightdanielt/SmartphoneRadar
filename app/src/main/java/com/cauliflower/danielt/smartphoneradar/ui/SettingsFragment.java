@@ -191,10 +191,11 @@ public class SettingsFragment extends PreferenceFragment implements
         }
         radarDbHelper.close();
 
+        //伺服器無法連線時，應禁止點擊帳號與查詢功能
         if (!mServerOnline) {
             findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(false);
             findPreference(getString(R.string.pref_key_MapsActivity)).setEnabled(false);
-            findPreference(getString(R.string.pref_key_position)).setEnabled(false);
+//            findPreference(getString(R.string.pref_key_position)).setEnabled(false);
         }
     }
 
@@ -270,7 +271,7 @@ public class SettingsFragment extends PreferenceFragment implements
                 .setMinimumLatency(1000)
                 .setOverrideDeadline(2000)
                 //job will be written to disk and loaded at boot
-//                .setPersisted(true)
+                .setPersisted(true)
                 .build();
         if (jobScheduler != null) {
             jobScheduler.schedule(netWatcherInfo);

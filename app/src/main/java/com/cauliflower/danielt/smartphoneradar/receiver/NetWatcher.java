@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
@@ -37,7 +38,12 @@ public class NetWatcher extends BroadcastReceiver {
                 //開啟網路時同時開啟 RadarService
                 if (info.isConnected() && !RadarService.mInService) {
                     Intent i = new Intent(context, RadarService.class);
-                    context.getApplicationContext().startService(i);
+                    // Can not use startService when app is in background for device api O
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(i);
+                    } else {
+                        context.startService(i);
+                    }
                 } else {
                     //關閉網路時同時停止 RadarService
                     Intent i = new Intent(context, RadarService.class);
