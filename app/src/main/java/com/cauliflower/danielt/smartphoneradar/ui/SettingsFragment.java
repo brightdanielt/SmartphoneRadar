@@ -1,12 +1,16 @@
 
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -15,13 +19,15 @@ import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
-import com.cauliflower.danielt.smartphoneradar.service.NetWatcher;
+import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
+import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.tool.NetworkUtils;
 
@@ -31,9 +37,9 @@ import java.util.List;
 public class SettingsFragment extends PreferenceFragment implements
         // Implement OnSharedPreferenceChangeListener from SettingsFragment
         SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final String TAG = SettingsFragment.class.getSimpleName();
     String mAccount_sendLocation, mPassword_sendLocation;
     String mAccount_getLocation, mPassword_getLocation;
-    NetWatcher watcher ;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -48,7 +54,6 @@ public class SettingsFragment extends PreferenceFragment implements
         /* Unregister the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
-        unRegisterNetWatcher();
     }
 
     // Register SettingsFragment (this) as a SharedPreferenceChangedListener in onStart
@@ -58,8 +63,8 @@ public class SettingsFragment extends PreferenceFragment implements
         /* Register the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
-        registerNetWatcher();
         refreshAll();
+        getActivity().startService(new Intent(getActivity(), NetWatcherJob.class));
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed
@@ -78,12 +83,23 @@ public class SettingsFragment extends PreferenceFragment implements
                                 .setMessage(R.string.dialog_msg_enablePosition_noInternetConnected)
                                 .setCancelable(true)
                                 .create().show();
-                    } else {
+                    }
+                    //Check android api level
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        scheduleNetWatcherJob();
+                    }else {
+                        //For apps targeting M and below
                         PositionPreferences.startRadarService(getActivity());
                     }
                 } else {
-                    //Stop RadarService if turn off the switch
-                    PositionPreferences.stopRadarService(getActivity());
+                    if(RadarService.mInService){
+                        //Stop RadarService if turn off the switch
+                        PositionPreferences.stopRadarService(getActivity());
+                    }
+
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        cancelScheduledNetWatcherJob();
+                    }
                 }
             }
         }
@@ -131,6 +147,9 @@ public class SettingsFragment extends PreferenceFragment implements
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
         RadarDbHelper radarDbHelper = new RadarDbHelper(getActivity());
+
+        findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(true);
+        findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
 
         //MapsActivity
         List<User> userList_getLocation = radarDbHelper.searchUser(RadarContract.UserEntry.USED_FOR_GETLOCATION);
@@ -238,22 +257,38 @@ public class SettingsFragment extends PreferenceFragment implements
         }
     }
 
+    private static int NET_WATCHER_JOB_ID = 100;
+
     /**
-     * 當activity 結束並解除註冊NetWatcher後，
-     * 無法再接收CONNECTIVITY_ACTION
-     * 即使是透過getApplicationContext註冊
-     *
-     * 接著測試在Service or receiver內註冊CONNECTIVITY_ACTION
-     * */
-    private void registerNetWatcher() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        watcher =new NetWatcher();
-        getActivity().getApplicationContext().registerReceiver(watcher, intentFilter);
+     * Schedule a job that register a receiver to monitor network connectivity in background,
+     */
+    @TargetApi(Build.VERSION_CODES.N)
+    private void scheduleNetWatcherJob() {
+        JobScheduler jobScheduler = (JobScheduler) getActivity().getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        JobInfo netWatcherInfo = new JobInfo.Builder(NET_WATCHER_JOB_ID, new ComponentName(getActivity(), NetWatcherJob.class))
+                .setRequiredNetworkType(JobInfo.NETWORK_TYPE_NONE)
+                .setMinimumLatency(1000)
+                .setOverrideDeadline(2000)
+                //job will be written to disk and loaded at boot
+//                .setPersisted(true)
+                .build();
+        if (jobScheduler != null) {
+            jobScheduler.schedule(netWatcherInfo);
+        } else {
+            Log.i(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while scheduling job");
+        }
     }
-    private void unRegisterNetWatcher() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        getActivity().getApplicationContext().unregisterReceiver(watcher);
+
+    /**
+     * Cancel the NetWatcher job scheduled
+     */
+    @TargetApi(Build.VERSION_CODES.N)
+    private void cancelScheduledNetWatcherJob() {
+        JobScheduler jobScheduler = (JobScheduler) getActivity().getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        if (jobScheduler != null) {
+            jobScheduler.cancel(NET_WATCHER_JOB_ID);
+        } else {
+            Log.i(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while cancel job");
+        }
     }
 }

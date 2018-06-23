@@ -154,6 +154,8 @@ public class RadarService extends Service {
 //        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "onDestroy");
         mWorker.removeCallbacks(mTask_serviceStatus);
+
+        mInService = false;
         RadarService.this.stopForeground(true);
         super.onDestroy();
 

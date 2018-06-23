@@ -61,7 +61,7 @@
     <string name="pref_key_position">position</string>
     <string name="pref_positioning">定位中</string>
     <string name="pref_not_positioning">未定位</string>
-    <bool name="pref_defaultValue_position">true</bool>
+    <bool name="pref_defaultValue_position">false</bool>
 
     <!--Preference settings updateFrequency-->
     <string name="pref_title_updateFrequency">定位頻率</string>

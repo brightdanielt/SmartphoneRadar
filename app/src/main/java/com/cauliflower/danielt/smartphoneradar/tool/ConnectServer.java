@@ -53,13 +53,13 @@ public class ConnectServer implements SocketInterface {
             @Override
             public void run() {
                 URL url;
+                HttpURLConnection connection = null;
                 try {
                     url = new URL(string_url);
-                    HttpURLConnection connection;
                     connection = (HttpURLConnection) url.openConnection();
                     //HttpURLConnection 預設是false，因為要送出資料，所以改為true
                     connection.setDoOutput(true);
-                    connection.setConnectTimeout(5000);
+                    connection.setConnectTimeout(3000);
                     PrintWriter out = new PrintWriter(connection.getOutputStream());
 
                     out.println(params);
@@ -84,6 +84,16 @@ public class ConnectServer implements SocketInterface {
                     e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
+                } finally {
+                    //Prevent from connection leaked ,close the response body
+                    if (connection != null) {
+                        try {
+                            connection.getInputStream().close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        connection.disconnect();
+                    }
                 }
             }
         });
@@ -125,18 +135,28 @@ public class ConnectServer implements SocketInterface {
      * {@code false} 連線失敗，伺服器無法連上
      */
     public static boolean checkServerOnline() {
-        URLConnection connection;
+        HttpURLConnection connection = null;
         try {
             URL url = new URL(SERVER_ADDRESS_INDEX);
-            connection = url.openConnection();
+            connection = (HttpURLConnection) url.openConnection();
             //超過5秒則連線逾時
-            connection.setConnectTimeout(5000);
+            connection.setConnectTimeout(3000);
             connection.connect();
             return true;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            //Prevent from connection leaked ,close the response body
+            if (connection != null) {
+                try {
+                    connection.getInputStream().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                connection.disconnect();
+            }
         }
         return false;
     }
