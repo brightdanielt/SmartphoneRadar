@@ -64,7 +64,6 @@ public class SettingsFragment extends PreferenceFragment implements
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
         refreshAll();
-        getActivity().startService(new Intent(getActivity(), NetWatcherJob.class));
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed

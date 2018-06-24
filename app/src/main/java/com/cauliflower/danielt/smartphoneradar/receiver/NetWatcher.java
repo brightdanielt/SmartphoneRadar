@@ -28,8 +28,12 @@ public class NetWatcher extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i(TAG, "onReceive");
+        Log.i(TAG, "onReceive action: "+intent.getAction());
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (cm == null) {
+            Log.d(TAG, "Can not get system service: CONNECTIVITY_SERVICE in onReceive");
+            return;
+        }
         NetworkInfo info = cm.getActiveNetworkInfo();
 
         //若定位功能開啟
