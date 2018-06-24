@@ -2,10 +2,13 @@ package com.cauliflower.danielt.smartphoneradar.service;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
@@ -148,7 +151,7 @@ public class RadarService extends Service {
 
     @Override
     public void onDestroy() {
-        if(mClient!=null){
+        if (mClient != null) {
             mClient.removeLocationUpdates(mLocationCallback);
         }
 //        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
@@ -177,15 +180,28 @@ public class RadarService extends Service {
                 intent,
                 0);
 
-        Notification notification = new Notification.Builder(getApplicationContext())
+        //android O need a channel for notification
+        NotificationChannel radarChannel = null;
+        String channelId = "AndroidChannel";
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            radarChannel = new NotificationChannel(
+                    channelId, "AndroidRadar", NotificationManager.IMPORTANCE_HIGH);
+            radarChannel.setBypassDnd(true);
+            radarChannel.enableLights(false);
+            radarChannel.enableVibration(true);
+        }
+
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.pref_positioning))
 //                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.))
                 .setSmallIcon(R.drawable.ic_hat_notify)
                 .setWhen(System.currentTimeMillis())
-                .setContentIntent(contentIntent)
-                .build();
-        RadarService.this.startForeground(333, notification);
+                .setContentIntent(contentIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(channelId);
+        }
+        RadarService.this.startForeground(333, builder.build());
     }
 
 }
