@@ -24,6 +24,10 @@ public class RadarContract {
 
     public static final class UserEntry implements BaseColumns {
 
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_USER)
+                .build();
+
         /**
          * Name of database table for user
          */
@@ -83,6 +87,10 @@ public class RadarContract {
     }
 
     public static final class LocationEntry implements BaseColumns {
+
+        public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
+                .appendPath(PATH_LOCATION)
+                .build();
 
         /**
          * Name of database table for user

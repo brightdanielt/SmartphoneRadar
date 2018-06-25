@@ -3,9 +3,11 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -28,6 +30,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
+import com.cauliflower.danielt.smartphoneradar.data.RadarProvider;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
@@ -135,6 +140,8 @@ public class AccountActivity extends AppCompatActivity {
     private void updateView() {
         mUserList_sendLocation.clear();
         mUserList_getLocation.clear();
+        //Test MainDb
+//        mUserList_sendLocation.addAll(MainDb.searchUser(this, UserEntry.USED_FOR_SENDLOCATION));
         mUserList_sendLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_SENDLOCATION));
         mUserList_getLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_GETLOCATION));
 
@@ -303,6 +310,8 @@ public class AccountActivity extends AppCompatActivity {
                     }
                     case TASK_LOGIN_TO_SEND_LOCATION: {
                         mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
+                        //Test MainDb
+//                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.logIn_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
