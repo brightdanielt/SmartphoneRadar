@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
@@ -47,7 +48,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //用於遠端 DB
     private ConnectServer mConnectServer;
     //用於手機 DB
-    private RadarDbHelper mDbHelper;
     private List<SimpleLocation> mLocationList = new ArrayList<>();
     private boolean mShowNewMarkOnly = false;
 
@@ -62,7 +62,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getSupportActionBar().setSubtitle("");
                     }
                 }, 7500);
-                String time_to_compare = mDbHelper.searchNewTime(mAccount);
+                String time_to_compare = MainDb.searchNewTime(MapsActivity.this,mAccount);
                 mConnectServer.getLocationFromServer(mAccount, mPassword, time_to_compare);
                 //每 15 秒查詢一次座標
                 mHandler.postDelayed(mRunnable, 15000);
@@ -92,7 +92,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         mConnectServer = new ConnectServer(MapsActivity.this);
-        mDbHelper = new RadarDbHelper(MapsActivity.this);
         Intent i = getIntent();
         mAccount = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_ACCOUNT);
         mPassword = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
@@ -127,7 +126,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        mLocationList.addAll(mDbHelper.searchAllLocation(mAccount));
+        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this,mAccount));
         mAdapter = new MyAdapter(mLocationList);
         mRecycler_locationList.setAdapter(mAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
@@ -186,7 +185,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 longitude = location.getLongitude();
                 time = location.getTime();
                 //手機端資料庫新增一筆 Location
-                mDbHelper.addLocation(mAccount, latitude, longitude, time);
+                MainDb.addLocation(MapsActivity.this,mAccount, latitude, longitude, time);
 
                 //recycler_locationList 新增一筆資料
                 mLocationList.add(new SimpleLocation(time, latitude, longitude));
@@ -312,9 +311,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mDbHelper != null) {
-            mDbHelper.close();
-        }
     }
 
     class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {

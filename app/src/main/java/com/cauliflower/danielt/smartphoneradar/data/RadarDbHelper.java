@@ -56,7 +56,7 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + LocationEntry.TABLE_LOCATION);
         onCreate(db);
     }
-
+/*
     public void addUser(String account, String password, String usedFor, String in_use) {
         Cursor c = getReadableDatabase().query(UserEntry.TABLE_USER, new String[]{"account"},
                 UserEntry.COLUMN_USER_ACCOUNT + " = ? and " + UserEntry.COLUMN_USER_USED_FOR + " = ? ",
@@ -191,5 +191,5 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         } else {
             Log.i(TAG, "The same account and password already exists ,do not update the password");
         }
-    }
+    }*/
 }

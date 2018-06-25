@@ -57,7 +57,6 @@ public class AccountActivity extends AppCompatActivity {
 
     public static final String TAG = AccountActivity.class.getSimpleName();
     private static final int REQUEST_CODE_READ_PHONE_STATE = 101;
-    private RadarDbHelper mDbHelper;
     private ConnectServer mConnectServer;
     private ResponseCode mResponseCode;
 
@@ -87,7 +86,6 @@ public class AccountActivity extends AppCompatActivity {
         setContentView(R.layout.activity_account);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        mDbHelper = new RadarDbHelper(AccountActivity.this);
         mConnectServer = new ConnectServer(AccountActivity.this);
         mResponseCode = new ResponseCode(AccountActivity.this);
         makeViewWork();
@@ -127,8 +125,8 @@ public class AccountActivity extends AppCompatActivity {
         mListView_sendLocation = findViewById(R.id.listView_sendLocation);
         mListView_getLocation = findViewById(R.id.listView_getLocation);
 
-        mUserList_sendLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_SENDLOCATION));
-        mUserList_getLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_GETLOCATION));
+        mUserList_sendLocation.addAll(MainDb.searchUser(this, UserEntry.USED_FOR_SENDLOCATION));
+        mUserList_getLocation.addAll(MainDb.searchUser(this, UserEntry.USED_FOR_GETLOCATION));
         mAdapter_sendLocation = new AccountAdapter(mUserList_sendLocation);
         mAdapter_getLocation = new AccountAdapter(mUserList_getLocation);
         mListView_sendLocation.setAdapter(mAdapter_sendLocation);
@@ -142,8 +140,8 @@ public class AccountActivity extends AppCompatActivity {
         mUserList_getLocation.clear();
         //Test MainDb
 //        mUserList_sendLocation.addAll(MainDb.searchUser(this, UserEntry.USED_FOR_SENDLOCATION));
-        mUserList_sendLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_SENDLOCATION));
-        mUserList_getLocation.addAll(mDbHelper.searchUser(UserEntry.USED_FOR_GETLOCATION));
+        mUserList_sendLocation.addAll(MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_SENDLOCATION));
+        mUserList_getLocation.addAll(MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_GETLOCATION));
 
         if (mUserList_sendLocation.size() > 0) {
             mTv_hint_sendLocation.setVisibility(View.GONE);
@@ -304,19 +302,19 @@ public class AccountActivity extends AppCompatActivity {
                 //根據回傳值，得知目的成功與否
                 switch (whichTask) {
                     case TASK_SIGN_UP: {
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
+                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.sighUp_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_SEND_LOCATION: {
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
+                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
                         //Test MainDb
 //                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.logIn_sendLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
                     case TASK_LOGIN_TO_GET_LOCATION: {
-                        mDbHelper.addUser(mAccount_getLocation, mPassword_getLocation, UserEntry.USED_FOR_GETLOCATION, UserEntry.IN_USE_NO);
+                        MainDb.addUser(AccountActivity.this, mAccount_getLocation, mPassword_getLocation, UserEntry.USED_FOR_GETLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_getLocation + getString(R.string.logIn_getLocation_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
@@ -332,8 +330,8 @@ public class AccountActivity extends AppCompatActivity {
                     case TASK_UPDATE_PASSWORD: {
                         mAccount_sendLocation = mAccount_forgetPassword;
                         mPassword_sendLocation = String.valueOf(mVerification_code);
-                        mDbHelper.addUser(mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
-                        mDbHelper.updatePassword(mAccount_forgetPassword, String.valueOf(mVerification_code));
+                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
+                        MainDb.updatePassword(AccountActivity.this, mAccount_forgetPassword, String.valueOf(mVerification_code));
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.update_password_success), Toast.LENGTH_SHORT).show();
                         break;
                     }
@@ -352,9 +350,6 @@ public class AccountActivity extends AppCompatActivity {
         super.onDestroy();
         if (mDialog_loading != null && mDialog_loading.isShowing()) {
             mDialog_loading.dismiss();
-        }
-        if (mDbHelper != null) {
-            mDbHelper.close();
         }
     }
 
@@ -415,7 +410,7 @@ public class AccountActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         //要求 RadarDbHelper 更改該 User 的 in_use 為 yes
-                                        mDbHelper.updateUser_in_use(account);
+                                        MainDb.updateUser_in_use(AccountActivity.this, account);
                                         updateView();
                                     }
                                 })

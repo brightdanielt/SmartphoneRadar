@@ -16,6 +16,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
@@ -117,9 +118,7 @@ public class RadarService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        return super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand");
-        RadarDbHelper dbHelper = new RadarDbHelper(RadarService.this);
-        List<User> userList = dbHelper.searchUser(RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        dbHelper.close();
+        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList) {
             mAccount_sendLocation = null;
             mPassword_sendLocation = null;

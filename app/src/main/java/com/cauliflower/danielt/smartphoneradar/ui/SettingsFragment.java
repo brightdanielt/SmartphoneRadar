@@ -22,6 +22,7 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
@@ -146,13 +147,11 @@ public class SettingsFragment extends PreferenceFragment implements
 
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
-        RadarDbHelper radarDbHelper = new RadarDbHelper(getActivity());
-
         findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(true);
         findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
 
         //MapsActivity
-        List<User> userList_getLocation = radarDbHelper.searchUser(RadarContract.UserEntry.USED_FOR_GETLOCATION);
+        List<User> userList_getLocation = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (User user : userList_getLocation) {
             String in_use = user.getIn_use();
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
@@ -177,7 +176,7 @@ public class SettingsFragment extends PreferenceFragment implements
         //設定“定位開關”的開關值
         switchPreference.setChecked(PositionPreferences.getPositionEnable(getActivity()));
 //        switchPreference.setChecked(RadarService.inService);
-        List<User> userList_sendLocation = radarDbHelper.searchUser(RadarContract.UserEntry.USED_FOR_SENDLOCATION);
+        List<User> userList_sendLocation = MainDb.searchUser(getActivity(),RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList_sendLocation) {
             mAccount_sendLocation = user.getAccount();
             mPassword_sendLocation = user.getPassword();
@@ -189,7 +188,6 @@ public class SettingsFragment extends PreferenceFragment implements
                 break;
             }
         }
-        radarDbHelper.close();
 
         //伺服器無法連線時，應禁止點擊帳號與查詢功能
         if (!mServerOnline) {

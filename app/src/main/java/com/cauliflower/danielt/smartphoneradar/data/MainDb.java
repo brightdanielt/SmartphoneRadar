@@ -29,15 +29,17 @@ public final class MainDb {
                 RadarContract.UserEntry.COLUMN_USER_ACCOUNT + " = ? and " + RadarContract.UserEntry.COLUMN_USER_USED_FOR + " = ? ",
                 new String[]{account, usedFor}, null);
         if (cursor != null) {
-            cursor.close();
-//            cursor.moveToFirst();
-            ContentValues values = new ContentValues();
-            values.put(RadarContract.UserEntry.COLUMN_USER_ACCOUNT, account);
-            values.put(RadarContract.UserEntry.COLUMN_USER_PASSWORD, password);
-            values.put(RadarContract.UserEntry.COLUMN_USER_USED_FOR, usedFor);
-            values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
-            Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
-            Log.i(context.getClass().toString(), "Add user,uri: " + uri);
+            cursor.moveToFirst();
+            if (cursor.getCount() > 0) {
+                cursor.close();
+                ContentValues values = new ContentValues();
+                values.put(RadarContract.UserEntry.COLUMN_USER_ACCOUNT, account);
+                values.put(RadarContract.UserEntry.COLUMN_USER_PASSWORD, password);
+                values.put(RadarContract.UserEntry.COLUMN_USER_USED_FOR, usedFor);
+                values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
+                Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
+                Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
+            }
         } else {
             Log.i(context.getClass().toString(), "The same account already exists ,do not add the user.");
         }
@@ -70,10 +72,12 @@ public final class MainDb {
         //取得最新 time 值
         if (cursor != null) {
             cursor.moveToFirst();
-            int index_time_to_compare = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
-            String newestTime = cursor.getString(index_time_to_compare);
-            cursor.close();
-            return newestTime;
+            if (cursor.getCount() > 0) {
+                int index_time_to_compare = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
+                String newestTime = cursor.getString(index_time_to_compare);
+                cursor.close();
+                return newestTime;
+            }
         }
         return "1911-01-01-00:00:00";
     }
@@ -90,22 +94,24 @@ public final class MainDb {
 
         if (cursor != null) {
             cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                int index_id = cursor.getColumnIndex(RadarContract.LocationEntry._ID);
-                int index_ac = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_ACCOUNT);
-                int index_time = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
-                int index_lat = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LATITUDE);
-                int index_lng = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LONGITUDE);
+            if (cursor.getCount() > 0) {
+                while (!cursor.isAfterLast()) {
+                    int index_id = cursor.getColumnIndex(RadarContract.LocationEntry._ID);
+                    int index_ac = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_ACCOUNT);
+                    int index_time = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
+                    int index_lat = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LATITUDE);
+                    int index_lng = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LONGITUDE);
 
-                int id = cursor.getInt(index_id);
-                String ac = cursor.getString(index_ac);
-                String time = cursor.getString(index_time);
-                double lat = cursor.getDouble(index_lat);
-                double lng = cursor.getDouble(index_lng);
-                SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
-                locationList.add(simpleLocation);
-                Log.i(context.getClass().toString(), id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
-                cursor.moveToNext();
+                    int id = cursor.getInt(index_id);
+                    String ac = cursor.getString(index_ac);
+                    String time = cursor.getString(index_time);
+                    double lat = cursor.getDouble(index_lat);
+                    double lng = cursor.getDouble(index_lng);
+                    SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
+                    locationList.add(simpleLocation);
+                    Log.i(context.getClass().toString(), id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
+                    cursor.moveToNext();
+                }
             }
             cursor.close();
         }
@@ -123,20 +129,22 @@ public final class MainDb {
                 null);
         if (cursor != null) {
             cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                User user = new User();
-                int index_account = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_ACCOUNT);
-                int index_password = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
-                int index_in_use = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_IN_USE);
-                user.setAccount(cursor.getString(index_account));
-                user.setPassword(cursor.getString(index_password));
-                user.setUsedFor(usedFor);
-                user.setIn_use(cursor.getString(index_in_use));
-                //存在帳密，已註冊
-                if (user.getAccount() != null && user.getPassword() != null) {
-                    userList.add(user);
+            if (cursor.getCount() > 0) {
+                while (!cursor.isAfterLast()) {
+                    User user = new User();
+                    int index_account = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_ACCOUNT);
+                    int index_password = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
+                    int index_in_use = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_IN_USE);
+                    user.setAccount(cursor.getString(index_account));
+                    user.setPassword(cursor.getString(index_password));
+                    user.setUsedFor(usedFor);
+                    user.setIn_use(cursor.getString(index_in_use));
+                    //存在帳密，已註冊
+                    if (user.getAccount() != null && user.getPassword() != null) {
+                        userList.add(user);
+                    }
+                    cursor.moveToNext();
                 }
-                cursor.moveToNext();
             }
             cursor.close();
         }
