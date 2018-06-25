@@ -1,8 +1,21 @@
 package com.cauliflower.danielt.smartphoneradar.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 public class RadarContract {
+
+    public static final String CONTENT_AUTHORITY = "com.cauliflower.danielt.smartphoneradar";
+
+    /*
+     * Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact
+     * the content provider for SmartphoneRadar.
+     * */
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+
+    public static final String PATH_USER = "user";
+    public static final String PATH_LOCATION = "location";
+
 
     // To prevent someone from accidentally instantiating the contract class,
     // give it an empty constructor.

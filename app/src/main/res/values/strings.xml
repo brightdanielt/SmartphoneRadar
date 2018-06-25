@@ -2,6 +2,9 @@
     <string name="app_name">Android雷達</string>
     <string name="title_activity_maps">Map</string>
 
+    <!--Content Provider-->
+    <string name="content_authority">com.cauliflower.danielt.smartphoneradar</string>
+
     <!--Response code-->
     <!--<string name="INSERT_USER_SUCCESS">註冊定位用帳號成功</string>-->
 

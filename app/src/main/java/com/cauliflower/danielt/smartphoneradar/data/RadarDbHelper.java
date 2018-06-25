@@ -75,23 +75,6 @@ public class RadarDbHelper extends SQLiteOpenHelper {
 
     }
 
-    public void updatePassword(String account, String password) {
-        Cursor c = getReadableDatabase().query(UserEntry.TABLE_USER, new String[]{"account"},
-                UserEntry.COLUMN_USER_ACCOUNT + " = ? and " + UserEntry.COLUMN_USER_PASSWORD + " = ? ",
-                new String[]{account, password}, null, null, null);
-        if (!c.moveToFirst()) {
-            c.close();
-            ContentValues values = new ContentValues();
-            values.put(UserEntry.COLUMN_USER_PASSWORD, password);
-
-            long i = getWritableDatabase().update(
-                    UserEntry.TABLE_USER, values, UserEntry.COLUMN_USER_ACCOUNT + " = ? ", new String[]{account});
-            Log.i(TAG, "update user column password,count:" + i);
-        } else {
-            Log.i(TAG, "The same account and password already exists ,do not update the password");
-        }
-    }
-
     public void addLocation(String account, double latitude, double longitude, String time) {
         ContentValues values = new ContentValues();
         values.put(LocationEntry.COLUMN_LOCATION_ACCOUNT, account);
@@ -104,6 +87,7 @@ public class RadarDbHelper extends SQLiteOpenHelper {
     }
 
     //查詢資料表 Location 的最新 time 值
+
     public String searchNewTime(String account) {
         //先查詢 Location 是否有紀錄
         Cursor cursor = getReadableDatabase().query(
@@ -120,7 +104,6 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         }
         return "1911-01-01-00:00:00";
     }
-
     public List<SimpleLocation> searchAllLocation(String account) {
         List<SimpleLocation> locationList = new ArrayList<>();
 
@@ -178,7 +161,8 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         return userList;
     }
 
-    //更新改使用者為已登入
+    //更新使用者為已登入
+
     public void updateUser_in_use(String account) {
         //先更新所有 getLocation 帳號為未登入
         ContentValues values_in_use_no = new ContentValues();
@@ -190,5 +174,22 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         values_in_use_yes.put(UserEntry.COLUMN_USER_IN_USE, UserEntry.IN_USE_YES);
         int j = getWritableDatabase().update(UserEntry.TABLE_USER, values_in_use_yes, UserEntry.COLUMN_USER_ACCOUNT + "=?", new String[]{account});
         Log.i(TAG, "update user column in_use,count:" + j);
+    }
+
+    public void updatePassword(String account, String password) {
+        Cursor c = getReadableDatabase().query(UserEntry.TABLE_USER, new String[]{"account"},
+                UserEntry.COLUMN_USER_ACCOUNT + " = ? and " + UserEntry.COLUMN_USER_PASSWORD + " = ? ",
+                new String[]{account, password}, null, null, null);
+        if (!c.moveToFirst()) {
+            c.close();
+            ContentValues values = new ContentValues();
+            values.put(UserEntry.COLUMN_USER_PASSWORD, password);
+
+            long i = getWritableDatabase().update(
+                    UserEntry.TABLE_USER, values, UserEntry.COLUMN_USER_ACCOUNT + " = ? ", new String[]{account});
+            Log.i(TAG, "update user column password,count:" + i);
+        } else {
+            Log.i(TAG, "The same account and password already exists ,do not update the password");
+        }
     }
 }

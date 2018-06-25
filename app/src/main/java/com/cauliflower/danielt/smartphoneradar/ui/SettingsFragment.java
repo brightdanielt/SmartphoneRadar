@@ -38,6 +38,7 @@ public class SettingsFragment extends PreferenceFragment implements
         // Implement OnSharedPreferenceChangeListener from SettingsFragment
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
+    private static final int LOADER_ID = 1;
     String mAccount_sendLocation, mPassword_sendLocation;
     String mAccount_getLocation, mPassword_getLocation;
 
@@ -86,12 +87,12 @@ public class SettingsFragment extends PreferenceFragment implements
                     //Check android api level
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         scheduleNetWatcherJob();
-                    }else {
+                    } else {
                         //For apps targeting M and below
                         PositionPreferences.startRadarService(getActivity());
                     }
                 } else {
-                    if(RadarService.mInService){
+                    if (RadarService.mInService) {
                         //Stop RadarService if turn off the switch
                         PositionPreferences.stopRadarService(getActivity());
                     }
@@ -199,9 +200,9 @@ public class SettingsFragment extends PreferenceFragment implements
     }
 
     private boolean mServerOnline = false;
-
     /*檢查伺服器連線狀況*/
     class CheckServerOnlineTask extends AsyncTask<Void, Void, Boolean> {
+
         ProgressDialog mLoadingDialog;
 
         @Override
