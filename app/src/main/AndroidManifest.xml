@@ -119,6 +119,7 @@
 
                 這個決定意味著在 LogInActivity 並不會有“定位”帳號清單能夠選擇以登入
                 只有“查詢”帳號能夠選擇(done)
-
+    todo 09: MapsActivity
+                為座標清單建立暫存，避免再次進入 MapsActivity 時重新向裝置端 database 查詢座標 ()
 
     -->

@@ -6,8 +6,8 @@ android {
         applicationId "com.cauliflower.danielt.smartphoneradar"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 11
-        versionName "1.0.1.0"
+        versionCode 12
+        versionName "1.0.1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
