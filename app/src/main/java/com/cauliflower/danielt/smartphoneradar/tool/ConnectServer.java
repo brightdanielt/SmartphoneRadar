@@ -186,8 +186,8 @@ public class ConnectServer implements SocketInterface {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
                 "&model=" + URLEncoder.encode(model, "UTF-8") +
-                "&imei=" + URLEncoder.encode(imei, "UTF-8") +
-                "&action=" + URLEncoder.encode("login", "UTF-8") +
+                "&imei_1=" + URLEncoder.encode(imei, "UTF-8") +
+                "&action=" + URLEncoder.encode("logIn_sendLocation", "UTF-8") +
                 "&";
 
         Log.i(TAG, "Params: " + params);
@@ -203,7 +203,7 @@ public class ConnectServer implements SocketInterface {
             UnsupportedEncodingException {
         String params = "account=" + URLEncoder.encode(account, "UTF-8") +
                 "&password=" + URLEncoder.encode(password, "UTF-8") +
-                "&action=" + URLEncoder.encode("login", "UTF-8") +
+                "&action=" + URLEncoder.encode("logIn_getLocation", "UTF-8") +
                 "&";
 
         Log.i(TAG, "Params: " + params);

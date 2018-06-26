@@ -307,7 +307,7 @@ public class AccountActivity extends AppCompatActivity {
                         break;
                     }
                     case TASK_LOGIN_TO_SEND_LOCATION: {
-                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
+                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                         //Test MainDb
 //                        MainDb.addUser(AccountActivity.this, mAccount_sendLocation, mPassword_sendLocation, UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_NO);
                         Toast.makeText(AccountActivity.this, mAccount_sendLocation + getString(R.string.logIn_sendLocation_success), Toast.LENGTH_SHORT).show();

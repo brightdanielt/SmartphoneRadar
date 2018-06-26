@@ -26,6 +26,7 @@ public class ResponseCode {
     public static final String INSERT_PHONE_INFO_ERROR = "204";
     public static final String UPDATE_LOCATION_ERROR = "205";
     public static final String LOGIN_ERROR = "206";
+    public static final String LOGIN_WRONG_PHONE_INFO = "2061";
     public static final String SEND_VERIFICATION_CODE_FAILED = "208";
     public static final String UPDATE_PASSWORD_FAILED = "209";
 
@@ -50,43 +51,48 @@ public class ResponseCode {
             }
 
             case PARAMETER_ERROR: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+PARAMETER_ERROR+",PARAMETER_ERROR");
+                Log.d(context.getClass().getSimpleName(), "Response code " + PARAMETER_ERROR + ",PARAMETER_ERROR");
                 return false;
             }
             case USER_ALREADY_EXISTS: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+USER_ALREADY_EXISTS+",USER_ALREADY_EXISTS");
+                Log.d(context.getClass().getSimpleName(), "Response code " + USER_ALREADY_EXISTS + ",USER_ALREADY_EXISTS");
                 Toast.makeText(context, context.getString(R.string.USER_ALREADY_EXISTS), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case IMEI_ALREADY_EXISTS: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+IMEI_ALREADY_EXISTS+",IMEI_ALREADY_EXISTS");
+                Log.d(context.getClass().getSimpleName(), "Response code " + IMEI_ALREADY_EXISTS + ",IMEI_ALREADY_EXISTS");
                 Toast.makeText(context, context.getString(R.string.IMEI_ALREADY_EXISTS), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case INSERT_USER_ERROR: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+INSERT_USER_ERROR+",INSERT_USER_ERROR");
+                Log.d(context.getClass().getSimpleName(), "Response code " + INSERT_USER_ERROR + ",INSERT_USER_ERROR");
                 return false;
             }
             case INSERT_PHONE_INFO_ERROR: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+INSERT_PHONE_INFO_ERROR+",INSERT_PHONE_INFO_ERROR");
+                Log.d(context.getClass().getSimpleName(), "Response code " + INSERT_PHONE_INFO_ERROR + ",INSERT_PHONE_INFO_ERROR");
                 return false;
             }
             case UPDATE_LOCATION_ERROR: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+UPDATE_LOCATION_ERROR+",UPDATE_LOCATION_ERROR");
+                Log.d(context.getClass().getSimpleName(), "Response code " + UPDATE_LOCATION_ERROR + ",UPDATE_LOCATION_ERROR");
+                return false;
+            }
+            case LOGIN_WRONG_PHONE_INFO: {
+                Log.d(context.getClass().getSimpleName(), "Response code " + LOGIN_WRONG_PHONE_INFO + ",LOGIN_WRONG_PHONE_INFO");
+                Toast.makeText(context, context.getString(R.string.LOGIN_WRONG_PHONE_INFO), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case LOGIN_ERROR: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+LOGIN_ERROR+",LOGIN_ERROR");
+                Log.d(context.getClass().getSimpleName(), "Response code " + LOGIN_ERROR + ",LOGIN_ERROR");
                 Toast.makeText(context, context.getString(R.string.LOGIN_ERROR), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case SEND_VERIFICATION_CODE_FAILED: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+SEND_VERIFICATION_CODE_FAILED+",SEND_VERIFICATION_CODE_FAILED");
+                Log.d(context.getClass().getSimpleName(), "Response code " + SEND_VERIFICATION_CODE_FAILED + ",SEND_VERIFICATION_CODE_FAILED");
                 Toast.makeText(context, context.getString(R.string.SEND_VERIFICATION_CODE_FAILED), Toast.LENGTH_SHORT).show();
                 return false;
             }
             case UPDATE_PASSWORD_FAILED: {
-                Log.d(context.getClass().getSimpleName(),"Response code "+UPDATE_PASSWORD_FAILED+",UPDATE_PASSWORD_FAILED");
+                Log.d(context.getClass().getSimpleName(), "Response code " + UPDATE_PASSWORD_FAILED + ",UPDATE_PASSWORD_FAILED");
                 return false;
             }
 

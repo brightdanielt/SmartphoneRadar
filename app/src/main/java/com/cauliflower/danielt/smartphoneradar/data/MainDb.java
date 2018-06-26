@@ -30,7 +30,8 @@ public final class MainDb {
                 new String[]{account, usedFor}, null);
         if (cursor != null) {
             cursor.moveToFirst();
-            if (cursor.getCount() > 0) {
+            //不存在該user則能夠新增
+            if (cursor.getCount() == 0) {
                 cursor.close();
                 ContentValues values = new ContentValues();
                 values.put(RadarContract.UserEntry.COLUMN_USER_ACCOUNT, account);
@@ -39,9 +40,11 @@ public final class MainDb {
                 values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
                 Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
                 Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
+            }else {
+                Log.i(context.getClass().toString(), "The same account already exists ,do not add the user.");
             }
         } else {
-            Log.i(context.getClass().toString(), "The same account already exists ,do not add the user.");
+            Log.i(context.getClass().toString(), "Query return null cursor");
         }
 
     }

@@ -32,6 +32,8 @@
 
     <string name="LOGIN_ERROR">帳號或密碼錯誤</string>
 
+    <string name="LOGIN_WRONG_PHONE_INFO">無法識別裝置</string>
+
     <string name="SEND_VERIFICATION_CODE_FAILED">無法寄出驗證碼</string>
 
     <string name="UPDATE_PASSWORD_FAILED">UPDATE_PASSWORD_FAILED</string>
