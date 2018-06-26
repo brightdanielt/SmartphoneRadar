@@ -8,6 +8,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +41,7 @@ import java.util.List;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, Updater {
 
+    private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private RecyclerView mRecycler_locationList;
     private MyAdapter mAdapter;
@@ -62,7 +64,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         getSupportActionBar().setSubtitle("");
                     }
                 }, 7500);
-                String time_to_compare = MainDb.searchNewTime(MapsActivity.this,mAccount);
+                String time_to_compare = MainDb.searchNewTime(MapsActivity.this, mAccount);
                 mConnectServer.getLocationFromServer(mAccount, mPassword, time_to_compare);
                 //每 15 秒查詢一次座標
                 mHandler.postDelayed(mRunnable, 15000);
@@ -126,7 +128,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this,mAccount));
+        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mAccount));
         mAdapter = new MyAdapter(mLocationList);
         mRecycler_locationList.setAdapter(mAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
@@ -185,7 +187,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 longitude = location.getLongitude();
                 time = location.getTime();
                 //手機端資料庫新增一筆 Location
-                MainDb.addLocation(MapsActivity.this,mAccount, latitude, longitude, time);
+                MainDb.addLocation(MapsActivity.this, mAccount, latitude, longitude, time);
 
                 //recycler_locationList 新增一筆資料
                 mLocationList.add(new SimpleLocation(time, latitude, longitude));
@@ -306,6 +308,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.maps_menu, menu);
         return true;
+    }
+
+
+    @Override
+    protected void onStop() {
+        //當使用者離開畫面時，應該停止查詢裝置位置
+        if (mHandler != null) {
+            mHandler.removeCallbacks(mRunnable);
+            Log.i(TAG, "stop get new location from server");
+        }
+        super.onStop();
     }
 
     @Override
