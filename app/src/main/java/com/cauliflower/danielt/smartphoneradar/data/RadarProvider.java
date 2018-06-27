@@ -12,31 +12,46 @@ import android.support.annotation.Nullable;
 
 /**
  * This class serves as the ContentProvider for all of the SmartphoneRadar's data. This class allows us to
- * bulkInsert data, query data and delete data.
+ * insert data, query data and update data.
  */
 public class RadarProvider extends ContentProvider {
 
-    /*
+    /**
      * These constant will be used to match URIs with the data they are looking for. We will take
      * advantage of the UriMatcher class to make the matching MUCH easier than doing something
      * ourselves, such as using regular expressions.
-     * */
+     */
     public static final int CODE_USER = 100;
     public static final int CODE_LOCATION = 200;
 
-    /*
+    /**
      * The URI Matcher used by this content provider. The leading "s" in this variable name
      * signifies that this UriMatcher is a static member variable of RadarProvider and is a
      * common convention in Android programming.
-     * */
+     */
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private RadarDbHelper mOpenHelper;
 
+    /**
+     * Create the UriMatcher that will match each URI to the CODE_USER and CODE_LOCATION constants
+     * defined above.
+     *
+     * @return A UriMatcher that correctly matches the constants for CODE_USER and CODE_LOCATION
+     */
     public static UriMatcher buildUriMatcher() {
+
+        /**
+         * All paths added to the UriMatcher have a corresponding code to return when a match is
+         * found. THe code passed in the constructor of UriMatcher here represents the code to
+         * return for the root URI's. It's the common to use NO_MATCH as the code for this case.
+         * */
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = RadarContract.CONTENT_AUTHORITY;
 
+
+        //This URI is content://com.cauliflower.danielt.smartphoneradar/user/
         matcher.addURI(authority, RadarContract.PATH_USER, CODE_USER);
+        //This URI is content://com.cauliflower.danielt.smartphoneradar/location/
         matcher.addURI(authority, RadarContract.PATH_LOCATION, CODE_LOCATION);
 
         return matcher;
@@ -84,9 +99,15 @@ public class RadarProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        return null;
+        throw new RuntimeException("We are not implementing getType in SmartphoneRadar");
     }
 
+    /**
+     * This method has not been used.
+     * I consider to ues it when get locations from server ,the code should update
+     * is {@link com.cauliflower.danielt.smartphoneradar.tool.HandlerXML}
+     * and {@link com.cauliflower.danielt.smartphoneradar.ui.MapsActivity}
+     */
     @Override
     public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -99,6 +120,13 @@ public class RadarProvider extends ContentProvider {
         }
     }
 
+    /**
+     * In SmartphoneRadar, we may insert location and user
+     *
+     * @param uri    The URI of insertion request, This must not be null.
+     * @param values A set of column_name/value pares to add the newly inserted item.
+     * @return The Uri of inserted row.
+     */
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
@@ -140,7 +168,7 @@ public class RadarProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        return 0;
+        throw new RuntimeException("We are not implementing delete in SmartphoneRadar");
     }
 
     @Override

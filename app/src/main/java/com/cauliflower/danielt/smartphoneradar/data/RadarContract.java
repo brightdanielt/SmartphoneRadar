@@ -13,17 +13,34 @@ public class RadarContract {
      * */
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
+    /*
+     * Possible paths that can be appended to BASE_CONTENT_URI to form valid URI;s that SmartphoneRadar
+     * can handle. For instance,
+     *     content://com.cauliflower.danielt.smartphoneradar/user/
+     *     [            BASE_CONTENT_URI                   ][ PATH_USER ]
+     * is a valid path for looking at user data.
+     *
+     *     content://com.cauliflower.danielt.smartphoneradar/usedForgetLocation/
+     *
+     * will failed ,as the ContentProvider hasn't been given any information on what to do with
+     * "usedForgetLocation". At least, let's hope not.Don't be that dev. reader.
+     * */
     public static final String PATH_USER = "user";
     public static final String PATH_LOCATION = "location";
-
 
     // To prevent someone from accidentally instantiating the contract class,
     // give it an empty constructor.
     private RadarContract() {
     }
 
+    /**
+     * Inner class that define the table content of the user table
+     */
     public static final class UserEntry implements BaseColumns {
 
+        /**
+         * The CONTENT_URI used to query,update,insert the user table from the {@link RadarProvider}
+         */
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_USER)
                 .build();
@@ -86,8 +103,14 @@ public class RadarContract {
 
     }
 
+    /**
+     * Inner class that define the table content of the user table
+     */
     public static final class LocationEntry implements BaseColumns {
 
+        /**
+         * The CONTENT_URI used to query,update,insert the location table from the {@link RadarProvider}
+         */
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_LOCATION)
                 .build();
