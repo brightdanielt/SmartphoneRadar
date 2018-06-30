@@ -74,6 +74,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (null != preference) {
             if (preference instanceof ListPreference) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
+                showDialogSettingWorkNextTime();
             } else {
                 //Start RadarService if turn on the switch
                 if (sharedPreferences.getBoolean(key, false)) {
@@ -288,5 +289,14 @@ public class SettingsFragment extends PreferenceFragment implements
         } else {
             Log.i(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while cancel job");
         }
+    }
+
+    //Remind user the modification of setting might work until user start RadarService next time
+    private void showDialogSettingWorkNextTime(){
+        new AlertDialog.Builder(getActivity())
+                .setTitle(R.string.updateSetting)
+                .setMessage(R.string.settingWorkNextTime)
+                .create()
+                .show();
     }
 }
