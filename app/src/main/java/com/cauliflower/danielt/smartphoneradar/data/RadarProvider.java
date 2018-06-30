@@ -10,6 +10,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.cauliflower.danielt.smartphoneradar.network.HandlerXML;
+
 /**
  * This class serves as the ContentProvider for all of the SmartphoneRadar's data. This class allows us to
  * insert data, query data and update data.
@@ -105,7 +107,7 @@ public class RadarProvider extends ContentProvider {
     /**
      * This method has not been used.
      * I consider to ues it when get locations from server ,the code should update
-     * is {@link com.cauliflower.danielt.smartphoneradar.tool.HandlerXML}
+     * is {@link HandlerXML}
      * and {@link com.cauliflower.danielt.smartphoneradar.ui.MapsActivity}
      */
     @Override
@@ -151,7 +153,6 @@ public class RadarProvider extends ContentProvider {
                         values);
                 if (_id != -1) {
                     //return the uri of row inserted
-//                    return RadarContract.BASE_CONTENT_URI.buildUpon().path("#" + _id).build();
                     insertedUri = ContentUris.withAppendedId(uri, _id);
                 } else {
                     throw new android.database.SQLException("Failed to insert row into " + uri);

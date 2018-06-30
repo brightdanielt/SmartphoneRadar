@@ -3,11 +3,9 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,13 +29,10 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.data.RadarProvider;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
-import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
+import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
-import com.cauliflower.danielt.smartphoneradar.tool.ResponseCode;
+import com.cauliflower.danielt.smartphoneradar.network.ResponseCode;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;

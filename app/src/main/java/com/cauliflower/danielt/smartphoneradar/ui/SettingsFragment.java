@@ -26,11 +26,10 @@ import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.data.RadarDbHelper;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
-import com.cauliflower.danielt.smartphoneradar.tool.ConnectServer;
-import com.cauliflower.danielt.smartphoneradar.tool.NetworkUtils;
+import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
 
 import java.util.List;
 
