@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
             case REQUEST_CODE_ACCESS_FINE_LOCATION:
                 if (grantResults.length > 0 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED
-//                        PositionPreferences.getPositionEnable(SettingsActivity.this)==true
+//                        RadarPreferences.getPositionEnable(SettingsActivity.this)==true
                         ) {
                     //使用者允許權限
                     break;

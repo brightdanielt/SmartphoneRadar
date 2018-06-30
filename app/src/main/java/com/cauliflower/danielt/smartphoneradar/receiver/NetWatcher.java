@@ -8,12 +8,13 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 
 /**
  * Created by danielt on 2018/4/10.
+ * <p>
  * 監聽裝置的網路連線狀況，當定位設定已開啟且網路連接上，啟動 RadarService
  * <p>
  * {@link NetWatcher} will be registered in two ways:
@@ -37,7 +38,7 @@ public class NetWatcher extends BroadcastReceiver {
         NetworkInfo info = cm.getActiveNetworkInfo();
 
         //若定位功能開啟
-        if (PositionPreferences.getPositionEnable(context)) {
+        if (RadarPreferences.getPositionEnable(context)) {
             if (info != null) {
                 //開啟網路時同時開啟 RadarService
                 if (info.isConnected() && !RadarService.mInService) {

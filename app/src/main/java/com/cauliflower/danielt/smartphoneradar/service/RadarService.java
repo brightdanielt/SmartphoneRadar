@@ -17,7 +17,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
@@ -54,6 +54,7 @@ public class RadarService extends Service {
     };
     private Handler mWorker = new Handler();
 
+    //http no response should not bigger than 3 times
     private static final int NO_RESPONSE_MAXIMUM = 3;
     private int mNoResponseCount = 0;
 
@@ -74,7 +75,7 @@ public class RadarService extends Service {
     }
 
     private void createLocationRequest() {
-        String frequency = PositionPreferences.getUpdateFrequency(RadarService.this);
+        String frequency = RadarPreferences.getUpdateFrequency(RadarService.this);
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(Integer.valueOf(frequency));
         mLocationRequest.setFastestInterval(Integer.valueOf(frequency));

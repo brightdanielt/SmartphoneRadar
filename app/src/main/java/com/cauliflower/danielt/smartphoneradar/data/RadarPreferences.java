@@ -12,7 +12,7 @@ import com.cauliflower.danielt.smartphoneradar.service.RadarService;
  * Created by danielt on 2018/4/9.
  */
 
-public final class PositionPreferences {
+public final class RadarPreferences {
 
     //Get value of PositionEnable preference
     public static Boolean getPositionEnable(Context context) {

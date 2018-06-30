@@ -49,7 +49,7 @@
     <string name="connect_server">連接伺服器</string>
     <string name="connectNetwork_before_connectServer">請先開啟網路</string>
     <string name="updateSetting">更新設定</string>
-    <string name="settingWorkNextTime">設定在下次啟動定位功能時才生效</string>
+    <string name="settingWorkNextTime">下次啟動定位功能時才生效</string>
 
     <!--Preference account-->
     <string name="pref_category_title_AccountActivity">帳號</string>

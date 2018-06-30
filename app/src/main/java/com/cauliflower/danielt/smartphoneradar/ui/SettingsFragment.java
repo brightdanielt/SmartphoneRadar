@@ -23,7 +23,7 @@ import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.PositionPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
@@ -90,12 +90,12 @@ public class SettingsFragment extends PreferenceFragment implements
                         scheduleNetWatcherJob();
                     } else {
                         //For apps targeting M and below
-                        PositionPreferences.startRadarService(getActivity());
+                        RadarPreferences.startRadarService(getActivity());
                     }
                 } else {
                     if (RadarService.mInService) {
                         //Stop RadarService if turn off the switch
-                        PositionPreferences.stopRadarService(getActivity());
+                        RadarPreferences.stopRadarService(getActivity());
                     }
 
                     if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -167,16 +167,16 @@ public class SettingsFragment extends PreferenceFragment implements
         //UpdateFrequencyList
         Preference frequency = findPreference(getString(R.string.pref_key_updateFrequency));
         ListPreference listPreference = (ListPreference) frequency;
-        listPreference.setValue(PositionPreferences.getUpdateFrequency(getActivity()));
-        setPreferenceSummary(frequency, PositionPreferences.getUpdateFrequency(getActivity()));
+        listPreference.setValue(RadarPreferences.getUpdateFrequency(getActivity()));
+        setPreferenceSummary(frequency, RadarPreferences.getUpdateFrequency(getActivity()));
 
         //PositionSwitch
         Preference position = findPreference(getString(R.string.pref_key_position));
         SwitchPreference switchPreference = (SwitchPreference) position;
         //設定“定位開關”的開關值
-        switchPreference.setChecked(PositionPreferences.getPositionEnable(getActivity()));
+        switchPreference.setChecked(RadarPreferences.getPositionEnable(getActivity()));
 //        switchPreference.setChecked(RadarService.inService);
-        List<User> userList_sendLocation = MainDb.searchUser(getActivity(),RadarContract.UserEntry.USED_FOR_SENDLOCATION);
+        List<User> userList_sendLocation = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList_sendLocation) {
             mAccount_sendLocation = user.getAccount();
             mPassword_sendLocation = user.getPassword();
@@ -198,6 +198,7 @@ public class SettingsFragment extends PreferenceFragment implements
     }
 
     private boolean mServerOnline = false;
+
     /*檢查伺服器連線狀況*/
     class CheckServerOnlineTask extends AsyncTask<Void, Void, Boolean> {
 
@@ -292,10 +293,11 @@ public class SettingsFragment extends PreferenceFragment implements
     }
 
     //Remind user the modification of setting might work until user start RadarService next time
-    private void showDialogSettingWorkNextTime(){
+    private void showDialogSettingWorkNextTime() {
         new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.updateSetting)
                 .setMessage(R.string.settingWorkNextTime)
+                .setCancelable(true)
                 .create()
                 .show();
     }
