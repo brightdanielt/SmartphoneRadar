@@ -42,22 +42,22 @@
         <activity
             android:name=".ui.SettingsActivity"
             android:launchMode="singleTask">
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
 
         <activity
             android:name=".ui.AccountActivity"
             android:label="@string/pref_title_AccountActivity"
             android:parentActivityName=".ui.SettingsActivity">
+
             <!-- Parent activity meta-data to support 4.0 and lower -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.SettingsActivity" />
         </activity>
-
         <activity
             android:name=".ui.MapsActivity"
             android:label="@string/pref_title_MapsActivity"
@@ -72,23 +72,28 @@
             android:name=".service.RadarService"
             android:enabled="true"
             android:exported="false" />
-
         <service
             android:name=".service.NetWatcherJob"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <!--網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService-->
+        <!-- 網路的開關會啟動 NetWatcher，會間接啟動或關閉 RadarService -->
         <receiver android:name=".receiver.NetWatcher">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ui.FirebaseActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest><!--
-
     todo 00: User story、使用流程、定位Service驗證 (done)
     todo 01: Server 資料庫建立 (done)
     todo 02: PHP 查詢 DB (done)
@@ -121,5 +126,4 @@
                 只有“查詢”帳號能夠選擇(done)
     todo 09: MapsActivity
                 為座標清單建立暫存，避免再次進入 MapsActivity 時重新向裝置端 database 查詢座標 ()
-
-    -->
+-->
