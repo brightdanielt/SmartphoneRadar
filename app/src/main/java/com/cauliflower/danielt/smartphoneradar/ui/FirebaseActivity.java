@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,20 +16,37 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
+import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FirebaseActivity extends AppCompatActivity {
 
@@ -71,7 +89,11 @@ public class FirebaseActivity extends AppCompatActivity {
         btn_getFirestoreData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+//                writeFirestoreLocationDocument(mAuth.getCurrentUser().getEmail());
+                listenFirebaseLocation(mAuth.getCurrentUser().getEmail(), "123456789");
+//                getFirestoreLocationDocument(mAuth.getCurrentUser().getEmail());
+//                signUp(mAuth.getCurrentUser().getEmail(), "", "");
+//                getFirestorePhoneInfoDoc(mAuth.getCurrentUser().getEmail());
             }
         });
 
@@ -162,7 +184,8 @@ public class FirebaseActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                Log.i(TAG, "Name: " + user.getDisplayName());
+                Log.i(TAG, "Name: " + user.getDisplayName() + "\n" +
+                        "UID: " + user.getUid());
 
                 updateAuthInfo(mAuth.getCurrentUser());
             } else {
@@ -211,6 +234,170 @@ public class FirebaseActivity extends AppCompatActivity {
             }
             super.onPostExecute(bitmap);
         }
+    }
+
+    private static final String FIRESTORE_COLLECTION_LOCATION = "location";
+    private static final String FIRESTORE_COLLECTION_COORDINATE = "coordinate";
+    private static final String FIRESTORE_FIELD_LATITUDE = "latitude";
+    private static final String FIRESTORE_FIELD_LONGITUDE = "longitude";
+    private static final String FIRESTORE_FIELD_TIME = "time";
+    private static final String FIRESTORE_COLLECTION_PHONE_INFO = "phoneInfo";
+    private static final String FIRESTORE_FIELD_MODEL = "model";
+    private static final String FIRESTORE_FIELD_IMEI = "imei";
+    private static final String FIRESTORE_AUTH_UID = "uid";
+
+
+    private void getFirestoreLocationDocument(String email) {
+        // Access a Cloud Firestore instance from your Activity
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("location")
+                .document(email)
+                .collection("coordinate")
+                .document("01");
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        TextView tv_firestoreData = findViewById(R.id.tv_firestoreData);
+                        tv_firestoreData.setText(document.getData() + "");
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        Log.d(TAG, "No such document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
+    private void listenFirebaseLocation(String email, String imei) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_LOCATION)
+                .document(email)
+                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                .document("01")
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        if (snapshot != null && snapshot.exists()) {
+                            Log.d(TAG, "Current data: " + snapshot.getData());
+                        } else {
+                            Log.d(TAG, "Current data: null");
+                        }
+                    }
+                });
+                /*.whereEqualTo(FIRESTORE_FIELD_IMEI, imei)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get(FIRESTORE_FIELD_TIME) != null) {
+                                Log.d(TAG, "data: " + doc.getData());
+                            }
+                        }
+                        Log.d(TAG,"GGGG");
+                    }
+                });*/
+
+    }
+
+    private void writeFirestoreLocationDocument(String email) {
+        final boolean success[] = {false};
+        Map<String, Object> location = new HashMap<>();
+        location.put(FIRESTORE_FIELD_LATITUDE, 222.0);
+        location.put(FIRESTORE_FIELD_LONGITUDE, 333.0);
+        location.put(FIRESTORE_FIELD_TIME, new Date());
+        location.put(FIRESTORE_FIELD_IMEI, "123456789");
+        location.put(FIRESTORE_AUTH_UID, mAuth.getCurrentUser().getUid());
+        // Access a Cloud Firestore instance from your Activity
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_LOCATION)
+                .document(email)
+                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                .document("01")
+                .set(location)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written.");
+                        success[0] = true;
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                        success[0] = false;
+                    }
+                });
+    }
+
+
+    //註冊
+    public boolean signUp(String email, String model, String IMEI) {
+        final boolean[] success = {false};
+        Map<String, Object> phoneInfo = new HashMap<>();
+        phoneInfo.put(FIRESTORE_FIELD_MODEL, "HTC_m11");
+        phoneInfo.put(FIRESTORE_FIELD_IMEI, "123456789");
+        phoneInfo.put(FIRESTORE_AUTH_UID, mAuth.getCurrentUser().getUid());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_PHONE_INFO).document(email)
+                .set(phoneInfo)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written.");
+                        success[0] = true;
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                        success[0] = false;
+                    }
+                });
+        return success[0];
+    }
+
+    public boolean getFirestorePhoneInfoDoc(String email) {
+        final boolean[] success = {false};
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_PHONE_INFO).document(email)
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot document) {
+                        Log.d(TAG, "DocumentSnapshot successfully read.");
+                        TextView tv_firestoreData = findViewById(R.id.tv_firestoreData);
+                        Log.d(TAG, document.getId() + " => " + document.getData());
+                        tv_firestoreData.setText(document.getData() + "");
+                        success[0] = true;
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error read document", e);
+                        success[0] = false;
+                    }
+                });
+        return success[0];
     }
 
 }
