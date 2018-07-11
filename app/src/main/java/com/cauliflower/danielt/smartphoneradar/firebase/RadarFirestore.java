@@ -2,6 +2,7 @@ package com.cauliflower.danielt.smartphoneradar.firebase;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -12,12 +13,16 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class RadarFirestore {
@@ -187,15 +192,17 @@ public class RadarFirestore {
 
     /**
      * Before update location ,firestore security rule will verify
-     * if the imei of the device is equal to imei in firebase,
+     * if the imei, uid, password of the user is equal to correspond values in firebase,
      * if the verification passed ,the user can update the location.
      *
      * @param email     Email get from {@link FirebaseUser#getEmail()}.
-     * @param imei      The imei for verification.
+     * @param password  The password of user for verification.
+     * @param uid       The uid of user for verification.
+     * @param imei      The imei of device for verification.
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void updateLocation(String coordinateId, String password, String email, String uid,
+    public static void updateLocation(String coordinateId, String email, String password, String uid,
                                       String imei, double latitude, double longitude) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
@@ -225,19 +232,44 @@ public class RadarFirestore {
     }
 
     /**
-     * This method is testing.
      * The user don't have to sign in facebook to query new location.
      * <p>
      * Before setting listener to location ,firestore security rule will verify
      * if the password is equal to password in firebase,
      * if the verification passed ,the user can set listener to the location.
+     * <p>
+     * If there is any update in the collection_coordinate,
+     * the {@link EventListener#onEvent(Object, FirebaseFirestoreException)} will trigger.
      *
-     * @param email           The email that user sign in facebook.
-     * @param password        The user's password for verification.
-     * @param coordinateIndex There are 5 temp coordinate to listen.
+     * @param email    The email that user sign in facebook.
+     * @param password The user's password for verification.
      */
-    public static void setOnLocationUpdateListener(String email, String password, String coordinateIndex) {
+    public static void setOnLocationUpdateListener(String email, String password) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_USER)
+                .document(email)
+                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                //Listen to multiple documents in  collection_coordinate
+                .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
+                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot value,
+                                        @Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
 
+                        for (QueryDocumentSnapshot doc : value) {
+                            if (doc.get(FIRESTORE_FIELD_PASSWORD) != null) {
+                                Log.d(TAG, "onCoordinateUpdate," + "\n" +
+                                        "time: " + doc.getDate(FIRESTORE_FIELD_TIME) + "\n" +
+                                        "lat: " + doc.getDouble(FIRESTORE_FIELD_LATITUDE) + "\n" +
+                                        "lng: " + doc.getDouble(FIRESTORE_FIELD_LONGITUDE) + "\n");
+                            }
+                        }
+                    }
+                });
     }
 
 
