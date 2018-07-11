@@ -112,14 +112,12 @@ public class RadarFirestore {
     }
 
     /**
-     * The users don't have to sign in facebook before verify themselves.
-     * <p>
      * A user can track location of multiple users so the user could has a user list to
      * choose which user to track, before adding a user to the list, you should prove that
      * you have the right to read the user.
      * <p>
-     * Firestore security rule will verify if the password is equal to password in firebase,
-     * if the verification passed ,the user has the right to read this user.
+     * If we can get {@link QueryDocumentSnapshot} in callback,
+     * it means the user has right to read this user.
      *
      * @param email    The email that user sign in facebook.
      * @param password The user's password for verification.
@@ -129,6 +127,7 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .whereEqualTo(FIRESTORE_FIELD_EMAIL, email)
                 .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
+                //The only security rule is limit == 1
                 .limit(1)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
