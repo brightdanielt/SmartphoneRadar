@@ -2,11 +2,18 @@ package com.cauliflower.danielt.smartphoneradar.firebase;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.widget.TextView;
 
+import com.cauliflower.danielt.smartphoneradar.R;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -18,6 +25,7 @@ public class RadarFirestore {
     private static final String FIRESTORE_COLLECTION_USER = "user";
     private static final String FIRESTORE_COLLECTION_COORDINATE = "coordinate";
 
+    private static final String FIRESTORE_FIELD_EMAIL = "email";
     private static final String FIRESTORE_FIELD_UID = "uid";
     private static final String FIRESTORE_FIELD_ORIGINAL_PASSWORD = "originalPassword";
     private static final String FIRESTORE_FIELD_PASSWORD = "password";
@@ -39,6 +47,7 @@ public class RadarFirestore {
      */
     public static void createUser(String email, String password, String imei, String model, String uid) {
         Map<String, Object> user = new HashMap<>();
+        user.put(FIRESTORE_FIELD_EMAIL, email);
         user.put(FIRESTORE_FIELD_PASSWORD, password);
         user.put(FIRESTORE_FIELD_IMEI, imei);
         user.put(FIRESTORE_FIELD_MODEL, model);
@@ -77,6 +86,7 @@ public class RadarFirestore {
     public static void updatePassword(String email, String originalPassword, String newPassword,
                                       String imei, String model, String uid) {
         Map<String, Object> user = new HashMap<>();
+        user.put(FIRESTORE_FIELD_EMAIL, email);
         user.put(FIRESTORE_FIELD_ORIGINAL_PASSWORD, originalPassword);
         user.put(FIRESTORE_FIELD_PASSWORD, newPassword);
         user.put(FIRESTORE_FIELD_IMEI, imei);
@@ -102,11 +112,11 @@ public class RadarFirestore {
     }
 
     /**
-     * The users don't have to sign in facebook to verify themselves.
+     * The users don't have to sign in facebook before verify themselves.
      * <p>
      * A user can track location of multiple users so the user could has a user list to
      * choose which user to track, before adding a user to the list, you should prove that
-     * you have the right to access the user.
+     * you have the right to read the user.
      * <p>
      * Firestore security rule will verify if the password is equal to password in firebase,
      * if the verification passed ,the user has the right to read this user.
@@ -114,8 +124,25 @@ public class RadarFirestore {
      * @param email    The email that user sign in facebook.
      * @param password The user's password for verification.
      */
-    public static void verifyRightToReadUser(String email, String password) {
-
+    public static void checkRightToReadUser(String email, String password) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_USER)
+                .whereEqualTo(FIRESTORE_FIELD_EMAIL, email)
+                .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
+                .limit(1)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d(TAG, "Error listing documents: ", task.getException());
+                        }
+                    }
+                });
     }
 
     /**
