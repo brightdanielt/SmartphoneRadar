@@ -1,5 +1,6 @@
 package com.cauliflower.danielt.smartphoneradar.firebase;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.TextView;
@@ -145,6 +146,46 @@ public class RadarFirestore {
     }
 
     /**
+     * Before create location ,firestore security rule will verify if the uid
+     * from {@link FirebaseUser#getUid()} exists,
+     * if the user didn't sign in, there would be no uid and this create would failed.
+     *
+     * @param email     Email get from {@link FirebaseUser#getEmail()}.
+     * @param imei      The imei for verification.
+     * @param latitude  The latitude of the device.
+     * @param longitude The longitude of the device.
+     */
+    public static void createLocation(String coordinateId, String password, String email, String uid,
+                                      String imei, double latitude, double longitude) {
+        Map<String, Object> coordinate = new HashMap<>();
+        coordinate.put(FIRESTORE_FIELD_TIME, new Date());
+        coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
+        coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
+        coordinate.put(FIRESTORE_FIELD_IMEI, imei);
+        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
+        coordinate.put(FIRESTORE_FIELD_UID, uid);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_USER)
+                .document(email)
+                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                .document(coordinateId)
+                .set(coordinate)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully create.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error create document", e);
+                    }
+                });
+    }
+
+    /**
      * Before update location ,firestore security rule will verify
      * if the imei of the device is equal to imei in firebase,
      * if the verification passed ,the user can update the location.
@@ -154,8 +195,33 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void updateLocation(String email, String imei, double latitude, double longitude) {
-
+    public static void updateLocation(String coordinateId, String password, String email, String uid,
+                                      String imei, double latitude, double longitude) {
+        Map<String, Object> coordinate = new HashMap<>();
+        coordinate.put(FIRESTORE_FIELD_TIME, new Date());
+        coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
+        coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
+        coordinate.put(FIRESTORE_FIELD_IMEI, imei);
+        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
+        coordinate.put(FIRESTORE_FIELD_UID, uid);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_USER)
+                .document(email)
+                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                .document(coordinateId)
+                .set(coordinate)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully update.");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error update document", e);
+                    }
+                });
     }
 
     /**
