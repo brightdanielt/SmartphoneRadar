@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical|center_horizontal"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.15"
+                android:text="Email：" />
+
+            <EditText
+                android:id="@+id/dialog_edTxt_account"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:digits="@string/digits_email"
+                android:hint="輸入Email"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLength="@integer/length_email"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:weightSum="1">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.15"
+                android:text="密碼：" />
+
+            <EditText
+                android:id="@+id/dialog_edTxt_password"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.6"
+                android:digits="@string/digits_password"
+                android:hint="輸入定位密碼"
+                android:inputType="textPassword"
+                android:maxLength="@integer/length_password" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/dialog_btn_forgetPassword"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:text="忘記密碼"
+                android:textColor="@color/colorAccent"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/dialog_btn_cancel"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+
+                android:text="@string/cancel"
+                android:textColor="@color/colorAccent" />
+
+            <Button
+                android:id="@+id/dialog_btn_ok"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:text="@string/ok"
+                android:textColor="@color/colorAccent" />
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>
