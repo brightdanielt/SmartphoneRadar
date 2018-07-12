@@ -3,6 +3,7 @@ package com.cauliflower.danielt.smartphoneradar.firebase;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.widget.TextView;
 
@@ -51,7 +52,8 @@ public class RadarFirestore {
      * @param email    Email get from {@link FirebaseUser#getEmail()}.
      * @param password User's customized password.
      */
-    public static void createUser(String email, String password, String imei, String model, String uid) {
+    public static void createUser(String email, String password, String imei, String model, String uid,
+                                  OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> user = new HashMap<>();
         user.put(FIRESTORE_FIELD_EMAIL, email);
         user.put(FIRESTORE_FIELD_PASSWORD, password);
@@ -63,9 +65,12 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
+                /*.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+
                         Log.d(TAG, "DocumentSnapshot successfully create.");
                     }
                 })
@@ -74,7 +79,8 @@ public class RadarFirestore {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error create document", e);
                     }
-                });
+                });*/
+
     }
 
     /**
@@ -90,7 +96,8 @@ public class RadarFirestore {
      * @param newPassword      The new customized password.
      */
     public static void updatePassword(String email, String originalPassword, String newPassword,
-                                      String imei, String model, String uid) {
+                                      String imei, String model, String uid,
+                                      OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> user = new HashMap<>();
         user.put(FIRESTORE_FIELD_EMAIL, email);
         user.put(FIRESTORE_FIELD_ORIGINAL_PASSWORD, originalPassword);
@@ -103,7 +110,9 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .set(user)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
+                /*.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written.");
@@ -114,7 +123,7 @@ public class RadarFirestore {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error writing document", e);
                     }
-                });
+                });*/
     }
 
     /**
@@ -128,7 +137,7 @@ public class RadarFirestore {
      * @param email    The email that user sign in facebook.
      * @param password The user's password for verification.
      */
-    public static void checkRightToReadUser(String email, String password) {
+    public static void checkRightToReadUser(String email, String password, OnCompleteListener<QuerySnapshot> listener) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(FIRESTORE_COLLECTION_USER)
                 .whereEqualTo(FIRESTORE_FIELD_EMAIL, email)
@@ -136,7 +145,8 @@ public class RadarFirestore {
                 //The only security rule is limit == 1
                 .limit(1)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(listener);
+                /*.addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
@@ -147,7 +157,7 @@ public class RadarFirestore {
                             Log.d(TAG, "Error listing documents: ", task.getException());
                         }
                     }
-                });
+                });*/
     }
 
     /**
@@ -161,7 +171,8 @@ public class RadarFirestore {
      * @param longitude The longitude of the device.
      */
     public static void createLocation(String coordinateId, String password, String email, String uid,
-                                      String imei, double latitude, double longitude) {
+                                      String imei, double latitude, double longitude,
+                                      OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
@@ -176,7 +187,9 @@ public class RadarFirestore {
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
                 .document(coordinateId)
                 .set(coordinate)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
+                /*.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully create.");
@@ -187,7 +200,7 @@ public class RadarFirestore {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error create document", e);
                     }
-                });
+                });*/
     }
 
     /**
@@ -203,7 +216,8 @@ public class RadarFirestore {
      * @param longitude The longitude of the device.
      */
     public static void updateLocation(String coordinateId, String email, String password, String uid,
-                                      String imei, double latitude, double longitude) {
+                                      String imei, double latitude, double longitude,
+                                      OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
@@ -217,7 +231,9 @@ public class RadarFirestore {
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
                 .document(coordinateId)
                 .set(coordinate)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                .addOnSuccessListener(successListener)
+                .addOnFailureListener(failureListener);
+                /*.addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully update.");
@@ -228,7 +244,7 @@ public class RadarFirestore {
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error update document", e);
                     }
-                });
+                });*/
     }
 
     /**
@@ -244,14 +260,15 @@ public class RadarFirestore {
      * @param email    The email that user sign in facebook.
      * @param password The user's password for verification.
      */
-    public static void setOnLocationUpdateListener(String email, String password) {
+    public static void setOnLocationUpdateListener(String email, String password, EventListener<QuerySnapshot> onLocationUpdate) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
                 //Listen to multiple documents in  collection_coordinate
                 .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                .addSnapshotListener(onLocationUpdate);
+                /*.addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
                                         @Nullable FirebaseFirestoreException e) {
@@ -269,7 +286,7 @@ public class RadarFirestore {
                             }
                         }
                     }
-                });
+                });*/
     }
 
 
