@@ -84,9 +84,6 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".ui.FirebaseActivity">
-
-        </activity>
     </application>
 
 </manifest><!--
