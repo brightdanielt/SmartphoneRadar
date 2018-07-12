@@ -42,25 +42,18 @@ public class RadarAuthentication {
     /**
      * Sign out with firebase authentication
      */
-    public static void signOut(Context context) {
+    public static void signOut(Context context,OnCompleteListener<Void> listener) {
         AuthUI.getInstance()
                 .signOut(context)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    public void onComplete(@NonNull Task<Void> task) {
-                    }
-                });
+                .addOnCompleteListener(listener);
     }
 
     /**
      * Delete user with firebase authentication
      */
-    public static void deleteUser(Context context) {
+    public static void deleteUser(Context context,OnCompleteListener<Void> listener) {
         AuthUI.getInstance()
                 .delete(context)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                    }
-                });
+                .addOnCompleteListener(listener);
     }
 }

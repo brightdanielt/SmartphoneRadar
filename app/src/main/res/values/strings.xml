@@ -90,12 +90,12 @@
     <!--<string name="pref_title_mailUs">寄信給我</string>-->
 
     <!--AccountActivity-->
-    <string name="for_send_location">定位用:&#160;&#160;</string>
-    <string name="for_get_location">查詢用:&#160;&#160;</string>
+    <string name="notSignIn">未登入:&#160;&#160;</string>
+    <string name="targetTracked">追蹤目標:&#160;&#160;</string>
     <string name="nothing">無</string>
     <string name="logIn">登入</string>
     <string name="signUp">註冊</string>
-    <string name="add_account_get_location">添加新的追蹤帳號</string>
+    <string name="addTargetTracked">添加新的追蹤目標</string>
     <string name="please_complete_the_fields">請填妥資料</string>
     <string name="give_me_read_phone_state_permission">無法註冊，請授權電話資訊</string>
     <string name="sighUp_sendLocation_success">註冊定位用帳號成功</string>

@@ -6,38 +6,33 @@
     android:layout_height="match_parent"
     android:layout_margin="@dimen/default_margin"
     android:orientation="vertical"
+    android:weightSum="1"
     tools:context="com.cauliflower.danielt.smartphoneradar.ui.AccountActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.2"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/for_send_location"
-                android:textColor="@color/colorAccent" />
+            <ImageView
+                android:id="@+id/imgView_photo"
+                android:layout_width="@dimen/userPhoto_width"
+                android:layout_height="@dimen/userPhoto_height"
+                android:src="@color/colorPrimary" />
 
             <TextView
-                android:id="@+id/tv_hint_sendLocation"
+                android:id="@+id/tv_userInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:text="@string/nothing" />
+                android:text="@string/notSignIn" />
+
         </LinearLayout>
-
-        <ListView
-            android:id="@+id/listView_sendLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,27 +43,20 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btn_sendLocation_logIn"
+                android:id="@+id/btn_singIn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/default_margin"
                 android:background="@drawable/btn_bg_custom"
                 android:text="@string/logIn" />
-
-            <Button
-                android:id="@+id/btn_sendLocation_signUp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:background="@drawable/btn_bg_custom"
-                android:text="@string/signUp" />
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.8"
+        android:layout_marginTop="@dimen/default_margin"
+        android:layout_weight="0.5"
         android:orientation="vertical">
 
         <LinearLayout
@@ -79,46 +67,36 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/for_get_location"
+                android:text="@string/targetTracked"
                 android:textColor="@color/colorAccent" />
 
             <TextView
-                android:id="@+id/tv_hint_getLocation"
+                android:id="@+id/tv_hintTargetTracked"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:text="@string/nothing" />
         </LinearLayout>
 
-        <LinearLayout
+
+        <Button
+            android:id="@+id/btn_addTargetTracked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/btn_bg_custom"
+            android:padding="@dimen/default_margin"
+            android:text="@string/addTargetTracked" />
+
+
+        <ListView
+            android:id="@+id/listView_targetTracked"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="@dimen/default_margin" />
 
-            <ListView
-                android:id="@+id/listView_getLocation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="@dimen/default_margin" />
-        </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btn_getLocation_logIn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/btn_bg_custom"
-                android:padding="@dimen/default_margin"
-                android:text="@string/add_account_get_location" />
-
-        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
