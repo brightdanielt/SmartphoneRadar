@@ -151,42 +151,47 @@ public class SettingsFragment extends PreferenceFragment implements
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
         findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(true);
-        findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
+        findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(false);
 
         //MapsActivity
+        //向資料庫查詢追蹤目標
         List<User> userList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (User targetTracked : userList_targetTracked) {
+            //存在追蹤目標
             String in_use = targetTracked.getIn_use();
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
                 mEmail_targetTracked = targetTracked.getEmail();
                 mPassword_targetTracked = targetTracked.getPassword();
                 Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
+                //允許開啟 MapsActivity 以追蹤目標
                 p.setEnabled(true);
                 setPreferenceSummary(p, mEmail_targetTracked);
                 break;
             }
         }
 
-        //UpdateFrequencyList
+        //定位頻率
         Preference frequency = findPreference(getString(R.string.pref_key_updateFrequency));
         ListPreference listPreference = (ListPreference) frequency;
         listPreference.setValue(RadarPreferences.getUpdateFrequency(getActivity()));
         setPreferenceSummary(frequency, RadarPreferences.getUpdateFrequency(getActivity()));
 
-        //PositionSwitch
+        //定位開關
         Preference position = findPreference(getString(R.string.pref_key_position));
         SwitchPreference switchPreference = (SwitchPreference) position;
         //設定“定位開關”的開關值
         switchPreference.setChecked(RadarPreferences.getPositionEnable(getActivity()));
 //        switchPreference.setChecked(RadarService.inService);
+
         //取得使用者資訊
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
         if (firebaseUser != null) {
             String email = firebaseUser.getEmail().trim();
-            //若存在帳號則可點擊“定位開關”
+            //若存在使用者則可設定“定位開關”
             position.setEnabled(true);
             setPreferenceSummary(position, email);
-            findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
+            //若存在使用者則可設定“定位頻率”
+            frequency.setEnabled(true);
         }
 
     }
