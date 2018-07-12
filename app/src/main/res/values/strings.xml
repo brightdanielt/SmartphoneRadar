@@ -51,7 +51,7 @@
     <string name="updateSetting">更新設定</string>
     <string name="settingWorkNextTime">下次啟動定位功能時才生效</string>
 
-    <!--Preference account-->
+    <!--Preference email-->
     <string name="pref_category_title_AccountActivity">帳號</string>
     <string name="pref_key_AccountActivity">AccountActivity</string>
     <string name="pref_title_AccountActivity">帳號資訊</string>
@@ -93,14 +93,17 @@
     <string name="notSignIn">未登入:&#160;&#160;</string>
     <string name="targetTracked">追蹤目標:&#160;&#160;</string>
     <string name="nothing">無</string>
-    <string name="logIn">登入</string>
+    <string name="signIn">登入</string>
+    <string name="signOut">登出</string>
     <string name="signUp">註冊</string>
+    <string name="userHasBindToOtherDevice">該帳號已綁定於其他裝置</string>
     <string name="addTargetTracked">添加新的追蹤目標</string>
     <string name="please_complete_the_fields">請填妥資料</string>
     <string name="give_me_read_phone_state_permission">無法註冊，請授權電話資訊</string>
-    <string name="sighUp_sendLocation_success">註冊定位用帳號成功</string>
-    <string name="logIn_sendLocation_success">登入定位用帳號成功</string>
-    <string name="logIn_getLocation_success">登入查詢用帳號成功</string>
+    <string name="signIn_failed">登入失敗</string>
+    <string name="createUser_success">登入成功</string>
+    <string name="addTargetTracked_success">新增追蹤目標成功</string>
+    <string name="addTargetTracked_failed">新增追蹤目標失敗</string>
     <string name="please_receive_verification_code">請到E-mail接收驗證碼</string>
     <string name="update_password_success">更新密碼成功</string>
     <string name="title_forget_password">忘記密碼</string>
@@ -131,7 +134,7 @@
 
 
     <!--ProgressDialog-->
-    <string name="loading">Loading. Please wait&#8230;</string>
+    <string name="loading">載入中&#8230;</string>
     <string name="wrong_user">帳號或密碼錯誤</string>
 
 

@@ -29,18 +29,18 @@ import java.util.Map;
 public class RadarFirestore {
     private static final String TAG = RadarFirestore.class.getSimpleName();
 
-    private static final String FIRESTORE_COLLECTION_USER = "user";
-    private static final String FIRESTORE_COLLECTION_COORDINATE = "coordinate";
+    public static final String FIRESTORE_COLLECTION_USER = "user";
+    public static final String FIRESTORE_COLLECTION_COORDINATE = "coordinate";
 
-    private static final String FIRESTORE_FIELD_EMAIL = "email";
-    private static final String FIRESTORE_FIELD_UID = "uid";
-    private static final String FIRESTORE_FIELD_ORIGINAL_PASSWORD = "originalPassword";
-    private static final String FIRESTORE_FIELD_PASSWORD = "password";
-    private static final String FIRESTORE_FIELD_MODEL = "model";
-    private static final String FIRESTORE_FIELD_IMEI = "imei";
-    private static final String FIRESTORE_FIELD_LATITUDE = "latitude";
-    private static final String FIRESTORE_FIELD_LONGITUDE = "longitude";
-    private static final String FIRESTORE_FIELD_TIME = "time";
+    public static final String FIRESTORE_FIELD_EMAIL = "email";
+    public static final String FIRESTORE_FIELD_UID = "uid";
+    public static final String FIRESTORE_FIELD_ORIGINAL_PASSWORD = "originalPassword";
+    public static final String FIRESTORE_FIELD_PASSWORD = "password";
+    public static final String FIRESTORE_FIELD_MODEL = "model";
+    public static final String FIRESTORE_FIELD_IMEI = "imei";
+    public static final String FIRESTORE_FIELD_LATITUDE = "latitude";
+    public static final String FIRESTORE_FIELD_LONGITUDE = "longitude";
+    public static final String FIRESTORE_FIELD_TIME = "time";
 
     /**
      * In firestore, an user is composed by email, password, imei, uid, model.
@@ -142,6 +142,33 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .whereEqualTo(FIRESTORE_FIELD_EMAIL, email)
                 .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
+                //The only security rule is limit == 1
+                .limit(1)
+                .get()
+                .addOnCompleteListener(listener);
+                /*.addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.d(TAG, "Error listing documents: ", task.getException());
+                        }
+                    }
+                });*/
+    }
+
+    /**
+     * Check if the user exists in firestore.
+     *
+     * @param email The email that user sign in facebook.
+     */
+    public static void checkUserExists(String email, OnCompleteListener<QuerySnapshot> listener) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection(FIRESTORE_COLLECTION_USER)
+                .whereEqualTo(FIRESTORE_FIELD_EMAIL, email)
                 //The only security rule is limit == 1
                 .limit(1)
                 .get()

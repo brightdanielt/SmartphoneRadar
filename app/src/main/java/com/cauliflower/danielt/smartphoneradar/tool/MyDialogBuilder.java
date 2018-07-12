@@ -9,52 +9,31 @@ import android.widget.EditText;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 
-import static com.cauliflower.danielt.smartphoneradar.network.ConnectServer.NO_INTERNET;
-import static com.cauliflower.danielt.smartphoneradar.network.ConnectServer.NO_RESPONSE;
-
 public class MyDialogBuilder extends AlertDialog.Builder {
 
-    public MyDialogBuilder(Context context, String exception) {
-        super(context);
-        this.setCancelable(false);
-        this.setTitle("Something bad ＠_＠");
+    private EditText edTxt_email, edTxt_password;
+    Button btn_ok, btn_cancel;
 
-        switch (exception) {
-            case NO_INTERNET: {
-                this.setMessage(getContext().getString(R.string.no_internet));
-                break;
-            }
-            case NO_RESPONSE: {
-                this.setMessage(getContext().getString(R.string.no_response));
-                break;
-            }
-        }
-    }
-
-    private EditText edTxt_account, edTxt_password;
-    Button btn_ok, btn_cancel,btn_forgetPassword;
-
-    //用於登入帳號
-    public MyDialogBuilder(Context context,int resId_title) {
+    //用於添加追蹤目標
+    public MyDialogBuilder(Context context, int resId_title) {
         super(context);
         this.setCancelable(false);
         this.setTitle(context.getString(resId_title));
 
-        View view = LayoutInflater.from(context).inflate(R.layout.dialog_login, null);
-        edTxt_account = view.findViewById(R.id.dialog_edTxt_account);
+        View view = LayoutInflater.from(context).inflate(R.layout.dialog_add_target_tracked, null);
+        edTxt_email = view.findViewById(R.id.dialog_edTxt_account);
         edTxt_password = view.findViewById(R.id.dialog_edTxt_password);
         btn_ok = view.findViewById(R.id.dialog_btn_ok);
         btn_cancel = view.findViewById(R.id.dialog_btn_cancel);
-        btn_forgetPassword = view.findViewById(R.id.dialog_btn_forgetPassword);
 
         this.setView(view);
     }
 
-    public String getAccount() {
-        if (edTxt_account != null) {
-            String account = edTxt_account.getText().toString();
-            if (!(account.trim()).equals("")) {
-                return account;
+    public String getEmail() {
+        if (edTxt_email != null) {
+            String email = edTxt_email.getText().toString();
+            if (!(email.trim()).equals("")) {
+                return email;
             }
         }
         return null;
@@ -70,14 +49,9 @@ public class MyDialogBuilder extends AlertDialog.Builder {
         return null;
     }
 
-    public void setBtn_forgetPasswordVisibility(int visibility){
-        btn_forgetPassword.setVisibility(visibility);
-    }
-
     public void setOnButtonClickListener(View.OnClickListener listener) {
         btn_ok.setOnClickListener(listener);
         btn_cancel.setOnClickListener(listener);
-        btn_forgetPassword.setOnClickListener(listener);
     }
 
 }

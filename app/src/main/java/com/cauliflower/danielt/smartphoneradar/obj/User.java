@@ -1,13 +1,13 @@
 package com.cauliflower.danielt.smartphoneradar.obj;
 
 public class User {
-    private String account, password, usedFor, in_use;
+    private String email, password, usedFor, in_use;
 
     public User() {
     }
 
-    public void setAccount(String account) {
-        this.account = account;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setPassword(String password) {
@@ -22,8 +22,8 @@ public class User {
         this.in_use = in_use;
     }
 
-    public String getAccount() {
-        return account;
+    public String getEmail() {
+        return email;
     }
 
     public String getPassword() {

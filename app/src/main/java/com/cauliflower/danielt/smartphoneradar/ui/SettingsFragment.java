@@ -112,7 +112,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (key.equals(getString(R.string.pref_key_MapsActivity))) {
             if (mAccount_getLocation != null) {
                 Intent i = new Intent();
-                i.putExtra(RadarContract.UserEntry.COLUMN_USER_ACCOUNT, mAccount_getLocation);
+                i.putExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL, mAccount_getLocation);
                 i.putExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD, mPassword_getLocation);
                 i.setClass(getActivity(), MapsActivity.class);
                 startActivity(i);
@@ -155,7 +155,7 @@ public class SettingsFragment extends PreferenceFragment implements
         for (User user : userList_getLocation) {
             String in_use = user.getIn_use();
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
-                mAccount_getLocation = user.getAccount();
+                mAccount_getLocation = user.getEmail();
                 mPassword_getLocation = user.getPassword();
                 Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
                 p.setEnabled(true);
@@ -178,7 +178,7 @@ public class SettingsFragment extends PreferenceFragment implements
 //        switchPreference.setChecked(RadarService.inService);
         List<User> userList_sendLocation = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList_sendLocation) {
-            mAccount_sendLocation = user.getAccount();
+            mAccount_sendLocation = user.getEmail();
             mPassword_sendLocation = user.getPassword();
             if (mAccount_sendLocation != null) {
                 //若存在帳號則可點擊“定位開關”

@@ -58,11 +58,11 @@ public class RadarContract {
         public final static String _ID = BaseColumns._ID;
 
         /**
-         * Account of the user.
+         * Email of the user.
          * <p>
          * Type: TEXT
          */
-        public final static String COLUMN_USER_ACCOUNT = "account";
+        public final static String COLUMN_USER_EMAIL = "email";
 
         /**
          * Password of the user.
@@ -129,11 +129,11 @@ public class RadarContract {
 
         /**
          * The account who is in the location.
-         * This column is related with {@link UserEntry#COLUMN_USER_ACCOUNT}
+         * This column is related with {@link UserEntry#COLUMN_USER_EMAIL}
          * <p>
          * Type: TEXT
          */
-        public final static String COLUMN_LOCATION_ACCOUNT = "account";
+        public final static String COLUMN_LOCATION_EMAIL = "email";
 
         /**
          * Time of the location.

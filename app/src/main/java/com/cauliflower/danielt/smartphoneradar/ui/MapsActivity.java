@@ -94,7 +94,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mConnectServer = new ConnectServer(MapsActivity.this);
         Intent i = getIntent();
-        mAccount = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_ACCOUNT);
+        mAccount = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL);
         mPassword = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
     }
 

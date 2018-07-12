@@ -122,7 +122,7 @@ public class RadarService extends Service {
         for (User user : userList) {
             mAccount_sendLocation = null;
             mPassword_sendLocation = null;
-            mAccount_sendLocation = user.getAccount();
+            mAccount_sendLocation = user.getEmail();
             mPassword_sendLocation = user.getPassword();
         }
         if (mAccount_sendLocation != null) {
