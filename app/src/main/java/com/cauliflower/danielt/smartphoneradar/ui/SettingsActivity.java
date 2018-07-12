@@ -59,8 +59,6 @@ public class SettingsActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_refreshAll) {
             FragmentManager manager = getFragmentManager();
             SettingsFragment settingsFragment = (SettingsFragment) manager.findFragmentById(R.id.radar_settings_fragment);
-//        settingsFragment.onOptionsItemSelected(item);
-            settingsFragment.refreshAll();
         }
         return true;
     }

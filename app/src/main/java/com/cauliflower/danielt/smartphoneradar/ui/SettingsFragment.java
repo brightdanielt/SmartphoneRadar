@@ -30,6 +30,8 @@ import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 
@@ -39,8 +41,8 @@ public class SettingsFragment extends PreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
     private static final int LOADER_ID = 1;
-    String mAccount_sendLocation, mPassword_sendLocation;
-    String mAccount_getLocation, mPassword_getLocation;
+    private FirebaseAuth mAuth;
+    String mEmail_targetTracked, mPassword_targetTracked;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,10 +63,11 @@ public class SettingsFragment extends PreferenceFragment implements
     @Override
     public void onStart() {
         super.onStart();
+        mAuth = FirebaseAuth.getInstance();
         /* Register the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
-        refreshAll();
+        initPreference();
     }
 
     // Override onSharedPreferenceChanged to update non SwitchPreferences when they are changed
@@ -110,10 +113,10 @@ public class SettingsFragment extends PreferenceFragment implements
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         String key = preference.getKey();
         if (key.equals(getString(R.string.pref_key_MapsActivity))) {
-            if (mAccount_getLocation != null) {
+            if (mEmail_targetTracked != null) {
                 Intent i = new Intent();
-                i.putExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL, mAccount_getLocation);
-                i.putExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD, mPassword_getLocation);
+                i.putExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL, mEmail_targetTracked);
+                i.putExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD, mPassword_targetTracked);
                 i.setClass(getActivity(), MapsActivity.class);
                 startActivity(i);
             }
@@ -151,15 +154,15 @@ public class SettingsFragment extends PreferenceFragment implements
         findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
 
         //MapsActivity
-        List<User> userList_getLocation = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
-        for (User user : userList_getLocation) {
-            String in_use = user.getIn_use();
+        List<User> userList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
+        for (User targetTracked : userList_targetTracked) {
+            String in_use = targetTracked.getIn_use();
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
-                mAccount_getLocation = user.getEmail();
-                mPassword_getLocation = user.getPassword();
+                mEmail_targetTracked = targetTracked.getEmail();
+                mPassword_targetTracked = targetTracked.getPassword();
                 Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
                 p.setEnabled(true);
-                setPreferenceSummary(p, mAccount_getLocation);
+                setPreferenceSummary(p, mEmail_targetTracked);
                 break;
             }
         }
@@ -176,85 +179,16 @@ public class SettingsFragment extends PreferenceFragment implements
         //設定“定位開關”的開關值
         switchPreference.setChecked(RadarPreferences.getPositionEnable(getActivity()));
 //        switchPreference.setChecked(RadarService.inService);
-        List<User> userList_sendLocation = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        for (User user : userList_sendLocation) {
-            mAccount_sendLocation = user.getEmail();
-            mPassword_sendLocation = user.getPassword();
-            if (mAccount_sendLocation != null) {
-                //若存在帳號則可點擊“定位開關”
-                position.setEnabled(true);
-                setPreferenceSummary(position, mAccount_sendLocation);
-                findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
-                break;
-            }
+        //取得使用者資訊
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            String email = firebaseUser.getEmail().trim();
+            //若存在帳號則可點擊“定位開關”
+            position.setEnabled(true);
+            setPreferenceSummary(position, email);
+            findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(true);
         }
 
-        //伺服器無法連線時，應禁止點擊帳號與查詢功能
-        if (!mServerOnline) {
-            findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(false);
-            findPreference(getString(R.string.pref_key_MapsActivity)).setEnabled(false);
-//            findPreference(getString(R.string.pref_key_position)).setEnabled(false);
-        }
-    }
-
-    private boolean mServerOnline = false;
-
-    /*檢查伺服器連線狀況*/
-    class CheckServerOnlineTask extends AsyncTask<Void, Void, Boolean> {
-
-        ProgressDialog mLoadingDialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mServerOnline = false;
-            mLoadingDialog = new ProgressDialog(getActivity());
-            mLoadingDialog.setMessage(getString(R.string.dialog_msg_loading));
-            mLoadingDialog.setCancelable(false);
-            mLoadingDialog.show();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            return ConnectServer.checkServerOnline();
-        }
-
-        @Override
-        protected void onPostExecute(Boolean online) {
-            super.onPostExecute(online);
-            mLoadingDialog.dismiss();
-            mLoadingDialog = null;
-            mServerOnline = online;
-            //連不上伺服器
-            if (!mServerOnline) {
-                //提示使用者伺服器關閉中
-                new AlertDialog.Builder(getActivity())
-                        .setTitle(R.string.dialog_title_ops)
-                        .setMessage(R.string.dialog_msg_server_closed)
-                        .setCancelable(true)
-                        .create().show();
-            }
-            initPreference();
-        }
-    }
-
-    /**
-     * Check networkConnectivity
-     * Check server is online
-     * Reset preference enable,checked and summary
-     */
-    public void refreshAll() {
-        if (NetworkUtils.checkNetworkConnected(getActivity())) {
-            new CheckServerOnlineTask().execute();
-        } else {
-            mServerOnline = false;
-            new AlertDialog.Builder(getActivity())
-                    .setTitle(R.string.connect_server)
-                    .setMessage(R.string.connectNetwork_before_connectServer)
-                    .setCancelable(true)
-                    .create().show();
-            initPreference();
-        }
     }
 
     private static int NET_WATCHER_JOB_ID = 100;
