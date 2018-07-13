@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
@@ -295,39 +296,39 @@ public class AccountActivity extends AppCompatActivity {
                     @Override
                     public void onClick(final DialogInterface dialog, int which) {
                         //取得輸入的密碼
-                        String password = ed_password.getText().toString().trim();
+                        final String password = ed_password.getText().toString().trim();
                         //檢查密碼
                         if (!password.equals("")) {
                             mDialog_loading.show();
                             //在 firestore 建立使用者
-                            RadarFirestore.createUser(user.getEmail(), password, mIMEI, mModel, user.getUid(),
-                                    new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            //建立使用者成功
-                                            Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
-                                            //todo  寫入手機ＤＢ使用者信箱密碼 ，日後用於新建位置、查詢位置
-                                            //更新使用者資訊
-                                            updateAuthInfo(mAuth.getCurrentUser());
-                                            //關閉對話筐
-                                            dialog.dismiss();
-                                            //初始化座標文件
-                                            initFirestoreLocation();
-                                        }
-                                    },
-                                    new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            //建立使用者失敗
-                                            //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
-                                            Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
-                                            RadarAuthentication.signOut(AccountActivity.this, null);
-                                            updateAuthInfo(null);
-                                            Log.d(TAG, "Error create user", e);
-                                            //關閉對話筐
-                                            dialog.dismiss();
-                                        }
-                                    });
+                            RadarFirestore.createUser(user.getEmail(), password, mIMEI, mModel, user.getUid(), new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    //建立使用者成功
+                                    Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
+                                    //todo  寫入手機ＤＢ使用者信箱密碼 ，日後用於新建位置、查詢位置
+                                    MainDb.addUser(AccountActivity.this, user.getEmail(), password,
+                                            UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
+                                    //更新使用者資訊
+                                    updateAuthInfo(mAuth.getCurrentUser());
+                                    //關閉對話筐
+                                    dialog.dismiss();
+                                    //初始化座標文件
+                                    initFirestoreLocation();
+                                }
+                            }, new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    //建立使用者失敗
+                                    //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
+                                    Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
+                                    RadarAuthentication.signOut(AccountActivity.this, null);
+                                    updateAuthInfo(null);
+                                    Log.d(TAG, "Error create user", e);
+                                    //關閉對話筐
+                                    dialog.dismiss();
+                                }
+                            });
                         }
                     }
                 }).create().show();
@@ -378,9 +379,19 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void initFirestoreLocation() {
-        FirebaseUser user = mAuth.getCurrentUser();
+        String password = "";
+        List<User> userList = MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_SENDLOCATION);
+        for (User user : userList) {
+            password = user.getPassword();
+        }
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser.getEmail() != null && !password.trim().equals("")) {
+
+        }
+        //初始化 5 個座標
         for (int documentId = 1; documentId < 6; documentId++) {
-            RadarFirestore.createLocation(String.valueOf(documentId), user.getEmail(), user.getUid(),
+            RadarFirestore.createLocation(String.valueOf(documentId), firebaseUser.getEmail(),
+                    password, firebaseUser.getUid(),
                     mIMEI, 0, 0, null, null
             );
         }

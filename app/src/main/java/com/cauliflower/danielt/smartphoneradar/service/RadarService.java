@@ -28,6 +28,7 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.ui.AccountActivity;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -108,7 +109,7 @@ public class RadarService extends Service {
 
                 //更新位置資訊到 fireStore
                 RadarFirestore.updateLocation(
-                        String.valueOf(mDocumentId), mEmail, mAuth.getUid(), mIMEI, location.getLatitude(),
+                        String.valueOf(mDocumentId), mEmail, mPassword, mAuth.getUid(), mIMEI, location.getLatitude(),
                         location.getLongitude(), new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
@@ -162,13 +163,16 @@ public class RadarService extends Service {
         }
         mIMEI = telephonyManager.getDeviceId();
         mAuth = FirebaseAuth.getInstance();
+        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
+        for (User user : userList) {
+            mPassword = user.getPassword();
+            break;
+        }
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            mEmail = null;
-            mPassword = null;
             mEmail = user.getEmail();
         }
-        if (mEmail != null && mIMEI != null) {
+        if (mEmail != null && !mPassword.trim().equals("") && mIMEI != null) {
             mInService = true;
             showServiceStatus();
 

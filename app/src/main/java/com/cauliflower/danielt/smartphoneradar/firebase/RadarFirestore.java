@@ -197,11 +197,12 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void createLocation(String coordinateId, String email, String uid,
+    public static void createLocation(String coordinateId, String email,String password, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
+        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
         coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
         coordinate.put(FIRESTORE_FIELD_IMEI, imei);
@@ -240,11 +241,12 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void updateLocation(String coordinateId, String email, String uid,
+    public static void updateLocation(String coordinateId, String email,String password, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
+        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
         coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
         coordinate.put(FIRESTORE_FIELD_IMEI, imei);
