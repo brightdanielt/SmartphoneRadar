@@ -1,16 +1,22 @@
 package com.cauliflower.danielt.smartphoneradar.service;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import android.widget.Toast;
@@ -19,6 +25,7 @@ import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
+import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
@@ -27,23 +34,26 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 public class RadarService extends Service {
 
     private String TAG = RadarService.class.getSimpleName();
     public static boolean mInService = false;
-    private String mAccount_sendLocation, mPassword_sendLocation;
 
     private FusedLocationProviderClient mClient;
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
 
-    private ConnectServer mConnectServer;
+    private String mEmail, mPassword;
+    private String mIMEI;
+    private int mDocumentId = 1;
+    private FirebaseAuth mAuth;
 
     private Runnable mTask_serviceStatus = new Runnable() {
         @Override
@@ -56,7 +66,7 @@ public class RadarService extends Service {
 
     //http no response should not bigger than 3 times
     private static final int NO_RESPONSE_MAXIMUM = 3;
-    private int mNoResponseCount = 0;
+    private int mUpdateLocationFailureCount = 0;
 
     public RadarService() {
     }
@@ -71,6 +81,7 @@ public class RadarService extends Service {
     public void onCreate() {
         super.onCreate();
         Log.i(TAG, "onCreate");
+        mAuth = FirebaseAuth.getInstance();
 //        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
     }
 
@@ -85,57 +96,88 @@ public class RadarService extends Service {
     }
 
     private void createLocationCallback() {
+
+        //取得裝置位置後的動作
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                updateDocumentId();
                 final Location location = locationResult.getLastLocation();
                 Log.i(TAG, "onLocationResult is working");
 //                Toast.makeText(RadarService.this, "call onLocationResult", Toast.LENGTH_SHORT).show();
 
-                SimpleDateFormat s = new SimpleDateFormat("yy-MM-dd-HH:mm:ss");
-                String time = s.format(new Date());
-                try {
-                    String response = mConnectServer.sendLocationToServer(mAccount_sendLocation, mPassword_sendLocation,
-                            time, location.getLatitude(), location.getLongitude());
-                    if (response.contains(ConnectServer.NO_RESPONSE)) {
-                        mNoResponseCount++;
-                        Log.i(TAG, "Server no response times: " + mNoResponseCount);
-                        if (mNoResponseCount >= NO_RESPONSE_MAXIMUM) {
-                            Toast.makeText(RadarService.this,
-                                    getString(R.string.serverNoResponse_close_service), Toast.LENGTH_SHORT).show();
-                            RadarService.this.stopSelf();
-                        }
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-
+                //更新位置資訊到 fireStore
+                RadarFirestore.updateLocation(
+                        String.valueOf(mDocumentId), mEmail, mAuth.getUid(), mIMEI, location.getLatitude(),
+                        location.getLongitude(), new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                //更新成功
+                                Log.d(TAG, "UpdateLocation success:");
+                            }
+                        }, new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //更新失敗
+                                mUpdateLocationFailureCount++;
+                                if (mUpdateLocationFailureCount >= NO_RESPONSE_MAXIMUM) {
+                                    Toast.makeText(RadarService.this,
+                                            getString(R.string.serverNoResponse_close_service), Toast.LENGTH_SHORT).show();
+                                    RadarService.this.stopSelf();
+                                }
+                                Log.d(TAG, "updateLocation failure times:" + mUpdateLocationFailureCount, e);
+                            }
+                        });
             }
         };
+    }
+
+    /**
+     * 緩衝座標資訊，有時更新頻率太快，監聽反應又太慢，舊的座標已經被新座標覆蓋，而舊座標卻沒有被查詢到
+     * 所以在 firestore 建立 5 個座標文件，作為緩衝
+     */
+    private void updateDocumentId() {
+        mDocumentId++;
+        if (mDocumentId > 5) {
+            mDocumentId = 1;
+        }
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 //        return super.onStartCommand(intent, flags, startId);
         Log.i(TAG, "onStartCommand");
-        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        for (User user : userList) {
-            mAccount_sendLocation = null;
-            mPassword_sendLocation = null;
-            mAccount_sendLocation = user.getEmail();
-            mPassword_sendLocation = user.getPassword();
+        //檢查使用者身份
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.i(TAG, "No permission to get IMEI");
+            RadarService.this.stopSelf();
         }
-        if (mAccount_sendLocation != null) {
+        mIMEI = telephonyManager.getDeviceId();
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            mEmail = null;
+            mPassword = null;
+            mEmail = user.getEmail();
+        }
+        if (mEmail != null && mIMEI != null) {
             mInService = true;
             showServiceStatus();
 
-            mConnectServer = new ConnectServer(RadarService.this);
             createLocationRequest();
             createLocationCallback();
             fuseLocationRequest();
             foregroundService();
         } else {
-            Log.i(TAG, "There is no result for search account_sendLocation so RadarService stopped");
+            Log.i(TAG, "No firebaseUser so RadarService stopped");
             this.stopSelf();
         }
 

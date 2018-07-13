@@ -38,7 +38,7 @@ public class NetWatcher extends BroadcastReceiver {
         NetworkInfo info = cm.getActiveNetworkInfo();
 
         //若定位功能開啟
-        if (RadarPreferences.getPositionEnable(context)) {
+        if (RadarPreferences.getPositionCheck(context)) {
             if (info != null) {
                 //開啟網路時同時開啟 RadarService
                 if (info.isConnected() && !RadarService.mInService) {

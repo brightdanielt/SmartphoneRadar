@@ -208,8 +208,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.w(TAG, "handleLocation，遺失座標資料");
                     break;
                 }
+                if (latitude == 0) {
+                    Log.i(TAG, "查到初始化座標，不寫入資料，直接略過");
+                    return;
+                }
                 //因為註冊監聽時會回傳舊的座標，所以必須判斷回傳座標是新的還是舊的
-                String dbNewTime = MainDb.searchNewTime(MapsActivity.this,mEmail);
+                String dbNewTime = MainDb.searchNewTime(MapsActivity.this, mEmail);
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date dateFromDb = null;
                 try {
@@ -217,9 +221,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                if(dateFromDb.compareTo(dateFromServer)>=0){
+                if (dateFromDb.compareTo(dateFromServer) >= 0) {
                     //server傳來舊座標，直接略過
-                    Log.i(TAG,"Ignore this location,"+dateFormat.format(dateFromDb)+">="+dateFormat.format(dateFromServer));
+                    Log.i(TAG, "Ignore this location," + dateFormat.format(dateFromDb) + ">=" + dateFormat.format(dateFromServer));
                     return;
                 }
                 String time = dateFormat.format(dateFromServer);

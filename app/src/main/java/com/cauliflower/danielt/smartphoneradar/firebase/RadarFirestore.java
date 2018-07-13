@@ -197,7 +197,7 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void createLocation(String coordinateId, String password, String email, String uid,
+    public static void createLocation(String coordinateId, String email, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
@@ -205,7 +205,6 @@ public class RadarFirestore {
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
         coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
         coordinate.put(FIRESTORE_FIELD_IMEI, imei);
-        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
         coordinate.put(FIRESTORE_FIELD_UID, uid);
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -236,13 +235,12 @@ public class RadarFirestore {
      * if the verification passed ,the user can update the location.
      *
      * @param email     Email get from {@link FirebaseUser#getEmail()}.
-     * @param password  The password of user for verification.
      * @param uid       The uid of user for verification.
      * @param imei      The imei of device for verification.
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void updateLocation(String coordinateId, String email, String password, String uid,
+    public static void updateLocation(String coordinateId, String email, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
@@ -250,7 +248,6 @@ public class RadarFirestore {
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
         coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
         coordinate.put(FIRESTORE_FIELD_IMEI, imei);
-        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
         coordinate.put(FIRESTORE_FIELD_UID, uid);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(FIRESTORE_COLLECTION_USER)

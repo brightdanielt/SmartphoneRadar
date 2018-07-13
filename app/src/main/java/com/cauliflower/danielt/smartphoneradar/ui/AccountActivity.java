@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
@@ -35,9 +37,11 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -185,11 +189,17 @@ public class AccountActivity extends AppCompatActivity {
         switch (view.getId()) {
             case R.id.btn_singIn: {
                 if (mAuth.getCurrentUser() != null) {
+                    //登出
                     RadarAuthentication.signOut(AccountActivity.this, new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 updateAuthInfo(null);
+                                //停止定位服務
+                                if (RadarService.mInService) {
+                                    stopService(new Intent(AccountActivity.this, RadarService.class));
+                                }
+//                                RadarPreferences.setPositionCheck(AccountActivity.this,false);
                             } else {
                                 Log.d(TAG, "Error Firebase auth sign out", task.getException());
                             }
@@ -296,10 +306,13 @@ public class AccountActivity extends AppCompatActivity {
                                         public void onSuccess(Void aVoid) {
                                             //建立使用者成功
                                             Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
+                                            //todo  寫入手機ＤＢ使用者信箱密碼 ，日後用於新建位置、查詢位置
                                             //更新使用者資訊
                                             updateAuthInfo(mAuth.getCurrentUser());
                                             //關閉對話筐
                                             dialog.dismiss();
+                                            //初始化座標文件
+                                            initFirestoreLocation();
                                         }
                                     },
                                     new OnFailureListener() {
@@ -361,6 +374,15 @@ public class AccountActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_CODE_READ_PHONE_STATE && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             getPhoneInfo();
+        }
+    }
+
+    private void initFirestoreLocation() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        for (int documentId = 1; documentId < 6; documentId++) {
+            RadarFirestore.createLocation(String.valueOf(documentId), user.getEmail(), user.getUid(),
+                    mIMEI, 0, 0, null, null
+            );
         }
     }
 

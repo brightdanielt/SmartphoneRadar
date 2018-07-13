@@ -148,10 +148,17 @@ public class SettingsFragment extends PreferenceFragment implements
 
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
+        //先恢復成預設值
         findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(true);
-        findPreference(getString(R.string.pref_key_updateFrequency)).setEnabled(false);
+        Preference mapsActivity = findPreference(getString(R.string.pref_key_MapsActivity));
+        Preference position = findPreference(getString(R.string.pref_key_position));
+        Preference frequency = findPreference(getString(R.string.pref_key_updateFrequency));
+        SwitchPreference switchPosition = (SwitchPreference) position;
+        ListPreference listFrequency = (ListPreference) frequency;
 
-        //MapsActivity
+        mapsActivity.setEnabled(false);
+        setPreferenceSummary(mapsActivity, "");
+
         //向資料庫查詢追蹤目標
         List<User> userList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (User targetTracked : userList_targetTracked) {
@@ -160,36 +167,36 @@ public class SettingsFragment extends PreferenceFragment implements
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
                 mEmail_targetTracked = targetTracked.getEmail();
                 mPassword_targetTracked = targetTracked.getPassword();
-                Preference p = findPreference(getString(R.string.pref_key_MapsActivity));
-                //允許開啟 MapsActivity 以追蹤目標
-                p.setEnabled(true);
-                setPreferenceSummary(p, mEmail_targetTracked);
+                //MapsActivity
+                mapsActivity.setEnabled(true);
+                setPreferenceSummary(mapsActivity, mEmail_targetTracked);
                 break;
             }
         }
-
-        //定位頻率
-        Preference frequency = findPreference(getString(R.string.pref_key_updateFrequency));
-        ListPreference listPreference = (ListPreference) frequency;
-        listPreference.setValue(RadarPreferences.getUpdateFrequency(getActivity()));
-        setPreferenceSummary(frequency, RadarPreferences.getUpdateFrequency(getActivity()));
-
-        //定位開關
-        Preference position = findPreference(getString(R.string.pref_key_position));
-        SwitchPreference switchPreference = (SwitchPreference) position;
-        //設定“定位開關”的開關值
-        switchPreference.setChecked(RadarPreferences.getPositionEnable(getActivity()));
-//        switchPreference.setChecked(RadarService.inService);
 
         //取得使用者資訊
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
         if (firebaseUser != null) {
             String email = firebaseUser.getEmail().trim();
-            //若存在使用者則可設定“定位開關”
+
+            //定位開關
             position.setEnabled(true);
+//            switchPosition.setChecked(RadarPreferences.getPositionCheck(getActivity()));
             setPreferenceSummary(position, email);
-            //若存在使用者則可設定“定位頻率”
+
+            //定位頻率
             frequency.setEnabled(true);
+//            listFrequency.setValue(RadarPreferences.getUpdateFrequency(getActivity()));
+            setPreferenceSummary(frequency, RadarPreferences.getUpdateFrequency(getActivity()));
+        }else {
+            frequency.setEnabled(false);
+            position.setEnabled(false);
+
+            setPreferenceSummary(position, getResources().getBoolean(R.bool.pref_defaultValue_position));
+            setPreferenceSummary(frequency, R.string.pref_defaultValue_updateFrequency);
+
+            switchPosition.setChecked(getResources().getBoolean(R.bool.pref_defaultValue_position));
+            listFrequency.setValue(getString(R.string.pref_defaultValue_updateFrequency));
         }
 
     }
