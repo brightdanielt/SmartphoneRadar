@@ -40,7 +40,7 @@ public final class MainDb {
                 values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
                 Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
                 Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
-            }else {
+            } else {
                 Log.i(context.getClass().toString(), "The same email already exists ,do not add the user.");
             }
         } else {
@@ -69,7 +69,8 @@ public final class MainDb {
                 new String[]{RadarContract.LocationEntry.COLUMN_LOCATION_TIME},
                 RadarContract.LocationEntry.COLUMN_LOCATION_TIME + ">?" + " AND " +
                         RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL + "=?",
-                new String[]{"1911-01-01-00:00:00", email},
+                new String[]{"1911-01-01 00:00:00", email},
+                //由大到小，所以第一筆資料時間是最新的
                 RadarContract.LocationEntry.COLUMN_LOCATION_TIME + " DESC");
 
         //取得最新 time 值
@@ -82,7 +83,7 @@ public final class MainDb {
                 return newestTime;
             }
         }
-        return "1911-01-01-00:00:00";
+        return "1911-01-01 00:00:00";
     }
 
     public static List<SimpleLocation> searchAllLocation(Context context, String email) {

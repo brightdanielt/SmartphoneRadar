@@ -25,6 +25,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.cauliflower
         }
         debug {
             signingConfig signingConfigs.cauliflower
@@ -42,17 +43,13 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:15.0.1'
     compile 'com.google.firebase:firebase-core:16.0.1'
     compile 'com.google.maps.android:android-maps-utils:0.4.4'
-
     //choose firebaseUI to implement sign-in
     implementation 'com.firebaseui:firebase-ui-auth:4.0.0'
-
     // Required only if Facebook login support is required
     // Find the latest Facebook SDK releases here: https://goo.gl/Ce5L94
     implementation 'com.facebook.android:facebook-android-sdk:4.29.0'
-
     //choose firestore to implement database in server side
     compile 'com.google.firebase:firebase-firestore:17.0.2'
-
     //    implementation 'com.android.support:preference-v7:25.0.1'
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     //    implementation 'com.android.support:support-vector-drawable:25.1.0'
@@ -62,9 +59,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
-
     compile 'com.android.support:multidex:1.0.0'
-
 }
 
 apply plugin: 'com.google.gms.google-services'

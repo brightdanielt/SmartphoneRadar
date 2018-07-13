@@ -1,9 +1,8 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.content.Context;
-import android.content.Intent;
+import android.icu.text.DateFormat;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,9 +19,9 @@ import android.widget.TextView;
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.interfacer.Updater;
+import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
-import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
+import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,56 +29,41 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
-import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, Updater {
+import javax.annotation.Nullable;
+
+import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_EMAIL;
+import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_LATITUDE;
+import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_LONGITUDE;
+import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_PASSWORD;
+import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_TIME;
+
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private RecyclerView mRecycler_locationList;
-    private MyAdapter mAdapter;
+    private LocationAdapter mLocationAdapter;
     private LinearLayout mLinearLayout_wrapRecyclerView;
 
-    //用於遠端 DB
-    private ConnectServer mConnectServer;
     //用於手機 DB
     private List<SimpleLocation> mLocationList = new ArrayList<>();
     private boolean mShowNewMarkOnly = false;
 
-    private Handler mHandler = new Handler();
-    private Runnable mRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        getSupportActionBar().setSubtitle("");
-                    }
-                }, 7500);
-                String time_to_compare = MainDb.searchNewTime(MapsActivity.this, mAccount);
-                mConnectServer.getLocationFromServer(mAccount, mPassword, time_to_compare);
-                //每 15 秒查詢一次座標
-                mHandler.postDelayed(mRunnable, 15000);
-//                SAXParser sp = SAXParserFactory.newInstance().newSAXParser();
-//                sp.parse(new ByteArrayInputStream(response.getBytes()), new HandlerXML(MapsActivity.this));
-//            } catch (ParserConfigurationException e) {
-//                e.printStackTrace();
-//            } catch (SAXException e) {
-//                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    private String mAccount, mPassword;
+    private String mEmail, mPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +76,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        mConnectServer = new ConnectServer(MapsActivity.this);
-        Intent i = getIntent();
-        mAccount = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL);
-        mPassword = i.getStringExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //查詢所有追蹤對象
+        List<User> trackingList = MainDb.searchUser(MapsActivity.this, RadarContract.UserEntry.USED_FOR_GETLOCATION);
+        for (User targetTracked : trackingList) {
+            //找出正在追蹤的對象
+            if (targetTracked.getIn_use().equals(RadarContract.UserEntry.IN_USE_YES)) {
+                //取得信箱與密碼
+                mEmail = targetTracked.getEmail().trim();
+                mPassword = targetTracked.getPassword().trim();
+                break;
+            }
+        }
+    }
 
     /**
      * Manipulates the map once available.
@@ -114,9 +109,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         makeViewWork();
 
-        if (mAccount != null && mPassword != null) {
-            //3 秒後執行第一次座標查詢
-            mHandler.postDelayed(mRunnable, 3000);
+        //判斷是否查得正在追蹤對象
+        if (mEmail != null && mPassword != null) {
+            //監聽該追蹤對象的座標更新
+            RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
+                    //監聽失敗
+                    if (e != null) {
+                        Log.d(TAG, "setOnLocationUpdateListener failed", e);
+                        return;
+                    }
+                    //監聽成功
+                    if (value != null) {
+                        //處理座標資料
+                        handleLocation(value);
+                    }
+                }
+            });
         }
     }
 
@@ -127,9 +137,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mAccount));
-        mAdapter = new MyAdapter(mLocationList);
-        mRecycler_locationList.setAdapter(mAdapter);
+        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mEmail));
+        mLocationAdapter = new LocationAdapter(mLocationList);
+        mRecycler_locationList.setAdapter(mLocationAdapter);
         mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
 
         //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
@@ -139,6 +149,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         showAllMarks();
     }
 
+    /**
+     * 當地圖上固定範圍內的標記太多時，會以標記集合的方式呈現
+     */
     private void setUpCluster() {
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
@@ -170,26 +183,51 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             SimpleLocation location = mLocationList.get(size - 1);
             MyItem item1 = new MyItem(null,
                     location.getLatitude(), location.getLongitude(), location.getTime(), null);
+            //加入最新的座標
             mClusterManager.addItem(item1);
         }
     }
 
-    //處理向伺服器查詢得的位置資訊
-    @Override
-    public void updateData(List<SimpleLocation> locations) {
-        if (locations.size() > 0) {
-            for (SimpleLocation location : locations) {
+    //將座標儲存到手機資料庫、顯示於清單
+    private void handleLocation(QuerySnapshot value) {
+        //取出座標文件
+        for (QueryDocumentSnapshot doc : value) {
+            //驗證身份
+            if (mPassword.equals(doc.getString(FIRESTORE_FIELD_PASSWORD))) {
                 double latitude, longitude;
-                String time;
-
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                time = location.getTime();
+                Date dateFromServer;
+                //檢查資料是否齊全
+                if (doc.getDouble(FIRESTORE_FIELD_LATITUDE) != null
+                        && doc.getDouble(FIRESTORE_FIELD_LONGITUDE) != null
+                        && doc.getDate(FIRESTORE_FIELD_TIME) != null) {
+                    latitude = doc.getDouble(FIRESTORE_FIELD_LATITUDE);
+                    longitude = doc.getDouble(FIRESTORE_FIELD_LONGITUDE);
+                    dateFromServer = doc.getDate(FIRESTORE_FIELD_TIME);
+                } else {
+                    //資料不齊全
+                    Log.w(TAG, "handleLocation，遺失座標資料");
+                    break;
+                }
+                //因為註冊監聽時會回傳舊的座標，所以必須判斷回傳座標是新的還是舊的
+                String dbNewTime = MainDb.searchNewTime(MapsActivity.this,mEmail);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date dateFromDb = null;
+                try {
+                    dateFromDb = dateFormat.parse(dbNewTime);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                if(dateFromDb.compareTo(dateFromServer)>=0){
+                    //server傳來舊座標，直接略過
+                    Log.i(TAG,"Ignore this location,"+dateFormat.format(dateFromDb)+">="+dateFormat.format(dateFromServer));
+                    return;
+                }
+                String time = dateFormat.format(dateFromServer);
                 //手機端資料庫新增一筆 Location
-                MainDb.addLocation(MapsActivity.this, mAccount, latitude, longitude, time);
+                MainDb.addLocation(MapsActivity.this, mEmail, latitude, longitude, time);
 
-                //recycler_locationList 新增一筆資料
-                mLocationList.add(new SimpleLocation(time, latitude, longitude));
+                //座標清單，新增一筆資料
+                mLocationAdapter.addNewLocation(new SimpleLocation(time, latitude, longitude));
 
                 if (mShowNewMarkOnly) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -203,13 +241,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LatLng latLng = new LatLng(latitude, longitude);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
 
+                //提示使用者有新的座標
+                getSupportActionBar().setSubtitle(getString(R.string.get_new_location) + ": " + time);
+            } else {
+                Log.w(TAG, "handleLocation，身份驗證失敗");
             }
-            getSupportActionBar().setSubtitle(null);
-            mAdapter.notifyDataSetChanged();
-        } else {
-            getSupportActionBar().setSubtitle(R.string.get_no_location);
         }
-
+        //刷新座標清單
+        mLocationAdapter.notifyDataSetChanged();
     }
 
     private class MyItem implements ClusterItem {
@@ -259,7 +298,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // Declare a variable for the cluster manager.
-
     private ClusterManager<MyItem> mClusterManager;
 
     @Override
@@ -272,12 +310,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_locationList: {
                 if (item.isChecked()) {
                     item.setChecked(false);
+                    //Show recyclerView
                     mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 0f
                             )
                     );
                 } else {
+                    //Hide recyclerView
                     item.setChecked(true);
                     mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
@@ -312,11 +352,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onStop() {
-        //當使用者離開畫面時，應該停止查詢裝置位置
-        if (mHandler != null) {
-            mHandler.removeCallbacks(mRunnable);
-            Log.i(TAG, "stop get new location from server");
-        }
         super.onStop();
     }
 
@@ -325,10 +360,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
     }
 
-    class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+    class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHolder> {
         private List<SimpleLocation> mLocationList;
 
-        MyAdapter(List<SimpleLocation> list) {
+        LocationAdapter(List<SimpleLocation> list) {
             mLocationList = list;
         }
 
@@ -345,7 +380,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         @Override
-        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public LocationAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             View view = LayoutInflater.from(context).
                     inflate(R.layout.recycler_view_item, parent, false);
@@ -380,6 +415,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public int getItemCount() {
             return mLocationList.size();
+        }
+
+        public void addNewLocation(SimpleLocation location) {
+            if (mLocationList != null) {
+                mLocationList.add(location);
+            }
         }
     }
 }

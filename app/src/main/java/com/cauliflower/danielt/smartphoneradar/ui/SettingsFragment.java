@@ -115,8 +115,6 @@ public class SettingsFragment extends PreferenceFragment implements
         if (key.equals(getString(R.string.pref_key_MapsActivity))) {
             if (mEmail_targetTracked != null) {
                 Intent i = new Intent();
-                i.putExtra(RadarContract.UserEntry.COLUMN_USER_EMAIL, mEmail_targetTracked);
-                i.putExtra(RadarContract.UserEntry.COLUMN_USER_PASSWORD, mPassword_targetTracked);
                 i.setClass(getActivity(), MapsActivity.class);
                 startActivity(i);
             }

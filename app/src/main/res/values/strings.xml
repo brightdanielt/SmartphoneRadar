@@ -116,6 +116,7 @@
     <string name="locationList">座標清單</string>
     <string name="showNewMarkOnly">只顯示最新座標</string>
     <string name="get_no_location">查無新座標</string>
+    <string name="get_new_location">查得新座標</string>
     <string name="time">時間</string>
     <string name="latitude">經度</string>
     <string name="longitude">緯度</string>
