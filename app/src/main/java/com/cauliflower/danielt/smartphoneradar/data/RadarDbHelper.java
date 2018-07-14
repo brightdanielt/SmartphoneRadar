@@ -24,7 +24,7 @@ public class RadarDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + UserEntry.TABLE_USER + " (" +
-                UserEntry._ID + " INTEGER, " +
+                UserEntry._ID + " INTEGER , " +
                 UserEntry.COLUMN_USER_EMAIL + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_PASSWORD + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_USED_FOR + " TEXT NOT NULL, " +
@@ -33,12 +33,12 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         );
 
         db.execSQL("CREATE TABLE " + LocationEntry.TABLE_LOCATION + " (" +
-                LocationEntry._ID + " INTEGER, " +
+                LocationEntry._ID + " INTEGER , " +
                 LocationEntry.COLUMN_LOCATION_EMAIL + " TEXT NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_LATITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_LONGITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_TIME + " DATETIME NOT NULL, " +
-                "PRIMARY KEY( " + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + ") ) "
+                "PRIMARY KEY( " + "," + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + ") ) "
         );
     }
 

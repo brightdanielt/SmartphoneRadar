@@ -270,15 +270,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             boolean a = dateFromDb.before(dateFromServer);
             boolean c = dateFromDb.equals(dateFromServer);*/
             if (dateFromDb.after(dateFromServer)) {
-                return false;
+                //是舊(過期)的時間
+                Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
+                return true;
             }
-            //是舊(過期)的時間
-            Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
         } catch (ParseException e) {
 //            SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.dateFormat));
             Log.d(TAG, "DateFormat parse error", e);
+            return true;
         }
-        return true;
+        return false;
     }
 
     private class MyItem implements ClusterItem {

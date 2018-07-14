@@ -20,6 +20,8 @@ import java.util.List;
 public final class MainDb {
     // To prevent someone from accidentally instantiating the contract class,
     // give it an empty constructor.
+    private static boolean debug = false;
+
     private MainDb() {
     }
 
@@ -69,15 +71,21 @@ public final class MainDb {
                 new String[]{RadarContract.LocationEntry.COLUMN_LOCATION_TIME},
                 RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL + "=?",
                 new String[]{email},
-                //由大到小，所以第一筆資料時間是最新的
-                RadarContract.LocationEntry._ID + " DESC");
+                null
+        );
 
         //取得最新 time 值
         if (cursor != null) {
-            cursor.moveToFirst();
+            //最後一筆，最新的資料
+            cursor.moveToLast();
             if (cursor.getCount() > 0) {
                 int index_time_to_compare = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
                 String newestTime = cursor.getString(index_time_to_compare);
+                int index_id = cursor.getColumnIndex(RadarContract.LocationEntry._ID);
+                if (debug) {
+                    Log.i(context.getClass().getSimpleName(), "Query location id:" + cursor.getInt(index_id));
+                    Log.i(context.getClass().getSimpleName(), "Query location time:" + newestTime);
+                }
                 cursor.close();
                 return newestTime;
             }
