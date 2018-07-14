@@ -119,4 +119,6 @@
                 只有“查詢”帳號能夠選擇(done)
     todo 09: MapsActivity
                 為座標清單建立暫存，避免再次進入 MapsActivity 時重新向裝置端 database 查詢座標 ()
+    todo 10: 重構 RadarService, AccountActivity, SettingsFragment
+
 -->
