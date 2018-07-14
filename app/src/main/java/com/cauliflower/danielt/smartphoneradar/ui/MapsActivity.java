@@ -251,7 +251,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     /**
      * 注意！！！ Date 格式化成字串後，若再將字串轉回 Date，
-     * 跟同時間的 Date 比較，結果可能不是是相等的，所以在比較之前，將新的 Date轉為字串，再轉回 Date，
+     * 跟同時間的 Date 比較，結果可能不是是相等的，所以在比較之前，將新的 Date 轉為字串，再轉回 Date，
      * 就沒問題了
      */
     private boolean isExpiredDateFromServer(Date dateFromServer) {

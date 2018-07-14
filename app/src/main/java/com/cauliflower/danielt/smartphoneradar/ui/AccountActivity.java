@@ -74,6 +74,7 @@ public class AccountActivity extends AppCompatActivity {
     private String mIMEI, mModel;
 
     private Button mBtn_signIn, mBtn_addTragetTracked;
+    private static final int MAX_DOCUMENT_LOCATIION = 1;
     private ImageView imgView_userPhoto;
     private TextView mTv_userInfo, mTv_hintTargetTracked;
     private ListView mListView_targetTracked;
@@ -388,8 +389,8 @@ public class AccountActivity extends AppCompatActivity {
         if (firebaseUser.getEmail() != null && !password.trim().equals("")) {
 
         }
-        //初始化 5 個座標
-        for (int documentId = 1; documentId < 6; documentId++) {
+        //初始化 1 個座標
+        for (int documentId = 1; documentId <= MAX_DOCUMENT_LOCATIION; documentId++) {
             RadarFirestore.createLocation(String.valueOf(documentId), firebaseUser.getEmail(),
                     password, firebaseUser.getUid(),
                     mIMEI, 0, 0, null, null

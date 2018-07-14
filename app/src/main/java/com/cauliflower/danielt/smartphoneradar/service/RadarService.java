@@ -102,7 +102,8 @@ public class RadarService extends Service {
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                updateDocumentId();
+                //指定要更新的 document id
+//                updateDocumentId();
                 final Location location = locationResult.getLastLocation();
                 Log.i(TAG, "onLocationResult is working");
 //                Toast.makeText(RadarService.this, "call onLocationResult", Toast.LENGTH_SHORT).show();
