@@ -36,8 +36,8 @@ import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
+import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,7 +53,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
-    private RecyclerView mRecycler_locationList;
+    private RecyclerView mRecyclerView_location;
     private LocationAdapter mLocationAdapter;
     private LinearLayout mLinearLayout_wrapRecyclerView;
 
@@ -129,16 +129,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void makeViewWork() {
+        //設定標記集合
         setUpCluster();
 
-        mRecycler_locationList = findViewById(R.id.recycler_locationList);
+        mRecyclerView_location = findViewById(R.id.recycler_locationList);
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
         mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mEmail));
         mLocationAdapter = new LocationAdapter(mLocationList);
-        mRecycler_locationList.setAdapter(mLocationAdapter);
-        mRecycler_locationList.setLayoutManager(new LinearLayoutManager(this));
+        //item 大小固定
+        mRecyclerView_location.setHasFixedSize(true);
+        mRecyclerView_location.setAdapter(mLocationAdapter);
+        mRecyclerView_location.setLayoutManager(new LinearLayoutManager(this));
 
         //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
         //取出 listLocation 物件作為 item 的資料，同時添增標記
@@ -186,7 +189,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    //將座標儲存到手機資料庫、顯示於清單
+    //驗應資料身份、將座標儲存到手機資料庫、顯示於清單
     private void handleLocation(QuerySnapshot value) {
         //取出座標文件
         for (QueryDocumentSnapshot doc : value) {
@@ -207,25 +210,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     break;
                 }
                 if (latitude == 0) {
-                    Log.i(TAG, "查到初始化座標，不寫入資料，直接略過");
+                    Log.i(TAG, "查到初始化座標，略過該筆資料");
                     return;
                 }
                 //因為註冊監聽時會回傳舊的座標，所以必須判斷回傳座標是新的還是舊的
-
                 if (isExpiredDateFromServer(dateFromServer)) {
                     //server傳來舊座標，直接略過
                     return;
                 }
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String time = dateFormat.format(dateFromServer);
+                //格式化字串
+                String time = DateFormat.getDateTimeInstance().format(dateFromServer);
                 //手機端資料庫新增一筆 Location
                 MainDb.addLocation(MapsActivity.this, mEmail, latitude, longitude, time);
 
                 //座標清單，新增一筆資料
-                SimpleLocation location = new SimpleLocation(time, latitude, longitude);
-                mLocationAdapter.addNewLocation(location);
-                //刷新座標清單
-                mLocationAdapter.notifyDataSetChanged();
+                mLocationAdapter.addNewLocation(new SimpleLocation(time, latitude, longitude));
 
                 if (mShowNewMarkOnly) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -245,39 +244,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.w(TAG, "handleLocation，身份驗證失敗");
             }
         }
-        //刷新座標清單
-        mLocationAdapter.notifyDataSetChanged();
     }
 
     /**
-     * 注意！！！ Date 格式化成字串後，若再將字串轉回 Date，
-     * 跟同時間的 Date 比較，結果可能不是是相等的，所以在比較之前，將新的 Date 轉為字串，再轉回 Date，
-     * 就沒問題了
+     * 注意！！！ Date 格式化成字串後，如下：
+     * String dateStr = DateFormat.getDateTimeInstance().format(date)
+     * 若再將字串轉回 Date 如下：
+     * Date date2 = DateFormat.getDateTimeInstance().parse(dateFromDbStr);
+     * 原 date 跟轉回的 date2 比較，結果可能不是是相等的，因為格式化過程中，milliseconds 後三位數字不在格式的範圍，
+     * 而轉回的 date2 在沒有後三位的情況下自動給予 0 的值
+     * 所以要就統一格式化，若不格式化，也可以 milliseconds 為判斷基礎，最不容易出錯
      */
     private boolean isExpiredDateFromServer(Date dateFromServer) {
-        //server date
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String dateStrFromServer = dateFormat.format(dateFromServer);
-        try {
-            dateFromServer = dateFormat.parse(dateStrFromServer);
-        } catch (ParseException e) {
-            e.printStackTrace();
+        String dateFromDbStr = MainDb.searchNewTime(MapsActivity.this, mEmail);
+        if (dateFromDbStr == null) {
+            //尚無資料可比較
+            return false;
         }
-        //db date
-        String dateStrFromDb = MainDb.searchNewTime(MapsActivity.this, mEmail);
-        Date dateFromDb = null;
         try {
-            dateFromDb = dateFormat.parse(dateStrFromDb);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+            String dateFromServerStr = DateFormat.getDateTimeInstance().format(dateFromServer);
+            Date dateFromDb = DateFormat.getDateTimeInstance().parse(dateFromDbStr);
+            dateFromServer = DateFormat.getDateTimeInstance().parse(dateFromServerStr);
 
-        boolean before = dateFromDb.before(dateFromServer);
-        Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
-        /*boolean after = dateFromDb.after(dateFromServer);
-        boolean sameString = dateFromServer.toString().equals(dateFromDb.toString());
-        boolean equals = dateFromDb.equals(dateFromServer);*/
-        return !before;
+            /*int j = dateFromDb.compareTo(dateFromServer);
+            boolean a = dateFromDb.before(dateFromServer);
+            boolean c = dateFromDb.equals(dateFromServer);*/
+            if (dateFromDb.after(dateFromServer)) {
+                return false;
+            }
+            //是舊(過期)的時間
+            Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
+        } catch (ParseException e) {
+//            SimpleDateFormat dateFormat = new SimpleDateFormat(getString(R.string.dateFormat));
+            Log.d(TAG, "DateFormat parse error", e);
+        }
+        return true;
     }
 
     private class MyItem implements ClusterItem {
@@ -449,6 +450,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void addNewLocation(SimpleLocation location) {
             if (mLocationList != null) {
                 mLocationList.add(location);
+                //刷新座標清單
+                LocationAdapter.this.notifyDataSetChanged();
             }
         }
     }

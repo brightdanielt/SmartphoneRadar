@@ -138,7 +138,7 @@ public class RadarContract {
         /**
          * Time of the location.
          * <p>
-         * Type: DATETIME
+         * Type: TEXT
          */
         public final static String COLUMN_LOCATION_TIME = "time";
 

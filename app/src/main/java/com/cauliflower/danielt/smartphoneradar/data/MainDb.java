@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 
@@ -61,17 +62,15 @@ public final class MainDb {
     }
 
     //查詢資料表 Location 的最新 time 值
-
     public static String searchNewTime(Context context, String email) {
         //先查詢 Location 是否有紀錄
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.LocationEntry.CONTENT_URI,
                 new String[]{RadarContract.LocationEntry.COLUMN_LOCATION_TIME},
-                RadarContract.LocationEntry.COLUMN_LOCATION_TIME + ">?" + " AND " +
-                        RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL + "=?",
-                new String[]{"1911-01-01 00:00:00", email},
+                RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL + "=?",
+                new String[]{email},
                 //由大到小，所以第一筆資料時間是最新的
-                RadarContract.LocationEntry.COLUMN_LOCATION_TIME + " DESC");
+                RadarContract.LocationEntry._ID + " DESC");
 
         //取得最新 time 值
         if (cursor != null) {
@@ -83,7 +82,8 @@ public final class MainDb {
                 return newestTime;
             }
         }
-        return "1911-01-01 00:00:00";
+        //還沒有 Location 資料
+        return null;
     }
 
     public static List<SimpleLocation> searchAllLocation(Context context, String email) {
