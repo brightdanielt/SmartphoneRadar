@@ -27,8 +27,6 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
-import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
-import com.cauliflower.danielt.smartphoneradar.ui.AccountActivity;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -46,6 +44,7 @@ public class RadarService extends Service {
 
     private String TAG = RadarService.class.getSimpleName();
     public static boolean mInService = false;
+    private static boolean debug = false;
 
     private FusedLocationProviderClient mClient;
     private LocationRequest mLocationRequest;
@@ -53,20 +52,12 @@ public class RadarService extends Service {
 
     private String mEmail, mPassword;
     private String mIMEI;
+    //在 firebase 的座標文件數量
     private int mDocumentId = 1;
     private FirebaseAuth mAuth;
 
-    private Runnable mTask_serviceStatus = new Runnable() {
-        @Override
-        public void run() {
-            mWorker.postDelayed(this, 15000);
-            Log.d(TAG, "InService: " + mInService);
-        }
-    };
-    private Handler mWorker = new Handler();
-
-    //http no response should not bigger than 3 times
-    private static final int NO_RESPONSE_MAXIMUM = 3;
+    //更新座標失敗次數不能超過 3 次
+    private static final int UPDATE_FAILURE_MAXIMUM = 3;
     private int mUpdateLocationFailureCount = 0;
 
     public RadarService() {
@@ -81,37 +72,98 @@ public class RadarService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "onCreate");
+        if (debug) {
+            Log.i(TAG, "onCreate");
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (debug) {
+            Log.i(TAG, "onStartCommand");
+        }
+        getUserIdentity();
+
+        if (mEmail != null && !mPassword.trim().equals("") && mIMEI != null) {
+            mInService = true;
+            if (debug) {
+                showServiceStatus();
+            }
+            createLocationRequest();
+            createLocationCallback();
+            fuseLocationRequest();
+            foregroundService();
+        } else {
+            Log.i(TAG, "Missing identity for verify so RadarService stopped");
+            this.stopSelf();
+        }
+
+        return START_STICKY;
+    }
+
+    private void getUserIdentity() {
+        //取得 IMEI
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.w(TAG, "No permission to get IMEI");
+            RadarService.this.stopSelf();
+        }
+        if (telephonyManager == null) {
+            Log.w(TAG, "Null IMEI");
+            this.stopSelf();
+        }
         mAuth = FirebaseAuth.getInstance();
-//        Toast.makeText(this, "onCreate", Toast.LENGTH_SHORT).show();
+
+        //取得使用者 IMEI
+        mIMEI = telephonyManager.getDeviceId();
+
+        //取得使用者 email
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        if (firebaseUser != null) {
+            mEmail = firebaseUser.getEmail();
+        }
+
+        //根據 email 取得使用者 password
+        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
+        for (User user : userList) {
+            if (user.getEmail().equals(mEmail)) {
+                mPassword = user.getPassword();
+            }
+        }
+
     }
 
     private void createLocationRequest() {
-        String frequency = RadarPreferences.getUpdateFrequency(RadarService.this);
+        int frequency = Integer.parseInt(RadarPreferences.getUpdateFrequency(RadarService.this));
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(Integer.valueOf(frequency));
-        mLocationRequest.setFastestInterval(Integer.valueOf(frequency));
-        mLocationRequest.setPriority(
-                LocationRequest.PRIORITY_HIGH_ACCURACY);
-        Log.i(TAG, "updateFrequency:" + frequency);
+        mLocationRequest.setInterval(frequency);
+        mLocationRequest.setFastestInterval(frequency);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        if (debug) {
+            Log.i(TAG, "updateFrequency:" + frequency);
+        }
     }
 
     private void createLocationCallback() {
-
         //取得裝置位置後的動作
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                //指定要更新的 document id
+                //更新目標文件 id
 //                updateDocumentId();
                 final Location location = locationResult.getLastLocation();
-                Log.i(TAG, "onLocationResult is working");
-//                Toast.makeText(RadarService.this, "call onLocationResult", Toast.LENGTH_SHORT).show();
-
-                //更新位置資訊到 fireStore
-                RadarFirestore.updateLocation(
-                        String.valueOf(mDocumentId), mEmail, mPassword, mAuth.getUid(), mIMEI, location.getLatitude(),
-                        location.getLongitude(), new OnSuccessListener<Void>() {
+                Log.i(TAG, "Get location result");
+                //更新位置資訊到 firestore
+                RadarFirestore.updateLocation(String.valueOf(mDocumentId), mEmail, mPassword,
+                        mAuth.getUid(), mIMEI, location.getLatitude(), location.getLongitude(),
+                        new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 //更新成功
@@ -122,7 +174,7 @@ public class RadarService extends Service {
                             public void onFailure(@NonNull Exception e) {
                                 //更新失敗
                                 mUpdateLocationFailureCount++;
-                                if (mUpdateLocationFailureCount >= NO_RESPONSE_MAXIMUM) {
+                                if (mUpdateLocationFailureCount > UPDATE_FAILURE_MAXIMUM) {
                                     Toast.makeText(RadarService.this,
                                             getString(R.string.serverNoResponse_close_service), Toast.LENGTH_SHORT).show();
                                     RadarService.this.stopSelf();
@@ -136,7 +188,9 @@ public class RadarService extends Service {
 
     /**
      * 緩衝座標資訊，有時更新頻率太快，監聽反應又太慢，舊的座標已經被新座標覆蓋，而舊座標卻沒有被查詢到
-     * 所以在 firestore 建立 5 個座標文件，作為緩衝
+     * 所以在 firestore 建立 5 個座標文件，作為緩衝;
+     * <p>
+     * ***還在測試中，雖然目前監聽狀況良好，不會漏掉座標(看來文件沒有看仔細Ｒ～)***
      */
     private void updateDocumentId() {
         mDocumentId++;
@@ -145,70 +199,21 @@ public class RadarService extends Service {
         }
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-//        return super.onStartCommand(intent, flags, startId);
-        Log.i(TAG, "onStartCommand");
-        //檢查使用者身份
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            Log.i(TAG, "No permission to get IMEI");
-            RadarService.this.stopSelf();
-        }
-        mIMEI = telephonyManager.getDeviceId();
-        mAuth = FirebaseAuth.getInstance();
-        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        for (User user : userList) {
-            mPassword = user.getPassword();
-            break;
-        }
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            mEmail = user.getEmail();
-        }
-        if (mEmail != null && !mPassword.trim().equals("") && mIMEI != null) {
-            mInService = true;
-            showServiceStatus();
-
-            createLocationRequest();
-            createLocationCallback();
-            fuseLocationRequest();
-            foregroundService();
-        } else {
-            Log.i(TAG, "No firebaseUser so RadarService stopped");
-            this.stopSelf();
-        }
-
-        return START_STICKY;
-    }
-
     @SuppressLint("MissingPermission")
     private void fuseLocationRequest() {
         mClient = LocationServices.getFusedLocationProviderClient(RadarService.this);
         mClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
-    @Override
-    public void onDestroy() {
-        if (mClient != null) {
-            mClient.removeLocationUpdates(mLocationCallback);
+    //每 15 秒 log 一次 service 是不是還活著
+    private Runnable mTask_serviceStatus = new Runnable() {
+        @Override
+        public void run() {
+            mWorker.postDelayed(this, 15000);
+            Log.d(TAG, "InService: " + mInService);
         }
-//        Toast.makeText(this, "onDestroy", Toast.LENGTH_SHORT).show();
-        Log.i(TAG, "onDestroy");
-        mWorker.removeCallbacks(mTask_serviceStatus);
-
-        mInService = false;
-        RadarService.this.stopForeground(true);
-        super.onDestroy();
-
-    }
+    };
+    private Handler mWorker = new Handler();
 
     private void showServiceStatus() {
         //每 15 秒 Log 一次
@@ -221,10 +226,7 @@ public class RadarService extends Service {
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent contentIntent = PendingIntent.getActivity(
-                RadarService.this,
-                0,
-                intent,
-                0);
+                RadarService.this, 0, intent, 0);
 
         //android O need a channel for notification
         NotificationChannel radarChannel = null;
@@ -250,4 +252,16 @@ public class RadarService extends Service {
         RadarService.this.startForeground(333, builder.build());
     }
 
+    @Override
+    public void onDestroy() {
+        if (mClient != null) {
+            mClient.removeLocationUpdates(mLocationCallback);
+        }
+        Log.i(TAG, "onDestroy");
+        mWorker.removeCallbacks(mTask_serviceStatus);
+
+        mInService = false;
+        RadarService.this.stopForeground(true);
+        super.onDestroy();
+    }
 }
