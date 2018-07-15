@@ -199,6 +199,18 @@ public class RadarService extends Service {
         }
     }
 
+    /**
+     * 判斷上一次更新到 firestore的座標 與現在的座標距離是否大於 ＸＸＸ
+     *
+     * @return true 距離大於ＸＸＸ，應該向 firestore 更新該座標
+     * @return false 距離小於等於ＸＸＸ，不應該向 firestore 更新該座標
+     */
+    private Location mLastValidLocation;
+
+    private boolean isValidLocation(LocationResult result) {
+        return false;
+    }
+
     @SuppressLint("MissingPermission")
     private void fuseLocationRequest() {
         mClient = LocationServices.getFusedLocationProviderClient(RadarService.this);

@@ -121,4 +121,8 @@
                 為座標清單建立暫存，避免再次進入 MapsActivity 時重新向裝置端 database 查詢座標 ()
     todo 10: 重構 RadarService, AccountActivity, SettingsFragment
 
+    todo 11: RadarService 希望更新座標時 先判斷與上一次送出的座標距離，若距離在XXX內則不送出這次的座標，
+    這樣做的優點是，追蹤該使用者時，不會因為使用者移動距離不大或沒有移動，卻持續監聽到更新的座標，
+    在一小時內，可能同一地圖區域內，存在了 720 個標記 （假設 5 秒更新一次座標）
+
 -->
