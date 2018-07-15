@@ -90,7 +90,7 @@
     <!--<string name="pref_title_mailUs">寄信給我</string>-->
 
     <!--AccountActivity-->
-    <string name="notSignIn">未登入:&#160;&#160;</string>
+    <string name="notSignIn">未登入</string>
     <string name="targetTracked">追蹤目標:&#160;&#160;</string>
     <string name="nothing">無</string>
     <string name="signIn">登入</string>
@@ -137,7 +137,7 @@
 
 
     <!--ProgressDialog-->
-    <string name="loading">載入中&#8230;</string>
+    <string name="loading">載入中</string>
     <string name="wrong_user">帳號或密碼錯誤</string>
 
 

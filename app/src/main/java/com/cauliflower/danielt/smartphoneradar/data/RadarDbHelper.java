@@ -38,7 +38,7 @@ public class RadarDbHelper extends SQLiteOpenHelper {
                 LocationEntry.COLUMN_LOCATION_LATITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_LONGITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_TIME + " DATETIME NOT NULL, " +
-                "PRIMARY KEY( " + "," + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + ") ) "
+                "PRIMARY KEY( " + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + ") ) "
         );
     }
 

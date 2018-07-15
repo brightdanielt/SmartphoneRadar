@@ -59,7 +59,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry;
 
 public class AccountActivity extends AppCompatActivity {
@@ -90,21 +89,29 @@ public class AccountActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
         makeViewWork();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        mDialog_loading = new ProgressDialog(AccountActivity.this);
+        mDialog_loading.setMessage(getString(R.string.loading));
+        mDialog_loading.setIndeterminate(true);
+        mDialog_loading.setCancelable(false);
+        //要求權限、取得 IMEI、model
         getPhoneInfo();
-        mAuth = FirebaseAuth.getInstance();
         // Check if user is signed in (non-null) and update UI accordingly.
+        mAuth = FirebaseAuth.getInstance();
         final FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
+            //已登入
+            mDialog_loading.show();
+            //檢查 firestore 有沒有建立使用者
             RadarFirestore.checkUserExists(currentUser.getEmail(), new OnCompleteListener<QuerySnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    mDialog_loading.dismiss();
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
@@ -144,9 +151,6 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void makeViewWork() {
-        mDialog_loading = ProgressDialog.show(AccountActivity.this, "",
-                getString(R.string.loading), true);
-        mDialog_loading.dismiss();
         imgView_userPhoto = findViewById(R.id.imgView_photo);
         mBtn_signIn = findViewById(R.id.btn_singIn);
         mTv_userInfo = findViewById(R.id.tv_userInfo);
@@ -178,11 +182,10 @@ public class AccountActivity extends AppCompatActivity {
             new LoadBitmapFromUri().execute(firebaseUser.getPhotoUrl());
             mBtn_signIn.setText(R.string.signOut);
         } else {
-            mTv_userInfo.setText(R.string.notSignIn);
+            mTv_userInfo.setText("");
             imgView_userPhoto.setImageBitmap(null);
             mBtn_signIn.setText(R.string.signIn);
         }
-        mDialog_loading.dismiss();
     }
 
     public void clickBtn(View view) {
@@ -225,6 +228,7 @@ public class AccountActivity extends AppCompatActivity {
                             RadarFirestore.checkRightToReadUser(email, password, new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                    mDialog_loading.dismiss();
                                     if (task.isSuccessful() && task.getResult().size() > 0) {
                                         //成功
                                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -240,8 +244,6 @@ public class AccountActivity extends AppCompatActivity {
                                     } else {
                                         Log.d(TAG, "Error listing documents: ", task.getException());
                                     }
-                                    mDialog_loading.dismiss();
-
                                 }
                             });
                         }
@@ -271,7 +273,6 @@ public class AccountActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_CODE_READ_PHONE_STATE);
             }
-
             return;
         }
         //若未取得權限，getDeviceId 回傳 null
@@ -303,6 +304,9 @@ public class AccountActivity extends AppCompatActivity {
                             RadarFirestore.createUser(user.getEmail(), password, mIMEI, mModel, user.getUid(), new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
+                                    mDialog_loading.dismiss();
+                                    //關閉對話筐
+                                    dialog.dismiss();
                                     //建立使用者成功
                                     Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
                                     //寫入手機 datebase 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
@@ -310,8 +314,6 @@ public class AccountActivity extends AppCompatActivity {
                                             UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                                     //更新使用者資訊
                                     updateAuthInfo(mAuth.getCurrentUser());
-                                    //關閉對話筐
-                                    dialog.dismiss();
                                     //初始化座標文件
                                     initFirestoreLocation();
                                 }
@@ -320,12 +322,13 @@ public class AccountActivity extends AppCompatActivity {
                                 public void onFailure(@NonNull Exception e) {
                                     //建立使用者失敗
                                     //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
-                                    Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
-                                    RadarAuthentication.signOut(AccountActivity.this, null);
-                                    updateAuthInfo(null);
-                                    Log.d(TAG, "Error create user", e);
+                                    mDialog_loading.dismiss();
                                     //關閉對話筐
                                     dialog.dismiss();
+                                    RadarAuthentication.signOut(AccountActivity.this, null);
+                                    updateAuthInfo(null);
+                                    Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "Error create user", e);
                                 }
                             });
                         }
@@ -334,6 +337,13 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private class LoadBitmapFromUri extends AsyncTask<Uri, Void, Bitmap> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDialog_loading.show();
+        }
+
         @Override
         protected Bitmap doInBackground(Uri... uris) {
             Log.i(TAG, uris[0].toString());
@@ -364,6 +374,7 @@ public class AccountActivity extends AppCompatActivity {
             if (bitmap != null) {
                 imgView_userPhoto.setImageBitmap(bitmap);
             }
+            mDialog_loading.dismiss();
             super.onPostExecute(bitmap);
         }
 
@@ -420,6 +431,7 @@ public class AccountActivity extends AppCompatActivity {
                 RadarFirestore.checkUserExists(user.getEmail(), new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        mDialog_loading.dismiss();
                         if (task.isSuccessful() && task.getResult().size() > 0) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
@@ -444,7 +456,6 @@ public class AccountActivity extends AppCompatActivity {
                                 }
                             }
                         } else if (task.isSuccessful() && task.getResult().size() < 1) {
-                            mDialog_loading.dismiss();
                             //Firestore 不存在該使用者，代表第一次登入，向 firestore 新增使用者
                             showDialogCreateUser(user);
                         } else {
