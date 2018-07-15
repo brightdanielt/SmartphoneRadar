@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,10 +13,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -37,8 +36,6 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
@@ -70,11 +67,12 @@ public class AccountActivity extends AppCompatActivity {
     public static final String TAG = AccountActivity.class.getSimpleName();
     private static final int REQUEST_CODE_READ_PHONE_STATE = 101;
     private static final int REQUEST_CODE_SIGNIN_FIREBASE_AUTH = 102;
+    private boolean debug = false;
 
     private String mIMEI, mModel;
 
-    private Button mBtn_signIn, mBtn_addTragetTracked;
-    private static final int MAX_DOCUMENT_LOCATIION = 1;
+    private Button mBtn_signIn;
+    private static final int MAX_DOCUMENT_LOCATION = 1;
     private ImageView imgView_userPhoto;
     private TextView mTv_userInfo, mTv_hintTargetTracked;
     private ListView mListView_targetTracked;
@@ -88,10 +86,12 @@ public class AccountActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         makeViewWork();
-
     }
 
     @Override
@@ -108,13 +108,13 @@ public class AccountActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
-                            if (!currentUser.getEmail().equals(resultEmail)) {
+                            if (currentUser.getEmail().equals(resultEmail)) {
+                                //使用者還已經建立，代表合法登入，更新使用者資訊
+                                updateAuthInfo(currentUser);
+                            } else {
                                 //使用者還沒建立，代表非法登入，強制登出
                                 RadarAuthentication.signOut(AccountActivity.this, null);
                                 updateAuthInfo(null);
-                            } else {
-                                //使用者還已經建立，代表合法登入，更新使用者資訊
-                                updateAuthInfo(currentUser);
                             }
                         }
                     }
@@ -149,7 +149,6 @@ public class AccountActivity extends AppCompatActivity {
         mDialog_loading.dismiss();
         imgView_userPhoto = findViewById(R.id.imgView_photo);
         mBtn_signIn = findViewById(R.id.btn_singIn);
-        mBtn_addTragetTracked = findViewById(R.id.btn_addTargetTracked);
         mTv_userInfo = findViewById(R.id.tv_userInfo);
         mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);
         mListView_targetTracked = findViewById(R.id.listView_targetTracked);
@@ -168,7 +167,6 @@ public class AccountActivity extends AppCompatActivity {
             mTv_hintTargetTracked.setVisibility(View.GONE);
         }
         mAdapter_targetTracked.notifyDataSetChanged();
-        mDialog_loading.dismiss();
     }
 
     /**
@@ -197,11 +195,10 @@ public class AccountActivity extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 updateAuthInfo(null);
-                                //停止定位服務
                                 if (RadarService.mInService) {
+                                    //停止定位服務
                                     stopService(new Intent(AccountActivity.this, RadarService.class));
                                 }
-//                                RadarPreferences.setPositionCheck(AccountActivity.this,false);
                             } else {
                                 Log.d(TAG, "Error Firebase auth sign out", task.getException());
                             }
@@ -213,8 +210,10 @@ public class AccountActivity extends AppCompatActivity {
                 break;
             }
             case R.id.btn_addTargetTracked: {
+                //顯示對話筐，輸入追蹤對象的 email 與 password
                 final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
                 final AlertDialog dialogAddTargetTracked = builder.create();
+                dialogAddTargetTracked.show();
                 builder.setOnButtonClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -222,10 +221,12 @@ public class AccountActivity extends AppCompatActivity {
                             final String email = builder.getEmail();
                             final String password = builder.getPassword();
                             mDialog_loading.show();
+                            //檢查使用者權限
                             RadarFirestore.checkRightToReadUser(email, password, new OnCompleteListener<QuerySnapshot>() {
                                 @Override
                                 public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                     if (task.isSuccessful() && task.getResult().size() > 0) {
+                                        //成功
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d(TAG, document.getId() + " => " + document.getData());
                                             MainDb.addUser(AccountActivity.this, email, password,
@@ -233,23 +234,20 @@ public class AccountActivity extends AppCompatActivity {
                                             updateTrackList();
                                         }
                                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
+                                        //與 firestore 溝通成功，但找不到該使用者
                                         Toast.makeText(AccountActivity.this, R.string.wrong_user, Toast.LENGTH_SHORT).show();
-                                        Log.i(TAG, "找不到該使用者，可能信箱或密碼打錯");
-                                        mDialog_loading.dismiss();
+                                        Log.w(TAG, "找不到該使用者，可能信箱或密碼打錯");
                                     } else {
                                         Log.d(TAG, "Error listing documents: ", task.getException());
-                                        mDialog_loading.dismiss();
                                     }
+                                    mDialog_loading.dismiss();
 
                                 }
                             });
-                            dialogAddTargetTracked.dismiss();
-                        } else {
-                            dialogAddTargetTracked.dismiss();
                         }
+                        dialogAddTargetTracked.dismiss();
                     }
                 });
-                dialogAddTargetTracked.show();
                 break;
             }
         }
@@ -280,7 +278,7 @@ public class AccountActivity extends AppCompatActivity {
         mIMEI = telephonyManager.getDeviceId();
     }
 
-    //Create user to firestore
+    //顯示對話筐，輸入定位密碼
     private void showDialogCreateUser(final FirebaseUser user) {
         final EditText ed_password = new EditText(AccountActivity.this);
         ed_password.setHint(R.string.fui_password_hint);
@@ -290,8 +288,8 @@ public class AccountActivity extends AppCompatActivity {
         //要求使用者建立一組密碼，用於加強定位的安全性
         new AlertDialog.Builder(AccountActivity.this)
                 .setCancelable(false)
-                .setTitle("別擔心")
-                .setMessage("為了加強您的定位安全，請設定一組密碼，任何人皆需要該組密碼，才能將您列為為追蹤目標")
+                .setTitle(getString(R.string.dialogTitle_positionSafe))
+                .setMessage(getString(R.string.dialogMsg_pleaseSetPassword))
                 .setView(ed_password)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
@@ -307,7 +305,7 @@ public class AccountActivity extends AppCompatActivity {
                                 public void onSuccess(Void aVoid) {
                                     //建立使用者成功
                                     Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
-                                    //todo  寫入手機ＤＢ使用者信箱密碼 ，日後用於新建位置、查詢位置
+                                    //寫入手機 datebase 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
                                     MainDb.addUser(AccountActivity.this, user.getEmail(), password,
                                             UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
                                     //更新使用者資訊
@@ -379,22 +377,27 @@ public class AccountActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 建立使用者成功後，為使用者初始化 firestore 座標文件
+     */
     private void initFirestoreLocation() {
+        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+        String email = firebaseUser.getEmail();
         String password = "";
         List<User> userList = MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_SENDLOCATION);
         for (User user : userList) {
-            password = user.getPassword();
+            if (user.getEmail().equals(firebaseUser.getEmail())) {
+                password = user.getPassword();
+            }
         }
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        if (firebaseUser.getEmail() != null && !password.trim().equals("")) {
-
-        }
-        //初始化 1 個座標
-        for (int documentId = 1; documentId <= MAX_DOCUMENT_LOCATIION; documentId++) {
-            RadarFirestore.createLocation(String.valueOf(documentId), firebaseUser.getEmail(),
-                    password, firebaseUser.getUid(),
-                    mIMEI, 0, 0, null, null
-            );
+        if (email != null && !password.trim().equals("")) {
+            //初始化 1 個座標
+            for (int documentId = 1; documentId <= MAX_DOCUMENT_LOCATION; documentId++) {
+                RadarFirestore.createLocation(String.valueOf(documentId), email, password,
+                        firebaseUser.getUid(), mIMEI, 0, 0,
+                        null, null
+                );
+            }
         }
     }
 
@@ -408,8 +411,10 @@ public class AccountActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
                 final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                Log.i(TAG, "Name: " + user.getDisplayName() + "\n" +
-                        "UID: " + user.getUid());
+                if (debug) {
+                    Log.d(TAG, "Name: " + user.getDisplayName() + "\n" +
+                            "email: " + user.getEmail());
+                }
                 mDialog_loading.show();
                 //檢查是否第一次登入
                 RadarFirestore.checkUserExists(user.getEmail(), new OnCompleteListener<QuerySnapshot>() {
@@ -426,7 +431,7 @@ public class AccountActivity extends AppCompatActivity {
                                     updateAuthInfo(user);
                                 } else {
                                     //可能是在非綁定的裝置登入
-                                    Log.i(TAG, "該帳號已綁定於其他裝置.");
+                                    Log.w(TAG, "該帳號已綁定於其他裝置.");
                                     //提示使用者該帳號已綁定於其他裝置
                                     new AlertDialog.Builder(AccountActivity.this)
                                             .setTitle(R.string.dialog_title_ops)
@@ -444,7 +449,7 @@ public class AccountActivity extends AppCompatActivity {
                             showDialogCreateUser(user);
                         } else {
                             //不應該發生的錯誤
-                            Log.i(TAG, "Task is not successful when checkUserExists.");
+                            Log.d(TAG, "Task is not successful when checkUserExists.");
                             //強制登出
                             RadarAuthentication.signOut(AccountActivity.this, null);
                             updateAuthInfo(null);
@@ -459,7 +464,7 @@ public class AccountActivity extends AppCompatActivity {
                 Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
                 int errorCode = response.getError().getErrorCode();
                 String errorMsg = response.getError().getMessage();
-                Log.i(TAG, "ErrorCode: " + errorCode + "Msg: " + errorMsg);
+                Log.d(TAG, "ErrorCode: " + errorCode + "Msg: " + errorMsg);
             }
         }
 
@@ -509,7 +514,7 @@ public class AccountActivity extends AppCompatActivity {
                         new AlertDialog.Builder(AccountActivity.this)
                                 .setTitle("問問你～")
                                 .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + account +
-                                        "</font> 為目前追蹤對象嗎？"))
+                                        "</font> \n為目前追蹤對象嗎？"))
                                 .setCancelable(false)
                                 .setPositiveButton("是的", new DialogInterface.OnClickListener() {
                                     @Override
@@ -522,7 +527,6 @@ public class AccountActivity extends AppCompatActivity {
                                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-
                                     }
                                 })
                                 .show();

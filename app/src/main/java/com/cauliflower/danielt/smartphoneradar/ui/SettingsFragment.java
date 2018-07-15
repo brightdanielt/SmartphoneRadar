@@ -76,7 +76,9 @@ public class SettingsFragment extends PreferenceFragment implements
         if (null != preference) {
             if (preference instanceof ListPreference) {
                 setPreferenceSummary(preference, sharedPreferences.getString(key, ""));
-                showDialogSettingWorkNextTime();
+                if (RadarService.mInService) {
+                    showDialogSettingWorkNextTime();
+                }
             } else {
                 //Start RadarService if turn on the switch
                 if (sharedPreferences.getBoolean(key, false)) {
