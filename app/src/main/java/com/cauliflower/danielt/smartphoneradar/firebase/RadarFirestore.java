@@ -17,6 +17,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -197,7 +199,7 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void createLocation(String coordinateId, String email,String password, String uid,
+    public static void createLocation(String coordinateId, String email, String password, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
@@ -241,7 +243,7 @@ public class RadarFirestore {
      * @param latitude  The latitude of the device.
      * @param longitude The longitude of the device.
      */
-    public static void updateLocation(String coordinateId, String email,String password, String uid,
+    public static void updateLocation(String coordinateId, String email, String password, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
@@ -285,15 +287,17 @@ public class RadarFirestore {
      *
      * @param email    The email that user sign in facebook.
      * @param password The user's password for verification.
+     * @return ListenerRegistration ,we can stop listening by calling ListenerRegistration.remove();
      */
-    public static void setOnLocationUpdateListener(String email, String password, EventListener<QuerySnapshot> onLocationUpdate) {
+    public static ListenerRegistration setOnLocationUpdateListener(String email, String password,
+                                                                   EventListener<QuerySnapshot> onLocationUpdate) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection(FIRESTORE_COLLECTION_USER)
+        Query query = db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
                 //Listen to multiple documents in  collection_coordinate
-                .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password)
-                .addSnapshotListener(onLocationUpdate);
+                .whereEqualTo(FIRESTORE_FIELD_PASSWORD, password);
+        return query.addSnapshotListener(onLocationUpdate);
                 /*.addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,

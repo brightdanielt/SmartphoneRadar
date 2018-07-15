@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.android.clustering.ClusterItem;
@@ -56,6 +57,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RecyclerView mRecyclerView_location;
     private LocationAdapter mLocationAdapter;
     private LinearLayout mLinearLayout_wrapRecyclerView;
+    private ListenerRegistration mLocationListenerRg;
 
     //用於手機 DB
     private List<SimpleLocation> mLocationList = new ArrayList<>();
@@ -104,13 +106,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         makeViewWork();
 
         //判斷是否查得正在追蹤對象
         if (mEmail != null && mPassword != null) {
             //監聽該追蹤對象的座標更新
-            RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, new EventListener<QuerySnapshot>() {
+            mLocationListenerRg = RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, new EventListener<QuerySnapshot>() {
                 @Override
                 public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
                     //監聽失敗
@@ -384,6 +385,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onStop() {
         super.onStop();
+        //Stop listening location update
+        if (mLocationListenerRg != null) {
+            mLocationListenerRg.remove();
+        }
     }
 
     @Override
