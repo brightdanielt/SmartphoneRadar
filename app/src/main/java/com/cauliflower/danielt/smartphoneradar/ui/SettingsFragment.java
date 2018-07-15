@@ -40,7 +40,6 @@ public class SettingsFragment extends PreferenceFragment implements
         // Implement OnSharedPreferenceChangeListener from SettingsFragment
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
-    private static final int LOADER_ID = 1;
     private FirebaseAuth mAuth;
     String mEmail_targetTracked, mPassword_targetTracked;
 
@@ -148,7 +147,7 @@ public class SettingsFragment extends PreferenceFragment implements
 
     //設定 Preference 的 enable、checked、summary
     private void initPreference() {
-        //先恢復成預設值
+        //Find preference
         findPreference(getString(R.string.pref_key_AccountActivity)).setEnabled(true);
         Preference mapsActivity = findPreference(getString(R.string.pref_key_MapsActivity));
         Preference position = findPreference(getString(R.string.pref_key_position));
@@ -156,9 +155,9 @@ public class SettingsFragment extends PreferenceFragment implements
         SwitchPreference switchPosition = (SwitchPreference) position;
         ListPreference listFrequency = (ListPreference) frequency;
 
-        mapsActivity.setEnabled(false);
+        //MapsActivity preference
         setPreferenceSummary(mapsActivity, "");
-
+        mapsActivity.setEnabled(false);
         //向資料庫查詢追蹤目標
         List<User> userList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (User targetTracked : userList_targetTracked) {
@@ -167,7 +166,6 @@ public class SettingsFragment extends PreferenceFragment implements
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
                 mEmail_targetTracked = targetTracked.getEmail();
                 mPassword_targetTracked = targetTracked.getPassword();
-                //MapsActivity
                 mapsActivity.setEnabled(true);
                 setPreferenceSummary(mapsActivity, mEmail_targetTracked);
                 break;
@@ -177,26 +175,27 @@ public class SettingsFragment extends PreferenceFragment implements
         //取得使用者資訊
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
         if (firebaseUser != null) {
+            //以登入
             String email = firebaseUser.getEmail().trim();
 
-            //定位開關
+            //position preference
             position.setEnabled(true);
-//            switchPosition.setChecked(RadarPreferences.getPositionCheck(getActivity()));
             setPreferenceSummary(position, email);
 
-            //定位頻率
+            //updateFrequency preference
             frequency.setEnabled(true);
-//            listFrequency.setValue(RadarPreferences.getUpdateFrequency(getActivity()));
             setPreferenceSummary(frequency, RadarPreferences.getUpdateFrequency(getActivity()));
-        }else {
-            frequency.setEnabled(false);
+        } else {
+            //未登入
+            //position preference
             position.setEnabled(false);
-
             setPreferenceSummary(position, getResources().getBoolean(R.bool.pref_defaultValue_position));
-            setPreferenceSummary(frequency, R.string.pref_defaultValue_updateFrequency);
-
             switchPosition.setChecked(getResources().getBoolean(R.bool.pref_defaultValue_position));
+
+            //updateFrequency preference
+            frequency.setEnabled(false);
             listFrequency.setValue(getString(R.string.pref_defaultValue_updateFrequency));
+            setPreferenceSummary(frequency, R.string.pref_defaultValue_updateFrequency);
         }
 
     }
@@ -219,7 +218,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (jobScheduler != null) {
             jobScheduler.schedule(netWatcherInfo);
         } else {
-            Log.i(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while scheduling job");
+            Log.w(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while scheduling job");
         }
     }
 
@@ -232,7 +231,7 @@ public class SettingsFragment extends PreferenceFragment implements
         if (jobScheduler != null) {
             jobScheduler.cancel(NET_WATCHER_JOB_ID);
         } else {
-            Log.i(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while cancel job");
+            Log.w(TAG, "Can not get system service: JOB_SCHEDULER_SERVICE while cancel job");
         }
     }
 
