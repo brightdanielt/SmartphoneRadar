@@ -110,7 +110,23 @@
     <string name="please_receive_verification_code">請到E-mail接收驗證碼</string>
     <string name="update_password_success">更新密碼成功</string>
     <string name="title_forget_password">忘記密碼</string>
+    <string name="email">Email</string>
+    <string name="nickName">暱稱</string>
+    <string name="phoneNumber">電話</string>
 
+    <!--MyDialog-->
+    <string name="no_internet">請檢查網路是否已連線</string>
+    <string name="ok">好了</string>
+    <string name="sure">確定</string>
+    <string name="cancel">取消</string>
+    <string name="title_signUp">註冊</string>
+    <string name="title_logIn">登入</string>
+    <string name="send_verification_code">發送驗證碼</string>
+    <string name="edTxt_hint_email">Email</string>
+    <string name="edTxt_hint_password">定位密碼</string>
+    <string name="edTxt_error_email">請輸入Email</string>
+    <string name="edTxt_error_password">請輸入定位密碼</string>
+    <string name="forget_password">忘記密碼</string>
     <string name="digits_account">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="digits_password">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="digits_email">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@."</string>
@@ -127,18 +143,6 @@
     <!--RadarService-->
     <string name="updateLocationFailed_close_service">伺服器連線異常，將關閉雷達服務</string>
 
-    <!--MyDialog-->
-    <string name="no_internet">請檢查網路是否已連線</string>
-    <string name="ok">好了</string>
-    <string name="cancel">取消</string>
-    <string name="title_signUp">註冊</string>
-    <string name="title_logIn">登入</string>
-    <string name="send_verification_code">發送驗證碼</string>
-    <string name="edTxt_hint_email">Email</string>
-    <string name="edTxt_hint_password">定位密碼</string>
-    <string name="edTxt_error_email">請輸入Email</string>
-    <string name="edTxt_error_password">請輸入定位密碼</string>
-    <string name="forget_password">忘記密碼</string>
 
     <!--ProgressDialog-->
     <string name="loading">載入中</string>

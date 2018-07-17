@@ -62,7 +62,8 @@ public class RadarAuthentication {
     public static Uri getDifferentPhotoSize(Uri photoUri,int height){
         if (photoUri != null) {
 
-            return photoUri.buildUpon().appendQueryParameter("height",String.valueOf(height)).build();
+            return photoUri.buildUpon().appendQueryParameter("type","large").build();
+//            return photoUri.buildUpon().appendQueryParameter("height",String.valueOf(height)).build();
         }
         return null;
     }
