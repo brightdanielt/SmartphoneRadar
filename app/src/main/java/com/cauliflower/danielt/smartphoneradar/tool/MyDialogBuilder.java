@@ -21,7 +21,7 @@ public class MyDialogBuilder extends AlertDialog.Builder {
         this.setTitle(context.getString(resId_title));
 
         View view = LayoutInflater.from(context).inflate(R.layout.dialog_add_target_tracked, null);
-        edTxt_email = view.findViewById(R.id.dialog_edTxt_account);
+        edTxt_email = view.findViewById(R.id.dialog_edTxt_email);
         edTxt_password = view.findViewById(R.id.dialog_edTxt_password);
         btn_ok = view.findViewById(R.id.dialog_btn_ok);
         btn_cancel = view.findViewById(R.id.dialog_btn_cancel);

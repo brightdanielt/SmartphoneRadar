@@ -318,7 +318,7 @@ public class AccountActivity extends AppCompatActivity {
                                     //更新使用者資訊
                                     updateAuthInfo(mAuth.getCurrentUser());
                                     //初始化座標文件
-                                    initFirestoreLocation();
+                                    initFirestoreLocation(mAuth.getCurrentUser());
                                 }
                             }, new OnFailureListener() {
                                 @Override
@@ -394,17 +394,26 @@ public class AccountActivity extends AppCompatActivity {
     /**
      * 建立使用者成功後，為使用者初始化 firestore 座標文件
      */
-    private void initFirestoreLocation() {
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        String email = firebaseUser.getEmail();
+    private void initFirestoreLocation(FirebaseUser firebaseUser) {
+        String email;
         String password = "";
+        if (firebaseUser == null) {
+            RadarAuthentication.signOut(AccountActivity.this, null);
+            return;
+        }
+        email = firebaseUser.getEmail();
+        if (email == null || email.trim().equals("")) {
+            showNoEmailDialog();
+            RadarAuthentication.signOut(AccountActivity.this, null);
+            return;
+        }
         List<User> userList = MainDb.searchUser(AccountActivity.this, USED_FOR_SENDLOCATION);
         for (User user : userList) {
             if (user.getEmail().equals(firebaseUser.getEmail())) {
                 password = user.getPassword();
             }
         }
-        if (email != null && !password.trim().equals("")) {
+        if (!password.trim().equals("")) {
             //初始化 1 個座標
             for (int documentId = 1; documentId <= MAX_DOCUMENT_LOCATION; documentId++) {
                 RadarFirestore.createLocation(String.valueOf(documentId), email, password,
@@ -413,6 +422,30 @@ public class AccountActivity extends AppCompatActivity {
                 );
             }
         }
+    }
+
+    //提醒使用者 Facebook 帳號尚未設定 Email
+    private void showNoEmailDialog() {
+        new AlertDialog.Builder(AccountActivity.this)
+                .setCancelable(true)
+                .setTitle(R.string.dialog_title_ops)
+                .setMessage(R.string.userFbHasNoEmail)
+                .create().show();
+    }
+
+    //檢查使用者 facebook 有沒有 email
+    private boolean userHasEmail(FirebaseUser user) {
+        if (debug) {
+            Log.d(TAG, "Name: " + user.getDisplayName() + "\n" + "email: " + user.getEmail());
+        }
+        if (user == null) {
+            return false;
+        }
+        String email = user.getEmail();
+        if (email == null || email.trim().equals("")) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -424,14 +457,15 @@ public class AccountActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (debug) {
-                    Log.d(TAG, "Name: " + user.getDisplayName() + "\n" +
-                            "email: " + user.getEmail());
+                final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (!userHasEmail(firebaseUser)) {
+                    showNoEmailDialog();
+                    RadarAuthentication.signOut(AccountActivity.this, null);
+                    return;
                 }
                 mDialog_loading.show();
                 //檢查是否第一次登入
-                RadarFirestore.checkUserExists(user.getEmail(), new OnCompleteListener<QuerySnapshot>() {
+                RadarFirestore.checkUserExists(firebaseUser.getEmail(), new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         mDialog_loading.dismiss();
@@ -441,13 +475,13 @@ public class AccountActivity extends AppCompatActivity {
                                 String resultPassword = document.getString(RadarFirestore.FIRESTORE_FIELD_PASSWORD);
                                 String resultImei = document.getString(RadarFirestore.FIRESTORE_FIELD_IMEI);
                                 String resultUid = document.getString(RadarFirestore.FIRESTORE_FIELD_UID);
-                                if (user.getUid().equals(resultUid) && user.getEmail().equals(resultEmail)
+                                if (firebaseUser.getUid().equals(resultUid) && firebaseUser.getEmail().equals(resultEmail)
                                         && mIMEI.equals(resultImei)) {
                                     //Firestore 存在該使用者
                                     //將使用者新增至手機資料庫
                                     MainDb.addUser(AccountActivity.this, resultEmail, resultPassword,
                                             USED_FOR_SENDLOCATION, IN_USE_YES);
-                                    updateAuthInfo(user);
+                                    updateAuthInfo(firebaseUser);
                                 } else {
                                     //可能是在非綁定的裝置登入
                                     Log.w(TAG, "該帳號已綁定於其他裝置.");
@@ -464,7 +498,7 @@ public class AccountActivity extends AppCompatActivity {
                             }
                         } else if (task.isSuccessful() && task.getResult().size() < 1) {
                             //Firestore 不存在該使用者，代表第一次登入，向 firestore 新增使用者
-                            showDialogCreateUser(user);
+                            showDialogCreateUser(firebaseUser);
                         } else {
                             //不應該發生的錯誤
                             Log.d(TAG, "Task is not successful when checkUserExists.");
