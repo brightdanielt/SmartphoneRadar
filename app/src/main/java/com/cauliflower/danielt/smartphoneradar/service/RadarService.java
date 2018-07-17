@@ -57,8 +57,8 @@ public class RadarService extends Service {
     private FirebaseAuth mAuth;
 
     //更新座標失敗次數不能超過 3 次
-    private static final int UPDATE_FAILURE_MAXIMUM = 3;
-    private int mUpdateLocationFailureCount = 0;
+    private static final int UPDATE_LOCATION_FAILED_MAXIMUM = 3;
+    private int mUpdateLocationFailedCount = 0;
 
     public RadarService() {
     }
@@ -140,6 +140,9 @@ public class RadarService extends Service {
 
     }
 
+    /**
+     * Set up location request
+     * */
     private void createLocationRequest() {
         int frequency = Integer.parseInt(RadarPreferences.getUpdateFrequency(RadarService.this));
         mLocationRequest = new LocationRequest();
@@ -151,15 +154,22 @@ public class RadarService extends Service {
         }
     }
 
+    /**
+     * Implement callback after get location
+     */
     private void createLocationCallback() {
         //取得裝置位置後的動作
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                //更新目標文件 id
-//                updateDocumentId();
-                final Location location = locationResult.getLastLocation();
                 Log.i(TAG, "Get location result");
+                //更新目標文件 id
+                /*updateDocumentId();*/
+                final Location location = locationResult.getLastLocation();
+                //檢查座標是否有效
+                if (!isValidLocation(location)) {
+                    return;
+                }
                 //更新位置資訊到 firestore
                 RadarFirestore.updateLocation(String.valueOf(mDocumentId), mEmail, mPassword,
                         mAuth.getUid(), mIMEI, location.getLatitude(), location.getLongitude(),
@@ -167,23 +177,32 @@ public class RadarService extends Service {
                             @Override
                             public void onSuccess(Void aVoid) {
                                 //更新成功
-                                Log.d(TAG, "UpdateLocation success:");
+                                Log.d(TAG, "Successfully update location");
                             }
                         }, new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 //更新失敗
-                                mUpdateLocationFailureCount++;
-                                if (mUpdateLocationFailureCount > UPDATE_FAILURE_MAXIMUM) {
+                                mUpdateLocationFailedCount++;
+                                if (mUpdateLocationFailedCount > UPDATE_LOCATION_FAILED_MAXIMUM) {
                                     Toast.makeText(RadarService.this,
-                                            getString(R.string.serverNoResponse_close_service), Toast.LENGTH_SHORT).show();
+                                            getString(R.string.updateLocationFailed_close_service), Toast.LENGTH_SHORT).show();
                                     RadarService.this.stopSelf();
                                 }
-                                Log.d(TAG, "updateLocation failure times:" + mUpdateLocationFailureCount, e);
+                                Log.d(TAG, "Update location failed count:" + mUpdateLocationFailedCount, e);
                             }
                         });
             }
         };
+    }
+
+    /**
+     * Start request location
+     */
+    @SuppressLint("MissingPermission")
+    private void fuseLocationRequest() {
+        mClient = LocationServices.getFusedLocationProviderClient(RadarService.this);
+        mClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
     }
 
     /**
@@ -200,21 +219,27 @@ public class RadarService extends Service {
     }
 
     /**
-     * 判斷上一次更新到 firestore的座標 與現在的座標距離是否大於 ＸＸＸ
+     * 判斷上一次更新到 firestore 的座標 與現在的座標距離是否大於 15 公尺; 避免使用者靜止時更新大量無效座標
      *
-     * @return true 距離大於ＸＸＸ，應該向 firestore 更新該座標
-     * @return false 距離小於等於ＸＸＸ，不應該向 firestore 更新該座標
+     * @return true 距離大於 15 公尺，應該向 firestore 更新該座標; 若尚無座標可比對，也視同有效座標
+     * @return false 距離小於等於 15 公尺，不應該向 firestore 更新該座標
      */
     private Location mLastValidLocation;
+    private static final float VALID_DISTANCE = 15f;
 
-    private boolean isValidLocation(LocationResult result) {
-        return false;
-    }
-
-    @SuppressLint("MissingPermission")
-    private void fuseLocationRequest() {
-        mClient = LocationServices.getFusedLocationProviderClient(RadarService.this);
-        mClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+    private boolean isValidLocation(Location location) {
+        if (mLastValidLocation != null) {
+            float distance = location.distanceTo(mLastValidLocation);
+            if (distance > VALID_DISTANCE) {
+                mLastValidLocation = location;
+                Log.d(TAG, "Valid location," + distance + " > " + VALID_DISTANCE);
+                return true;
+            }
+            Log.d(TAG, "Invalid location," + distance + " <= " + VALID_DISTANCE);
+            return false;
+        }
+        mLastValidLocation = location;
+        return true;
     }
 
     //每 15 秒 log 一次 service 是不是還活著

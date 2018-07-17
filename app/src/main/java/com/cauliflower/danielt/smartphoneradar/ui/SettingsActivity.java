@@ -47,19 +47,11 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.settings_activity_menu, menu);
         return true;
     }
 
-    /**
-     * 點擊 Menu item 時呼叫 SettingsFragment 的方法
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_refreshAll) {
-            FragmentManager manager = getFragmentManager();
-            SettingsFragment settingsFragment = (SettingsFragment) manager.findFragmentById(R.id.radar_settings_fragment);
-        }
         return true;
     }
 
