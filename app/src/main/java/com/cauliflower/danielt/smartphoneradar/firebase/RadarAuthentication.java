@@ -2,6 +2,7 @@ package com.cauliflower.danielt.smartphoneradar.firebase;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -56,5 +57,13 @@ public class RadarAuthentication {
         AuthUI.getInstance()
                 .delete(context)
                 .addOnCompleteListener(listener);
+    }
+
+    public static Uri getDifferentPhotoSize(Uri photoUri,int height){
+        if (photoUri != null) {
+
+            return photoUri.buildUpon().appendQueryParameter("height",String.valueOf(height)).build();
+        }
+        return null;
     }
 }

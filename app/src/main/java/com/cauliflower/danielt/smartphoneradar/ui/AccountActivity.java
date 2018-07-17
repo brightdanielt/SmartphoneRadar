@@ -183,7 +183,8 @@ public class AccountActivity extends AppCompatActivity {
         if (firebaseUser != null) {
             mTv_userInfo.setText(firebaseUser.getEmail());
             new LoadBitmapFromUri().execute(
-                    firebaseUser.getPhotoUrl().buildUpon().appendQueryParameter("type","large").build());
+                    RadarAuthentication.getDifferentPhotoSize(
+                            firebaseUser.getPhotoUrl(), 300));
             mBtn_signIn.setText(R.string.signOut);
         } else {
             mTv_userInfo.setText("");
@@ -355,6 +356,9 @@ public class AccountActivity extends AppCompatActivity {
 
         @Override
         protected Bitmap doInBackground(Uri... uris) {
+            if (uris[0] == null) {
+                LoadBitmapFromUri.this.cancel(true);
+            }
             Log.i(TAG, uris[0].toString());
             try {
                 URL url = new URL(uris[0].toString());
