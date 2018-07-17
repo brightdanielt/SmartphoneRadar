@@ -28,7 +28,6 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
-import com.cauliflower.danielt.smartphoneradar.network.ConnectServer;
 import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;

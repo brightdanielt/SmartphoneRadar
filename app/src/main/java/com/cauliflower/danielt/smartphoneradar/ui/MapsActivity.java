@@ -1,6 +1,7 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -119,6 +120,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         Log.d(TAG, "setOnLocationUpdateListener failed", e);
                         return;
                     }
+                    //Document has local changes that haven't been written to the backend yet
+                    /*if (value.getMetadata().hasPendingWrites()) {
+                        //代表監聽到 local 的更新，而非來自 firestore 的更新
+                        //這是延遲補償的設計所導致的，但監聽座標不需要該功能
+                        return;
+                    }*/
                     //監聽成功
                     if (value != null) {
                         //處理座標資料
@@ -138,11 +145,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
         mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mEmail));
-        mLocationAdapter = new LocationAdapter(mLocationList);
+        mLocationAdapter = new LocationAdapter();
         //item 大小固定
         mRecyclerView_location.setHasFixedSize(true);
         mRecyclerView_location.setAdapter(mLocationAdapter);
         mRecyclerView_location.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView_location.scrollToPosition(mLocationList.size()-1);
 
         //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
         //取出 listLocation 物件作為 item 的資料，同時添增標記
@@ -196,7 +204,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (QueryDocumentSnapshot doc : value) {
             //驗證身份
             if (mPassword.equals(doc.getString(FIRESTORE_FIELD_PASSWORD))) {
-                double latitude, longitude;
+                final double latitude, longitude;
                 Date dateFromServer;
                 //檢查資料是否齊全
                 if (doc.getDouble(FIRESTORE_FIELD_LATITUDE) != null
@@ -220,7 +228,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return;
                 }
                 //格式化字串
-                String time = DateFormat.getDateTimeInstance().format(dateFromServer);
+                final String time = DateFormat.getDateTimeInstance().format(dateFromServer);
+
                 //手機端資料庫新增一筆 Location
                 MainDb.addLocation(MapsActivity.this, mEmail, latitude, longitude, time);
 
@@ -270,7 +279,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             /*int j = dateFromDb.compareTo(dateFromServer);
             boolean a = dateFromDb.before(dateFromServer);
             boolean c = dateFromDb.equals(dateFromServer);*/
-            if (dateFromDb.after(dateFromServer)) {
+            if (dateFromDb.after(dateFromServer)||dateFromDb.equals(dateFromServer)) {
                 //是舊(過期)的時間
                 Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
                 return true;
@@ -397,10 +406,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHolder> {
-        private List<SimpleLocation> mLocationList;
 
-        LocationAdapter(List<SimpleLocation> list) {
-            mLocationList = list;
+        LocationAdapter() {
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
@@ -442,7 +449,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 }
             });
@@ -458,6 +464,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mLocationList.add(location);
                 //刷新座標清單
                 LocationAdapter.this.notifyDataSetChanged();
+                mRecyclerView_location.scrollToPosition(mLocationList.size()-1);
             }
         }
     }

@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
@@ -60,6 +61,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.IN_USE_YES;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_SENDLOCATION;
 
 public class AccountActivity extends AppCompatActivity {
 
@@ -311,7 +314,7 @@ public class AccountActivity extends AppCompatActivity {
                                     Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
                                     //寫入手機 datebase 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
                                     MainDb.addUser(AccountActivity.this, user.getEmail(), password,
-                                            UserEntry.USED_FOR_SENDLOCATION, UserEntry.IN_USE_YES);
+                                            USED_FOR_SENDLOCATION, IN_USE_YES);
                                     //更新使用者資訊
                                     updateAuthInfo(mAuth.getCurrentUser());
                                     //初始化座標文件
@@ -395,7 +398,7 @@ public class AccountActivity extends AppCompatActivity {
         FirebaseUser firebaseUser = mAuth.getCurrentUser();
         String email = firebaseUser.getEmail();
         String password = "";
-        List<User> userList = MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_SENDLOCATION);
+        List<User> userList = MainDb.searchUser(AccountActivity.this, USED_FOR_SENDLOCATION);
         for (User user : userList) {
             if (user.getEmail().equals(firebaseUser.getEmail())) {
                 password = user.getPassword();
@@ -435,11 +438,15 @@ public class AccountActivity extends AppCompatActivity {
                         if (task.isSuccessful() && task.getResult().size() > 0) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
+                                String resultPassword = document.getString(RadarFirestore.FIRESTORE_FIELD_PASSWORD);
                                 String resultImei = document.getString(RadarFirestore.FIRESTORE_FIELD_IMEI);
                                 String resultUid = document.getString(RadarFirestore.FIRESTORE_FIELD_UID);
                                 if (user.getUid().equals(resultUid) && user.getEmail().equals(resultEmail)
                                         && mIMEI.equals(resultImei)) {
                                     //Firestore 存在該使用者
+                                    //將使用者新增至手機資料庫
+                                    MainDb.addUser(AccountActivity.this, resultEmail, resultPassword,
+                                            USED_FOR_SENDLOCATION, IN_USE_YES);
                                     updateAuthInfo(user);
                                 } else {
                                     //可能是在非綁定的裝置登入
@@ -513,7 +520,7 @@ public class AccountActivity extends AppCompatActivity {
             final String usedFor = userList.get(position).getUsedFor();
             String in_use = userList.get(position).getIn_use();
             tv_account.setText(account);
-            if (in_use.equals(UserEntry.IN_USE_YES)) {
+            if (in_use.equals(IN_USE_YES)) {
                 tv_account.append(" 追蹤對象");
             }
             convertView = v;

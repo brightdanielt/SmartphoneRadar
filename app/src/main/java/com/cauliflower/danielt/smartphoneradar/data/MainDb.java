@@ -26,6 +26,7 @@ public final class MainDb {
     }
 
     public static void addUser(Context context, String email, String password, String usedFor, String in_use) {
+        //先檢查使否存在該使用者
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.UserEntry.CONTENT_URI,
                 new String[]{RadarContract.UserEntry.COLUMN_USER_EMAIL},
@@ -33,7 +34,7 @@ public final class MainDb {
                 new String[]{email, usedFor}, null);
         if (cursor != null) {
             cursor.moveToFirst();
-            //不存在該user則能夠新增
+            //不存在該 user 則能夠新增
             if (cursor.getCount() == 0) {
                 cursor.close();
                 ContentValues values = new ContentValues();
@@ -44,7 +45,7 @@ public final class MainDb {
                 Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
                 Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
             } else {
-                Log.i(context.getClass().toString(), "The same email already exists ,do not add the user.");
+                Log.i(context.getClass().toString(), "The same email already exists ,stop add the user.");
             }
         } else {
             Log.i(context.getClass().toString(), "Query return null cursor");
