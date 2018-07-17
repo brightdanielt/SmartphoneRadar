@@ -55,6 +55,8 @@ public class RadarService extends Service {
     //在 firebase 的座標文件數量
     private int mDocumentId = 1;
     private FirebaseAuth mAuth;
+    private Location mLastValidLocation;
+    private static final float VALID_DISTANCE = 50;
 
     //更新座標失敗次數不能超過 3 次
     private static final int UPDATE_LOCATION_FAILED_MAXIMUM = 3;
@@ -142,7 +144,7 @@ public class RadarService extends Service {
 
     /**
      * Set up location request
-     * */
+     */
     private void createLocationRequest() {
         int frequency = Integer.parseInt(RadarPreferences.getUpdateFrequency(RadarService.this));
         mLocationRequest = new LocationRequest();
@@ -221,12 +223,8 @@ public class RadarService extends Service {
     /**
      * 判斷上一次更新到 firestore 的座標 與現在的座標距離是否大於 15 公尺; 避免使用者靜止時更新大量無效座標
      *
-     * @return true 距離大於 15 公尺，應該向 firestore 更新該座標; 若尚無座標可比對，也視同有效座標
      * @return false 距離小於等於 15 公尺，不應該向 firestore 更新該座標
      */
-    private Location mLastValidLocation;
-    private static final float VALID_DISTANCE = 15f;
-
     private boolean isValidLocation(Location location) {
         if (mLastValidLocation != null) {
             float distance = location.distanceTo(mLastValidLocation);

@@ -1,7 +1,7 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -27,8 +27,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -150,7 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView_location.setHasFixedSize(true);
         mRecyclerView_location.setAdapter(mLocationAdapter);
         mRecyclerView_location.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView_location.scrollToPosition(mLocationList.size()-1);
+        mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
 
         //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
         //取出 listLocation 物件作為 item 的資料，同時添增標記
@@ -245,11 +248,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mClusterManager.addItem(new MyItem(null, latitude, longitude, time, ""));
 
                 //鏡頭移動至該新座標
-                LatLng latLng = new LatLng(latitude, longitude);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                mMap.moveCamera(
+                        CameraUpdateFactory.newLatLngZoom(
+                                //zoom level 2 to 21
+                                new LatLng(latitude, longitude), 20));
+
+                //繪製路線
+                drawRoute();
 
                 //提示使用者有新的座標
-                getSupportActionBar().setSubtitle(getString(R.string.get_new_location) + ": " + time);
+                getSupportActionBar().setSubtitle(time);
             } else {
                 Log.w(TAG, "handleLocation，身份驗證失敗");
             }
@@ -279,7 +287,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             /*int j = dateFromDb.compareTo(dateFromServer);
             boolean a = dateFromDb.before(dateFromServer);
             boolean c = dateFromDb.equals(dateFromServer);*/
-            if (dateFromDb.after(dateFromServer)||dateFromDb.equals(dateFromServer)) {
+            if (dateFromDb.after(dateFromServer) || dateFromDb.equals(dateFromServer)) {
                 //是舊(過期)的時間
                 Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
                 return true;
@@ -290,6 +298,30 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
         return false;
+    }
+
+    /**
+     * Draw polyline between last location and new location
+     */
+    private void drawRoute() {
+        if (mLocationList.size() > 1) {
+            int size = mLocationList.size();
+            LatLng lastLocation = new LatLng(mLocationList.get(size - 2).getLatitude(),
+                    mLocationList.get(size - 2).getLongitude());
+            LatLng newLatLng = new LatLng(mLocationList.get(size - 1).getLatitude(),
+                    mLocationList.get(size - 1).getLongitude());
+
+            PolylineOptions options = new PolylineOptions()
+                    .add(lastLocation)
+                    .add(newLatLng)
+                    .color(Color.GREEN)
+                    .width(20)
+                    .clickable(true)
+                    .geodesic(true)
+                    .jointType(JointType.BEVEL)
+                    .startCap(new RoundCap());
+            mMap.addPolyline(options);
+        }
     }
 
     private class MyItem implements ClusterItem {
@@ -464,7 +496,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mLocationList.add(location);
                 //刷新座標清單
                 LocationAdapter.this.notifyDataSetChanged();
-                mRecyclerView_location.scrollToPosition(mLocationList.size()-1);
+                mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
             }
         }
     }
