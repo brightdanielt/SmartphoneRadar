@@ -1,78 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical|center_horizontal"
-    android:orientation="vertical"
-    android:background="@color/background">
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingTop="@dimen/default_margin"
+    android:orientation="vertical">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/dialog_edTxt_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:gravity="left"
+            android:hint="@string/edTxt_hint_email"
+            android:inputType="textEmailAddress" />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.design.widget.TextInputEditText
+            android:id="@+id/dialog_edTxt_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/default_margin"
+            android:layout_marginRight="@dimen/default_margin"
+            android:gravity="left"
+            android:hint="@string/edTxt_hint_password"
+            android:inputType="textPassword"
+            android:singleLine="true" />
+    </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:gravity="right"
+        android:orientation="horizontal">
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.design.widget.TextInputEditText
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:id="@+id/dialog_edTxt_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Email"
-                android:inputType="textEmailAddress"
-                android:gravity="center"/>
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-            <android.support.design.widget.TextInputEditText
-                android:id="@+id/dialog_edTxt_password"
-                android:layout_marginLeft="@dimen/default_margin"
-                android:layout_marginRight="@dimen/default_margin"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="定位密碼"
-                android:singleLine="true"
-                android:inputType="textPassword"
-                android:gravity="center"/>
-        </android.support.design.widget.TextInputLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/dialog_btn_forgetPassword"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:orientation="horizontal">
+            android:background="@null"
+            android:text="@string/forget_password"
+            android:textColor="@color/colorAccent"
+            android:visibility="invisible" />
 
-            <Button
-                android:id="@+id/dialog_btn_forgetPassword"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="忘記密碼"
-                android:textColor="@color/colorAccent"
-                android:visibility="invisible" />
+        <Button
+            android:id="@+id/dialog_btn_cancel"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
 
-            <Button
-                android:id="@+id/dialog_btn_cancel"
-                android:layout_width="70dp"
-                android:layout_height="wrap_content"
-                android:background="@null"
+            android:text="@string/cancel"
+            android:textColor="@color/colorAccent" />
 
-                android:text="@string/cancel"
-                android:textColor="@color/colorAccent" />
-
-            <Button
-                android:id="@+id/dialog_btn_ok"
-                android:layout_width="70dp"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:text="@string/ok"
-                android:textColor="@color/colorAccent" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/dialog_btn_ok"
+            android:layout_width="70dp"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:text="@string/ok"
+            android:textColor="@color/colorAccent" />
     </LinearLayout>
-
 
 </LinearLayout>

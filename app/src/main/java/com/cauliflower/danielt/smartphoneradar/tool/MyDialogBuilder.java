@@ -2,16 +2,16 @@ package com.cauliflower.danielt.smartphoneradar.tool;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.support.design.widget.TextInputEditText;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 
 public class MyDialogBuilder extends AlertDialog.Builder {
 
-    private EditText edTxt_email, edTxt_password;
+    private TextInputEditText edTxt_email, edTxt_password;
     Button btn_ok, btn_cancel;
 
     //用於添加追蹤目標
@@ -31,20 +31,22 @@ public class MyDialogBuilder extends AlertDialog.Builder {
 
     public String getEmail() {
         if (edTxt_email != null) {
-            String email = edTxt_email.getText().toString();
-            if (!(email.trim()).equals("")) {
+            String email = edTxt_email.getText().toString().trim();
+            if (email.length() != 0) {
                 return email;
             }
+            edTxt_email.setError(getContext().getString(R.string.edTxt_error_email));
         }
         return null;
     }
 
     public String getPassword() {
         if (edTxt_password != null) {
-            String password = edTxt_password.getText().toString();
-            if (!(password.trim()).equals("")) {
+            String password = edTxt_password.getText().toString().trim();
+            if (password.length() != 0) {
                 return password;
             }
+            edTxt_password.setError(getContext().getString(R.string.edTxt_error_password));
         }
         return null;
     }

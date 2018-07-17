@@ -34,7 +34,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/default_margin"
             android:background="@drawable/btn_bg_custom"
-            android:onClick="clickBtn"
+            android:onClick="clickButton"
             android:text="@string/signIn" />
     </LinearLayout>
 
@@ -72,7 +72,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_margin="@dimen/default_margin"
             android:background="@drawable/btn_bg_custom"
-            android:onClick="clickBtn"
+            android:onClick="clickButton"
             android:padding="@dimen/default_margin"
             android:text="@string/addTargetTracked" />
 

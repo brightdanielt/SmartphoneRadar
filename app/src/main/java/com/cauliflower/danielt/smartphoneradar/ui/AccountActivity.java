@@ -182,7 +182,8 @@ public class AccountActivity extends AppCompatActivity {
     private void updateAuthInfo(FirebaseUser firebaseUser) {
         if (firebaseUser != null) {
             mTv_userInfo.setText(firebaseUser.getEmail());
-            new LoadBitmapFromUri().execute(firebaseUser.getPhotoUrl());
+            new LoadBitmapFromUri().execute(
+                    firebaseUser.getPhotoUrl().buildUpon().appendQueryParameter("type","large").build());
             mBtn_signIn.setText(R.string.signOut);
         } else {
             mTv_userInfo.setText("");
@@ -191,8 +192,9 @@ public class AccountActivity extends AppCompatActivity {
         }
     }
 
-    public void clickBtn(View view) {
+    public void clickButton(View view) {
         switch (view.getId()) {
+            //登入
             case R.id.btn_singIn: {
                 if (mAuth.getCurrentUser() != null) {
                     //登出
@@ -215,6 +217,7 @@ public class AccountActivity extends AppCompatActivity {
                 }
                 break;
             }
+            //添加追蹤對象
             case R.id.btn_addTargetTracked: {
                 //顯示對話筐，輸入追蹤對象的 email 與 password
                 final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
@@ -226,6 +229,9 @@ public class AccountActivity extends AppCompatActivity {
                         if (v.getId() == R.id.dialog_btn_ok) {
                             final String email = builder.getEmail();
                             final String password = builder.getPassword();
+                            if (email == null || password == null) {
+                                return;
+                            }
                             mDialog_loading.show();
                             //檢查使用者權限
                             RadarFirestore.checkRightToReadUser(email, password, new OnCompleteListener<QuerySnapshot>() {
