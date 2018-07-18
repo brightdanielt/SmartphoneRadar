@@ -119,12 +119,19 @@
                 只有“查詢”帳號能夠選擇(done)
     todo 09: MapsActivity
                 為座標清單建立暫存，避免再次進入 MapsActivity 時重新向裝置端 database 查詢座標 ()
-    todo 10: 重構 RadarService, AccountActivity, SettingsFragment
+    todo 10: 重構 RadarService, AccountActivity, SettingsFragment(done)
 
     todo 11: RadarService 希望更新座標時 先判斷與上一次送出的座標距離，若距離在XXX內則不送出這次的座標，
     這樣做的優點是，追蹤該使用者時，不會因為使用者移動距離不大或沒有移動，卻持續監聽到更新的座標，
-    在一小時內，可能同一地圖區域內，存在了 720 個標記 （假設 5 秒更新一次座標）
+    在一小時內，可能同一地圖區域內，存在了 720 個標記 （假設 5 秒更新一次座標）(done)
 
     todo 12: 查閱 firestore 監聽文件
+     metadata.hasPending => true 代表是未寫入 firestore 的資料
+     其實不是監聽出問題，而是location丟錯位置了 RecyclerViewAdapter 跟他的父類別都有同名稱的 mLocationList
+     而新的 location add 到了父類別的 mLocationList，理所當然的，RecyclerView 永遠沒有新的資料，
+     後來決定只保留一個 locationList 就夠了(done)
+
+     todo 13: MapsActivity 新增功能，能刪除手機端資料庫內，舊的座標
+       實現方式：向左或右滑動 recyclerView 的 item 即刪除該筆資料
 
 -->
