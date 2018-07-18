@@ -88,10 +88,10 @@
 
 </manifest><!--
     todo 00: User story、使用流程、定位Service驗證 (done)
-    todo 01: Server 資料庫建立 (done)
-    todo 02: PHP 查詢 DB (done)
-    todo 02: Http 溝通 Server 的設計 (done)
-    todo 03: 註冊帳號 dialog (done)
+    todo 01: Server 資料庫建立 (done) 舊版功能
+    todo 02: PHP 查詢 DB (done) 舊版功能
+    todo 02: Http 溝通 Server 的設計 (done) 舊版功能
+    todo 03: 註冊帳號 dialog (done) 舊版功能
     todo 04: 帳號資訊 Activity (done)
     todo 05: 定位 Service (done)
     todo 06: 設定頁面：有關 sendLocation 的設定，使用 PreferenceFragment 實作該功能
@@ -133,5 +133,7 @@
 
      todo 13: MapsActivity 新增功能，能刪除手機端資料庫內，舊的座標
        實現方式：向左或右滑動 recyclerView 的 item 即刪除該筆資料
+
+     todo 14: 因為現今使用 firebase auth 與 firestore 需重新描述各功能如何實作完成，以及其規則
 
 -->
