@@ -72,7 +72,6 @@ public class AccountActivity extends AppCompatActivity {
 
     private String mIMEI, mModel;
 
-    //    private Button mBtn_signIn;
     private static final int MAX_DOCUMENT_LOCATION = 1;
     private ImageView imgView_userPhoto;
     private TextView mTv_userEmail, mTv_userNickName, mTv_userPhoneNumber, mTv_hintTargetTracked;
@@ -154,7 +153,6 @@ public class AccountActivity extends AppCompatActivity {
 
     private void makeViewWork() {
         imgView_userPhoto = findViewById(R.id.imgView_photo);
-//        mBtn_signIn = findViewById(R.id.btn_singIn);
         mTv_userNickName = findViewById(R.id.tv_userNickName);
         mTv_userEmail = findViewById(R.id.tv_userEmail);
         mTv_userPhoneNumber = findViewById(R.id.tv_userPhoneNumber);
@@ -188,13 +186,11 @@ public class AccountActivity extends AppCompatActivity {
             new LoadBitmapFromUri().execute(
                     RadarAuthentication.getDifferentPhotoSize(
                             firebaseUser.getPhotoUrl(), 200));
-//            mBtn_signIn.setText(R.string.signOut);
         } else {
             mTv_userNickName.setText("");
             mTv_userEmail.setText("");
             mTv_userPhoneNumber.setText("");
-            imgView_userPhoto.setImageBitmap(null);
-//            mBtn_signIn.setText(R.string.signIn);
+            imgView_userPhoto.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_add));
         }
     }
 
