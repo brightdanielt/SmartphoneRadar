@@ -48,6 +48,40 @@ public final class RadarPreferences {
         return sp.getString(key_updateFrequency, default_updateFrequency);
     }
 
+    //Set value of showNewMarkOnly in MapsActivity
+    public static void setShowNewMarkOnly(Context context, boolean show) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                context.getString(R.string.mapsActivity_pref), Context.MODE_PRIVATE);
+        final SharedPreferences.Editor edit = preferences.edit();
+        edit.putBoolean(context.getString(R.string.pref_key_showList), show);
+        edit.apply();
+    }
+
+    //Get value of showNewMarkOnly in MapsActivity
+    public static boolean getShowNewMarkOnly(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                context.getString(R.string.mapsActivity_pref), Context.MODE_PRIVATE);
+        return preferences.getBoolean(context.getString(R.string.pref_key_showNewMarkOnly),
+                context.getResources().getBoolean(R.bool.pref_defaultValue_showNewMarkOnly));
+    }
+
+    //Set value of showLocationList in MapsActivity
+    public static void setShowLocationList(Context context, boolean show) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                context.getString(R.string.mapsActivity_pref), Context.MODE_PRIVATE);
+        final SharedPreferences.Editor edit = preferences.edit();
+        edit.putBoolean(context.getString(R.string.pref_key_showList), show);
+        edit.apply();
+    }
+
+    //Get value of showLocationList in MapsActivity
+    public static boolean getShowLocationList(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences(
+                context.getString(R.string.mapsActivity_pref), Context.MODE_PRIVATE);
+        return preferences.getBoolean(context.getString(R.string.pref_key_showList),
+                context.getResources().getBoolean(R.bool.pref_defaultValue_showList));
+    }
+
     public static void startRadarService(Context context) {
         Intent i = new Intent();
         i.setClass(context, RadarService.class);

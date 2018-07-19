@@ -1,9 +1,12 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +25,7 @@ import android.widget.TextView;
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
 import com.cauliflower.danielt.smartphoneradar.obj.User;
@@ -35,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
+import com.google.common.collect.Maps;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -68,7 +73,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //用於手機 DB
     private List<SimpleLocation> mLocationList = new ArrayList<>();
-    private boolean mShowNewMarkOnly = false;
 
     private String mEmail, mPassword;
 
@@ -159,18 +163,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
         setItemTouchHelper();
 
-        //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
-        //取出 listLocation 物件作為 item 的資料，同時添增標記
-        //但在 view 的 params 變動時，recyclerView再次呼叫了方法 onBindViewHolder
-        //使得標記重複添加因此改為呼叫該方法 showAllMarks
-        showAllMarks();
-    }
-
-    private void pickUpItemAnimator(View view) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationZ", 1f, 10f);
-        animator.setDuration(300)
-                .setInterpolator(new DecelerateInterpolator());
-        animator.start();
+        //Load preference to decide show list and mark or not
+        if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
+            showNewMarkOnly();
+        } else {
+            showAllMarks();
+        }
     }
 
     /**
@@ -190,7 +188,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 //左右滑動後，從清單移除該項目
                 int position = viewHolder.getAdapterPosition();
-                //todo: 刪除內存資料庫的該筆資料
+                //刪除內存資料庫的該筆資料
                 MainDb.deleteLocation(MapsActivity.this, mEmail, mLocationList.get(position).getTime());
                 mLocationList.remove(position);
                 mLocationAdapter.notifyItemRemoved(position);
@@ -279,7 +277,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //座標清單，新增一筆資料
                 mLocationAdapter.addNewLocation(new SimpleLocation(time, latitude, longitude));
 
-                if (mShowNewMarkOnly) {
+                if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
                     mClusterManager.clearItems();
                 }
@@ -423,6 +421,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_locationList: {
                 if (item.isChecked()) {
                     item.setChecked(false);
+                    RadarPreferences.setShowLocationList(MapsActivity.this, false);
                     //Show recyclerView
                     mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
@@ -432,6 +431,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } else {
                     //Hide recyclerView
                     item.setChecked(true);
+                    RadarPreferences.setShowLocationList(MapsActivity.this, true);
                     mLinearLayout_wrapRecyclerView.setLayoutParams(
                             new LinearLayout.LayoutParams(
                                     ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f
@@ -443,11 +443,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             case R.id.action_showNewMarkOnly: {
                 if (item.isChecked()) {
                     item.setChecked(false);
-                    mShowNewMarkOnly = false;
+                    RadarPreferences.setShowNewMarkOnly(MapsActivity.this, false);
                     showAllMarks();
                 } else {
                     item.setChecked(true);
-                    mShowNewMarkOnly = true;
+                    RadarPreferences.setShowNewMarkOnly(MapsActivity.this, true);
                     showNewMarkOnly();
                 }
                 break;

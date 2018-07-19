@@ -132,7 +132,7 @@
      後來決定只保留一個 locationList 就夠了(done)
 
      todo 13: MapsActivity 新增功能，能刪除手機端資料庫內，舊的座標
-       實現方式：向左或右滑動 recyclerView 的 item 即刪除該筆資料
+       實現方式：向左或右滑動 recyclerView 的 item 即刪除該筆資料(done)
 
      todo 14: 因為現今使用 firebase auth 與 firestore 需重新描述各功能如何實作完成，以及其規則
 

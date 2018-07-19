@@ -132,6 +132,12 @@
     <string name="digits_email">"0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@."</string>
 
     <!--MapsActivity-->
+    <string name="mapsActivity_pref">mapsActivity_pref</string>
+    <string name="pref_key_showList">showList</string>
+    <string name="pref_key_showNewMarkOnly">showNewMarkOnly</string>
+    <bool name="pref_defaultValue_showList">true</bool>
+    <bool name="pref_defaultValue_showNewMarkOnly">true</bool>
+
     <string name="locationList">座標清單</string>
     <string name="showNewMarkOnly">只顯示最新座標</string>
     <string name="get_no_location">查無新座標</string>
@@ -223,6 +229,7 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_settings2">Settings</string>
+
 
 
     <!-- TODO: Remove or change this placeholder text -->
