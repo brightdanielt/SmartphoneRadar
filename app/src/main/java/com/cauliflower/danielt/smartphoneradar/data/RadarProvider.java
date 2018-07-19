@@ -5,6 +5,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -12,6 +13,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.network.HandlerXML;
+
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry.COLUMN_LOCATION_TIME;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry.TABLE_LOCATION;
 
 /**
  * This class serves as the ContentProvider for all of the SmartphoneRadar's data. This class allows us to
@@ -88,7 +92,7 @@ public class RadarProvider extends ContentProvider {
             }
             case CODE_LOCATION: {
                 cursor = mOpenHelper.getReadableDatabase().query(
-                        RadarContract.LocationEntry.TABLE_LOCATION,
+                        TABLE_LOCATION,
                         null,
                         selection,
                         selectionArgs,
@@ -149,7 +153,7 @@ public class RadarProvider extends ContentProvider {
                 break;
             }
             case CODE_LOCATION: {
-                long _id = mOpenHelper.getWritableDatabase().insert(RadarContract.LocationEntry.TABLE_LOCATION,
+                long _id = mOpenHelper.getWritableDatabase().insert(TABLE_LOCATION,
                         null,
                         values);
                 if (_id != -1) {
@@ -170,7 +174,24 @@ public class RadarProvider extends ContentProvider {
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
-        throw new RuntimeException("We are not implementing delete in SmartphoneRadar");
+        int rowDeleted;
+        switch (sUriMatcher.match(uri)) {
+            case CODE_USER: {
+                throw new UnsupportedOperationException("We are not implementing delete user in SmartphoneRadar");
+            }
+            case CODE_LOCATION: {
+                rowDeleted = mOpenHelper.getWritableDatabase().delete(TABLE_LOCATION,
+                        selection, selectionArgs);
+                if (rowDeleted < 1) {
+                    throw new SQLException("Failed to delete location: " + selectionArgs[1] + " of " + selectionArgs[0]);
+                }
+                break;
+            }
+            default: {
+                throw new UnsupportedOperationException("Unknown uri" + uri);
+            }
+        }
+        return rowDeleted;
     }
 
     @Override

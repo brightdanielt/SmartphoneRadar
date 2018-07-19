@@ -190,9 +190,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 //左右滑動後，從清單移除該項目
                 int position = viewHolder.getAdapterPosition();
+                //todo: 刪除內存資料庫的該筆資料
+                MainDb.deleteLocation(MapsActivity.this, mEmail, mLocationList.get(position).getTime());
                 mLocationList.remove(position);
                 mLocationAdapter.notifyItemRemoved(position);
-                //todo 刪除內存資料庫的該筆資料
 
             }
         });

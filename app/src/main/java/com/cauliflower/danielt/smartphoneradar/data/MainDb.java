@@ -13,6 +13,9 @@ import com.cauliflower.danielt.smartphoneradar.obj.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry.COLUMN_LOCATION_TIME;
+
 /**
  * Use MainDb please if you want to do anything related with database.
  * MainDb is created to prevent from repeating same code in different class
@@ -206,5 +209,20 @@ public final class MainDb {
         } else {
             Log.i(context.getClass().getSimpleName(), "The same email and password already exists ,do not update the password");
         }
+    }
+
+    /**
+     * Delete one row in location table
+     *
+     * @param email The email of target tracked
+     * @param time The time of location
+     * */
+    public static int deleteLocation(Context context, String email, String time) {
+        int rowDeleted = context.getContentResolver().delete(
+                RadarContract.LocationEntry.CONTENT_URI,
+                COLUMN_LOCATION_EMAIL + "=? AND " + COLUMN_LOCATION_TIME + "=? ",
+                new String[]{email, time});
+        Log.i(context.getClass().getSimpleName(), "Delete location " + time + " of " + email);
+        return rowDeleted;
     }
 }
