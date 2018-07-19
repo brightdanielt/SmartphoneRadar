@@ -5,7 +5,9 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -62,7 +64,8 @@ import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FI
 import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_PASSWORD;
 import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_TIME;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
+        GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener {
 
     private static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
@@ -117,6 +120,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMyLocationEnabled(true);
+        mMap.setOnMyLocationButtonClickListener(this);
+        mMap.setOnMyLocationClickListener(this);
         makeViewWork();
 
         //判斷是否查得正在追蹤對象
@@ -163,12 +169,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
         setItemTouchHelper();
 
-        //Load preference to decide show list and mark or not
-        if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
-            showNewMarkOnly();
-        } else {
-            showAllMarks();
-        }
+        //Load preference to decide how to show list and mark
+        boolean showNewMark = RadarPreferences.getShowNewMarkOnly(MapsActivity.this);
+        showNewMarkOnly(showNewMark);
+        boolean showList = RadarPreferences.getShowLocationList(MapsActivity.this);
+        showList(showList);
+    }
+
+    @Override
+    public boolean onMyLocationButtonClick() {
+        return false;
+    }
+
+    @Override
+    public void onMyLocationClick(@NonNull Location location) {
+
     }
 
     /**
@@ -215,27 +230,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterManager.setRenderer(new OwnRendering(MapsActivity.this, mMap, mClusterManager));
     }
 
-    //在地圖顯示所有標記
-    private void showAllMarks() {
+    //顯示最新或全部瘩的標記在地圖上
+    private void showNewMarkOnly(boolean showNewMark) {
         mClusterManager.clearItems();
-        for (SimpleLocation location : mLocationList) {
-            MyItem item = new MyItem(null,
-                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
-            mClusterManager.addItem(item);
+        if (showNewMark) {
+            if (!mLocationList.isEmpty()) {
+                int size = mLocationList.size();
+                //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
+                SimpleLocation location = mLocationList.get(size - 1);
+                MyItem item1 = new MyItem(null,
+                        location.getLatitude(), location.getLongitude(), location.getTime(), null);
+                //加入最新的座標
+                mClusterManager.addItem(item1);
+            }
+        } else {
+            for (SimpleLocation location : mLocationList) {
+                MyItem item = new MyItem(null,
+                        location.getLatitude(), location.getLongitude(), location.getTime(), null);
+                mClusterManager.addItem(item);
+            }
         }
     }
 
-    //只顯示最新的標記在地圖上
-    private void showNewMarkOnly() {
-        mClusterManager.clearItems();
-        if (!mLocationList.isEmpty()) {
-            int size = mLocationList.size();
-            //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
-            SimpleLocation location = mLocationList.get(size - 1);
-            MyItem item1 = new MyItem(null,
-                    location.getLatitude(), location.getLongitude(), location.getTime(), null);
-            //加入最新的座標
-            mClusterManager.addItem(item1);
+    //是否顯示座標清單
+    private void showList(boolean show) {
+        if (show) {
+            mLinearLayout_wrapRecyclerView.setVisibility(View.VISIBLE);
+        } else {
+            mLinearLayout_wrapRecyclerView.setVisibility(View.GONE);
         }
     }
 
@@ -353,7 +375,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .add(lastLocation)
                     .add(newLatLng)
                     .color(Color.GREEN)
-                    .width(20)
+                    .width(10)
                     .clickable(true)
                     .geodesic(true)
                     .jointType(JointType.BEVEL)
@@ -412,6 +434,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<MyItem> mClusterManager;
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.maps_menu, menu);
+        boolean showList = RadarPreferences.getShowLocationList(MapsActivity.this);
+        menu.findItem(R.id.action_locationList).setChecked(showList);
+        boolean showNewMarkOnly = RadarPreferences.getShowNewMarkOnly(MapsActivity.this);
+        menu.findItem(R.id.action_showNewMarkOnly).setChecked(showNewMarkOnly);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home: {
@@ -419,47 +451,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             }
             case R.id.action_locationList: {
-                if (item.isChecked()) {
-                    item.setChecked(false);
-                    RadarPreferences.setShowLocationList(MapsActivity.this, false);
-                    //Show recyclerView
-                    mLinearLayout_wrapRecyclerView.setLayoutParams(
-                            new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT, 0, 0f
-                            )
-                    );
-                } else {
-                    //Hide recyclerView
-                    item.setChecked(true);
-                    RadarPreferences.setShowLocationList(MapsActivity.this, true);
-                    mLinearLayout_wrapRecyclerView.setLayoutParams(
-                            new LinearLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT, 0, 3f
-                            )
-                    );
-                }
+                boolean newChecked = !item.isChecked();
+                item.setChecked(newChecked);
+                RadarPreferences.setShowLocationList(MapsActivity.this, newChecked);
+                showList(newChecked);
                 break;
             }
             case R.id.action_showNewMarkOnly: {
-                if (item.isChecked()) {
-                    item.setChecked(false);
-                    RadarPreferences.setShowNewMarkOnly(MapsActivity.this, false);
-                    showAllMarks();
-                } else {
-                    item.setChecked(true);
-                    RadarPreferences.setShowNewMarkOnly(MapsActivity.this, true);
-                    showNewMarkOnly();
-                }
+                boolean newChecked = !item.isChecked();
+                item.setChecked(newChecked);
+                RadarPreferences.setShowNewMarkOnly(MapsActivity.this, newChecked);
+                showNewMarkOnly(newChecked);
                 break;
             }
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.maps_menu, menu);
-        return true;
     }
 
     @Override

@@ -53,7 +53,7 @@ public final class RadarPreferences {
         SharedPreferences preferences = context.getSharedPreferences(
                 context.getString(R.string.mapsActivity_pref), Context.MODE_PRIVATE);
         final SharedPreferences.Editor edit = preferences.edit();
-        edit.putBoolean(context.getString(R.string.pref_key_showList), show);
+        edit.putBoolean(context.getString(R.string.pref_key_showNewMarkOnly), show);
         edit.apply();
     }
 
