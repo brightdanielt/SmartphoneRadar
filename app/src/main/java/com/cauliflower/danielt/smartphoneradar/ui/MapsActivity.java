@@ -1,5 +1,6 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,12 +8,14 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -154,6 +157,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView_location.setAdapter(mLocationAdapter);
         mRecyclerView_location.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
+        setItemTouchHelper();
 
         //該功能原本能夠直接在 AccountAdapter 的方法 onBindViewHolder 實現
         //取出 listLocation 物件作為 item 的資料，同時添增標記
@@ -161,6 +165,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //使得標記重複添加因此改為呼叫該方法 showAllMarks
         showAllMarks();
     }
+
+    private void pickUpItemAnimator(View view) {
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, "translationZ", 1f, 10f);
+        animator.setDuration(300)
+                .setInterpolator(new DecelerateInterpolator());
+        animator.start();
+    }
+
+    /**
+     * 為 location recyclerView 設置 item 滑動
+     */
+    private void setItemTouchHelper() {
+        //只接受左右滑動
+        ItemTouchHelper helper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(
+                0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                //左右滑動後，從清單移除該項目
+                int position = viewHolder.getAdapterPosition();
+                mLocationList.remove(position);
+                mLocationAdapter.notifyItemRemoved(position);
+                //todo 刪除內存資料庫的該筆資料
+
+            }
+        });
+        //指定 RecyclerView 對象
+        helper.attachToRecyclerView(mRecyclerView_location);
+    }
+
 
     /**
      * 當地圖上固定範圍內的標記太多時，會以標記集合的方式呈現
@@ -422,7 +461,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return true;
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -437,15 +475,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onDestroy();
     }
 
-    class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.ViewHolder> {
-
+    class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.LocationViewHolder> {
         LocationAdapter() {
         }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        class LocationViewHolder extends RecyclerView.ViewHolder {
             TextView tv_time, tv_lat, tv_lng;
 
-            private ViewHolder(View v) {
+            private LocationViewHolder(View v) {
                 super(v);
                 tv_time = v.findViewById(R.id.time);
                 tv_lat = v.findViewById(R.id.lat);
@@ -455,15 +492,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         @Override
-        public LocationAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public LocationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             View view = LayoutInflater.from(context).
                     inflate(R.layout.recycler_view_item, parent, false);
-            return new ViewHolder(view);
+            return new LocationViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, final int position) {
+        public void onBindViewHolder(LocationViewHolder holder, final int position) {
             SimpleLocation location = mLocationList.get(position);
             String time = location.getTime();
             double lat = location.getLatitude();
