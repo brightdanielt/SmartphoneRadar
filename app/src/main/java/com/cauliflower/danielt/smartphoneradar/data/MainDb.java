@@ -125,7 +125,7 @@ public final class MainDb {
                     double lng = cursor.getDouble(index_lng);
                     SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
                     locationList.add(simpleLocation);
-                    Log.i(context.getClass().toString(), id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
+                    Log.i(context.getClass().toString(), "\n" + id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
                     cursor.moveToNext();
                 }
             }
@@ -215,8 +215,8 @@ public final class MainDb {
      * Delete one row in location table
      *
      * @param email The email of target tracked
-     * @param time The time of location
-     * */
+     * @param time  The time of location
+     */
     public static int deleteLocation(Context context, String email, String time) {
         int rowDeleted = context.getContentResolver().delete(
                 RadarContract.LocationEntry.CONTENT_URI,
