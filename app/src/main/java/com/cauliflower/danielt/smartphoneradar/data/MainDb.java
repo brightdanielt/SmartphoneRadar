@@ -125,7 +125,7 @@ public final class MainDb {
                     double lng = cursor.getDouble(index_lng);
                     SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
                     locationList.add(simpleLocation);
-                    Log.i(context.getClass().toString(), "\n" + id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
+                    Log.i(context.getClass().toString(), "location\n" + id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
                     cursor.moveToNext();
                 }
             }

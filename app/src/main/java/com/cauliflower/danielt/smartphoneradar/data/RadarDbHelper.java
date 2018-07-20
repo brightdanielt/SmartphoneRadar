@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry;
 
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.LocationEntry.TABLE_LOCATION;
+
 /**
  * Created by danielt on 2018/3/27.
  */
@@ -23,29 +25,34 @@ public class RadarDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + UserEntry.TABLE_USER + " (" +
-                UserEntry._ID + " INTEGER , " +
+        db.execSQL("CREATE TABLE " + UserEntry.TABLE_USER +
+                " ( " +
+                UserEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 UserEntry.COLUMN_USER_EMAIL + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_PASSWORD + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_USED_FOR + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_IN_USE + " TEXT NOT NULL, " +
-                "PRIMARY KEY( " + UserEntry.COLUMN_USER_EMAIL + "," + UserEntry.COLUMN_USER_USED_FOR + ") ) "
+                " UNIQUE( " + UserEntry.COLUMN_USER_EMAIL + " , " + UserEntry.COLUMN_USER_USED_FOR + " ) " +
+                " ) "
         );
 
-        db.execSQL("CREATE TABLE " + LocationEntry.TABLE_LOCATION + " (" +
-                LocationEntry._ID + " INTEGER , " +
+        db.execSQL("CREATE TABLE " + TABLE_LOCATION +
+                " ( " +
+                LocationEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 LocationEntry.COLUMN_LOCATION_EMAIL + " TEXT NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_LATITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_LONGITUDE + " REAL NOT NULL, " +
                 LocationEntry.COLUMN_LOCATION_TIME + " DATETIME NOT NULL, " +
-                "PRIMARY KEY( " + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + ") ) "
+                " UNIQUE( " + LocationEntry.COLUMN_LOCATION_EMAIL + "," + LocationEntry.COLUMN_LOCATION_TIME + " ) " +
+                " ) "
         );
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + UserEntry.TABLE_USER);
-        db.execSQL("DROP TABLE IF EXISTS " + LocationEntry.TABLE_LOCATION);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCATION);
         onCreate(db);
     }
 /*

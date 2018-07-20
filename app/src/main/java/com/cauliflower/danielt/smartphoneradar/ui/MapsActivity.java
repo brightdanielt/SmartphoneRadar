@@ -346,7 +346,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             boolean c = dateFromDb.equals(dateFromServer);*/
             if (dateFromDb.after(dateFromServer) || dateFromDb.equals(dateFromServer)) {
                 //是舊(過期)的時間
-                Log.i(TAG, "Ignore this location," + dateFromDb + ">=" + dateFromServer);
+                Log.i(TAG, "Ignore this location," + dateFromDb + " >= " + dateFromServer);
                 return true;
             }
         } catch (ParseException e) {
