@@ -54,7 +54,8 @@ public final class MainDb {
     public static void addLocation(Context context, SimpleLocation simpleLocation) {
         Uri uri = context.getContentResolver().insert(
                 RadarContract.LocationEntry.CONTENT_URI, simpleLocation.getContentValues());
-        Log.i(context.getClass().getSimpleName(), "Add location success,uri: " + uri);
+        Log.i(context.getClass().getSimpleName(), "Add location success,uri: " + uri + "\n" +
+                "detail:" + simpleLocation.toString());
     }
 
     //查詢資料表 Location 的最新 time 值
