@@ -1,14 +1,8 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
-import android.Manifest;
-import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -20,18 +14,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
-import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
-import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarLocation;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,7 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-import com.google.common.collect.Maps;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -76,7 +67,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListenerRegistration mLocationListenerRg;
 
     //用於手機 DB
-    private List<SimpleLocation> mLocationList = new ArrayList<>();
+    private List<RadarLocation> mLocationList = new ArrayList<>();
 
     private String mEmail, mPassword;
 
@@ -97,8 +88,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStart() {
         super.onStart();
         //查詢所有追蹤對象
-        List<User> trackingList = MainDb.searchUser(MapsActivity.this, RadarContract.UserEntry.USED_FOR_GETLOCATION);
-        for (User targetTracked : trackingList) {
+        List<RadarUser> trackingList = MainDb.searchUser(MapsActivity.this, RadarContract.UserEntry.USED_FOR_GETLOCATION);
+        for (RadarUser targetTracked : trackingList) {
             //找出正在追蹤的對象
             if (targetTracked.getIn_use().equals(RadarContract.UserEntry.IN_USE_YES)) {
                 //取得信箱與密碼
@@ -202,7 +193,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int position = viewHolder.getAdapterPosition();
                 //刪除內存資料庫的該筆資料
                 MainDb.deleteLocation(MapsActivity.this,
-                        (SimpleLocation) viewHolder.itemView.getTag());
+                        (RadarLocation) viewHolder.itemView.getTag());
                 mLocationList.remove(position);
                 mLocationAdapter.notifyItemRemoved(position);
             }
@@ -233,15 +224,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (showNewMark) {
             if (!mLocationList.isEmpty()) {
                 int size = mLocationList.size();
-                //因為 locationList 是持續更新資料的，最後一筆資料即最新的 SimpleLocation
-                SimpleLocation location = mLocationList.get(size - 1);
+                //因為 locationList 是持續更新資料的，最後一筆資料即最新的 RadarLocation
+                RadarLocation location = mLocationList.get(size - 1);
                 MyItem item1 = new MyItem(null,
                         location.getLatitude(), location.getLongitude(), location.getTime(), null);
                 //加入最新的座標
                 mClusterManager.addItem(item1);
             }
         } else {
-            for (SimpleLocation location : mLocationList) {
+            for (RadarLocation location : mLocationList) {
                 MyItem item = new MyItem(null,
                         location.getLatitude(), location.getLongitude(), location.getTime(), null);
                 mClusterManager.addItem(item);
@@ -291,10 +282,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final String time = DateFormat.getDateTimeInstance().format(dateFromServer);
 
                 //手機端資料庫新增一筆 Location
-                SimpleLocation simpleLocation = new SimpleLocation(mEmail, time, latitude, longitude);
-                MainDb.addLocation(MapsActivity.this, simpleLocation);
+                RadarLocation radarLocation = new RadarLocation(mEmail, time, latitude, longitude);
+                MainDb.addLocation(MapsActivity.this, radarLocation);
                 //座標清單，新增一筆資料
-                mLocationAdapter.addNewLocation(simpleLocation);
+                mLocationAdapter.addNewLocation(radarLocation);
 
                 if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -505,7 +496,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         public void onBindViewHolder(LocationViewHolder holder, final int position) {
-            SimpleLocation location = mLocationList.get(position);
+            RadarLocation location = mLocationList.get(position);
             String time = location.getTime();
             double lat = location.getLatitude();
             double lng = location.getLongitude();
@@ -529,9 +520,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return mLocationList.size();
         }
 
-        public void addNewLocation(SimpleLocation simpleLocation) {
+        public void addNewLocation(RadarLocation radarLocation) {
             if (mLocationList != null) {
-                mLocationList.add(simpleLocation);
+                mLocationList.add(radarLocation);
                 //刷新座標清單
                 LocationAdapter.this.notifyDataSetChanged();
                 mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);

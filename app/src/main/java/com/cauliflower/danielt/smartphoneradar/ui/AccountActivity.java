@@ -26,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,7 +37,7 @@ import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
-import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.firebase.ui.auth.IdpResponse;
@@ -77,7 +76,7 @@ public class AccountActivity extends AppCompatActivity {
     private ImageView imgView_userPhoto;
     private TextView mTv_userEmail, mTv_userNickName, mTv_userPhoneNumber, mTv_hintTargetTracked;
     private ListView mListView_targetTracked;
-    private List<User> mTargetTrackedList = new ArrayList<>();
+    private List<RadarUser> mTargetTrackedList = new ArrayList<>();
     private TargetTrackedAdapter mAdapter_targetTracked;
     private ProgressDialog mDialog_loading;
 
@@ -256,7 +255,7 @@ public class AccountActivity extends AppCompatActivity {
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d(TAG, document.getId() + " => " + document.getData());
                                             MainDb.addUser(AccountActivity.this,
-                                                    new User(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
+                                                    new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
                                             updateTrackList();
                                         }
                                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
@@ -333,7 +332,7 @@ public class AccountActivity extends AppCompatActivity {
                                     Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
                                     //寫入手機 database 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
                                     MainDb.addUser(AccountActivity.this,
-                                            new User(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
+                                            new RadarUser(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
 
                                     //更新使用者資訊
                                     updateAuthInfo(mAuth.getCurrentUser());
@@ -430,10 +429,10 @@ public class AccountActivity extends AppCompatActivity {
             RadarAuthentication.signOut(AccountActivity.this, null);
             return;
         }
-        List<User> userList = MainDb.searchUser(AccountActivity.this, USED_FOR_SENDLOCATION);
-        for (User user : userList) {
-            if (user.getEmail().equals(firebaseUser.getEmail())) {
-                password = user.getPassword();
+        List<RadarUser> radarUserList = MainDb.searchUser(AccountActivity.this, USED_FOR_SENDLOCATION);
+        for (RadarUser radarUser : radarUserList) {
+            if (radarUser.getEmail().equals(firebaseUser.getEmail())) {
+                password = radarUser.getPassword();
             }
         }
         if (!password.trim().equals("")) {
@@ -503,7 +502,7 @@ public class AccountActivity extends AppCompatActivity {
                                     //Firestore 存在該使用者
                                     //將使用者新增至手機資料庫
                                     MainDb.addUser(AccountActivity.this,
-                                            new User(resultEmail, resultPassword, USED_FOR_SENDLOCATION, IN_USE_YES));
+                                            new RadarUser(resultEmail, resultPassword, USED_FOR_SENDLOCATION, IN_USE_YES));
                                     updateAuthInfo(firebaseUser);
                                 } else {
                                     //可能是在非綁定的裝置登入
@@ -546,20 +545,20 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     public class TargetTrackedAdapter extends BaseAdapter {
-        List<User> userList;
+        List<RadarUser> radarUserList;
 
-        TargetTrackedAdapter(List<User> userList) {
-            this.userList = userList;
+        TargetTrackedAdapter(List<RadarUser> radarUserList) {
+            this.radarUserList = radarUserList;
         }
 
         @Override
         public int getCount() {
-            return userList.size();
+            return radarUserList.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return userList.get(position);
+            return radarUserList.get(position);
         }
 
         @Override
@@ -572,10 +571,10 @@ public class AccountActivity extends AppCompatActivity {
 
             View v = LayoutInflater.from(AccountActivity.this).inflate(R.layout.list_view_item, null);
             TextView tv_account = v.findViewById(R.id.ckBox_account);
-            final String account = userList.get(position).getEmail();
-            final String password = userList.get(position).getPassword();
-            final String usedFor = userList.get(position).getUsedFor();
-            String in_use = userList.get(position).getIn_use();
+            final String account = radarUserList.get(position).getEmail();
+            final String password = radarUserList.get(position).getPassword();
+            final String usedFor = radarUserList.get(position).getUsedFor();
+            String in_use = radarUserList.get(position).getIn_use();
             tv_account.setText(account);
             if (in_use.equals(IN_USE_YES)) {
                 tv_account.append(" 追蹤對象");
@@ -594,7 +593,7 @@ public class AccountActivity extends AppCompatActivity {
                                 .setPositiveButton("是的", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-                                        //要求 RadarDbHelper 更改該 User 的 in_use 為 yes
+                                        //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
                                         MainDb.updateUser_in_use(AccountActivity.this, account);
                                         updateTrackList();
                                     }

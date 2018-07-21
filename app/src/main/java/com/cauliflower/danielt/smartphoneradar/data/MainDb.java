@@ -6,9 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.obj.SimpleLocation;
-import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarLocation;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,22 +27,22 @@ public final class MainDb {
     private MainDb() {
     }
 
-    public static void addUser(Context context, User user) {
+    public static void addUser(Context context, RadarUser radarUser) {
         //先檢查使否存在該使用者
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.UserEntry.CONTENT_URI,
                 new String[]{RadarContract.UserEntry.COLUMN_USER_EMAIL},
                 RadarContract.UserEntry.COLUMN_USER_EMAIL + " = ? and " + RadarContract.UserEntry.COLUMN_USER_USED_FOR + " = ? ",
-                new String[]{user.getEmail(), user.getUsedFor()}, null);
+                new String[]{radarUser.getEmail(), radarUser.getUsedFor()}, null);
         if (cursor != null) {
             cursor.moveToFirst();
-            //不存在該 user 則能夠新增
+            //不存在該 radarUser 則能夠新增
             if (cursor.getCount() == 0) {
                 cursor.close();
-                Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, user.getContentValues());
-                Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
+                Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, radarUser.getContentValues());
+                Log.i(context.getClass().toString(), "Add radarUser success,uri: " + uri);
             } else {
-                Log.i(context.getClass().toString(), "The same email already exists ,stop add the user.");
+                Log.i(context.getClass().toString(), "The same email already exists ,stop add the radarUser.");
             }
         } else {
             Log.i(context.getClass().toString(), "Query return null cursor");
@@ -51,11 +50,11 @@ public final class MainDb {
 
     }
 
-    public static void addLocation(Context context, SimpleLocation simpleLocation) {
+    public static void addLocation(Context context, RadarLocation radarLocation) {
         Uri uri = context.getContentResolver().insert(
-                RadarContract.LocationEntry.CONTENT_URI, simpleLocation.getContentValues());
+                RadarContract.LocationEntry.CONTENT_URI, radarLocation.getContentValues());
         Log.i(context.getClass().getSimpleName(), "Add location success,uri: " + uri + "\n" +
-                "detail:" + simpleLocation.toString());
+                "detail:" + radarLocation.toString());
     }
 
     //查詢資料表 Location 的最新 time 值
@@ -89,8 +88,8 @@ public final class MainDb {
         return null;
     }
 
-    public static List<SimpleLocation> searchAllLocation(Context context, String email) {
-        List<SimpleLocation> locationList = new ArrayList<>();
+    public static List<RadarLocation> searchAllLocation(Context context, String email) {
+        List<RadarLocation> locationList = new ArrayList<>();
 
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.LocationEntry.CONTENT_URI,
@@ -103,9 +102,9 @@ public final class MainDb {
             cursor.moveToFirst();
             if (cursor.getCount() > 0) {
                 while (!cursor.isAfterLast()) {
-                    SimpleLocation simpleLocation = new SimpleLocation(cursor);
-                    Log.i(context.getClass().toString(), simpleLocation.toString());
-                    locationList.add(simpleLocation);
+                    RadarLocation radarLocation = new RadarLocation(cursor);
+                    Log.i(context.getClass().toString(), radarLocation.toString());
+                    locationList.add(radarLocation);
                     cursor.moveToNext();
                 }
             }
@@ -114,9 +113,9 @@ public final class MainDb {
         return locationList;
     }
 
-    public static List<User> searchUser(Context context, String usedFor) {
+    public static List<RadarUser> searchUser(Context context, String usedFor) {
 //        String[] user = new String[2];
-        List<User> userList = new ArrayList<>();
+        List<RadarUser> radarUserList = new ArrayList<>();
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.UserEntry.CONTENT_URI,
                 null,
@@ -127,13 +126,13 @@ public final class MainDb {
             cursor.moveToFirst();
             if (cursor.getCount() > 0) {
                 while (!cursor.isAfterLast()) {
-                    userList.add(new User(cursor));
+                    radarUserList.add(new RadarUser(cursor));
                     cursor.moveToNext();
                 }
             }
             cursor.close();
         }
-        return userList;
+        return radarUserList;
     }
 
     //更新使用者為已登入
@@ -183,14 +182,14 @@ public final class MainDb {
     /**
      * Delete one row in location table
      *
-     * @param simpleLocation The location you want to delete.
+     * @param radarLocation The location you want to delete.
      */
-    public static int deleteLocation(Context context, SimpleLocation simpleLocation) {
+    public static int deleteLocation(Context context, RadarLocation radarLocation) {
         int rowDeleted = context.getContentResolver().delete(
                 RadarContract.LocationEntry.CONTENT_URI,
                 COLUMN_LOCATION_EMAIL + "=? AND " + COLUMN_LOCATION_TIME + "=? ",
-                new String[]{simpleLocation.getEmail(), simpleLocation.getTime()});
-        Log.i(context.getClass().getSimpleName(), "Delete: " + simpleLocation.toString());
+                new String[]{radarLocation.getEmail(), radarLocation.getTime()});
+        Log.i(context.getClass().getSimpleName(), "Delete: " + radarLocation.toString());
         return rowDeleted;
     }
 }

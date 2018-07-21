@@ -52,7 +52,7 @@ public class RadarFirestore {
      * if the user didn't sign in, this create would failed.
      *
      * @param email    Email get from {@link FirebaseUser#getEmail()}.
-     * @param password User's customized password.
+     * @param password RadarUser's customized password.
      */
     public static void createUser(String email, String password, String imei, String model, String uid,
                                   OnSuccessListener<Void> successListener, OnFailureListener failureListener) {

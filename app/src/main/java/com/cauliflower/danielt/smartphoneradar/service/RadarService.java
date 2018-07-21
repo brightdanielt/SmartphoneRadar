@@ -26,7 +26,7 @@ import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
-import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.ui.SettingsActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -133,10 +133,10 @@ public class RadarService extends Service {
         }
 
         //根據 email 取得使用者 password
-        List<User> userList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        for (User user : userList) {
-            if (user.getEmail().equals(mEmail)) {
-                mPassword = user.getPassword();
+        List<RadarUser> radarUserList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
+        for (RadarUser radarUser : radarUserList) {
+            if (radarUser.getEmail().equals(mEmail)) {
+                mPassword = radarUser.getPassword();
             }
         }
 

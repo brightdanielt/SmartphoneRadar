@@ -2,14 +2,12 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.annotation.TargetApi;
-import android.app.ProgressDialog;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -25,7 +23,7 @@ import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.obj.User;
+import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
@@ -160,8 +158,8 @@ public class SettingsFragment extends PreferenceFragment implements
         setPreferenceSummary(mapsActivity, "");
         mapsActivity.setEnabled(false);
         //向資料庫查詢追蹤目標
-        List<User> userList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
-        for (User targetTracked : userList_targetTracked) {
+        List<RadarUser> radarUserList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
+        for (RadarUser targetTracked : radarUserList_targetTracked) {
             //存在追蹤目標
             String in_use = targetTracked.getIn_use();
             if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {

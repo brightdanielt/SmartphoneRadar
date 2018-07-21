@@ -10,7 +10,7 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
  * Created by danielt on 2018/3/25.
  */
 
-public class SimpleLocation {
+public class RadarLocation {
     public static final String TIME = "time";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
@@ -19,17 +19,17 @@ public class SimpleLocation {
     private double latitude;
     private double longitude;
 
-    public SimpleLocation() {
+    public RadarLocation() {
     }
 
-    public SimpleLocation(String email, String time, double latitude, double longitude) {
+    public RadarLocation(String email, String time, double latitude, double longitude) {
         this.email = email;
         this.time = time;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public SimpleLocation(@NonNull Cursor cursor) {
+    public RadarLocation(@NonNull Cursor cursor) {
         int index_email = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL);
         int index_time = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
         int index_lat = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LATITUDE);
@@ -84,7 +84,7 @@ public class SimpleLocation {
 
     @Override
     public String toString() {
-        return "SimpleLocation" + "\t" +
+        return "RadarLocation" + "\t" +
                 email + "\t" +
                 time + "\t" +
                 latitude + "\t" +

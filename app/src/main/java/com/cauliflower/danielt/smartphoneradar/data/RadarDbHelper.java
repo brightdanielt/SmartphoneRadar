@@ -103,8 +103,8 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         }
         return "1911-01-01-00:00:00";
     }
-    public List<SimpleLocation> searchAllLocation(String account) {
-        List<SimpleLocation> locationList = new ArrayList<>();
+    public List<RadarLocation> searchAllLocation(String account) {
+        List<RadarLocation> locationList = new ArrayList<>();
 
         Cursor cursor = getReadableDatabase().query(
                 LocationEntry.TABLE_LOCATION, null, LocationEntry.COLUMN_LOCATION_EMAIL + "=?", new String[]{account},
@@ -124,7 +124,7 @@ public class RadarDbHelper extends SQLiteOpenHelper {
                 String time = cursor.getString(index_time);
                 double lat = cursor.getDouble(index_lat);
                 double lng = cursor.getDouble(index_lng);
-                SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
+                RadarLocation simpleLocation = new RadarLocation(time, lat, lng);
                 locationList.add(simpleLocation);
                 Log.i(TAG, id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
                 cursor.moveToNext();
@@ -133,16 +133,16 @@ public class RadarDbHelper extends SQLiteOpenHelper {
         return locationList;
     }
 
-    public List<User> searchUser(String usedFor) {
+    public List<RadarUser> searchUser(String usedFor) {
 //        String[] user = new String[2];
-        List<User> userList = new ArrayList<>();
+        List<RadarUser> userList = new ArrayList<>();
         Cursor cursor = getReadableDatabase().query(
                 UserEntry.TABLE_USER, null, UserEntry.COLUMN_USER_USED_FOR + "=?", new String[]{usedFor},
                 null, null, null);
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                User user = new User();
+                RadarUser user = new RadarUser();
                 int index_account = cursor.getColumnIndex(UserEntry.COLUMN_USER_EMAIL);
                 int index_password = cursor.getColumnIndex(UserEntry.COLUMN_USER_PASSWORD);
                 int index_in_use = cursor.getColumnIndex(UserEntry.COLUMN_USER_IN_USE);
