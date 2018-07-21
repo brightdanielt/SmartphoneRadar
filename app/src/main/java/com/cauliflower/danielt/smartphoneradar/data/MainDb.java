@@ -28,24 +28,19 @@ public final class MainDb {
     private MainDb() {
     }
 
-    public static void addUser(Context context, String email, String password, String usedFor, String in_use) {
+    public static void addUser(Context context, User user) {
         //先檢查使否存在該使用者
         Cursor cursor = context.getContentResolver().query(
                 RadarContract.UserEntry.CONTENT_URI,
                 new String[]{RadarContract.UserEntry.COLUMN_USER_EMAIL},
                 RadarContract.UserEntry.COLUMN_USER_EMAIL + " = ? and " + RadarContract.UserEntry.COLUMN_USER_USED_FOR + " = ? ",
-                new String[]{email, usedFor}, null);
+                new String[]{user.getEmail(), user.getUsedFor()}, null);
         if (cursor != null) {
             cursor.moveToFirst();
             //不存在該 user 則能夠新增
             if (cursor.getCount() == 0) {
                 cursor.close();
-                ContentValues values = new ContentValues();
-                values.put(RadarContract.UserEntry.COLUMN_USER_EMAIL, email);
-                values.put(RadarContract.UserEntry.COLUMN_USER_PASSWORD, password);
-                values.put(RadarContract.UserEntry.COLUMN_USER_USED_FOR, usedFor);
-                values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
-                Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, values);
+                Uri uri = context.getContentResolver().insert(RadarContract.UserEntry.CONTENT_URI, user.getContentValues());
                 Log.i(context.getClass().toString(), "Add user success,uri: " + uri);
             } else {
                 Log.i(context.getClass().toString(), "The same email already exists ,stop add the user.");
@@ -56,14 +51,9 @@ public final class MainDb {
 
     }
 
-    public static void addLocation(Context context, String email, double latitude, double longitude, String time) {
-        ContentValues values = new ContentValues();
-        values.put(RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL, email);
-        values.put(RadarContract.LocationEntry.COLUMN_LOCATION_LATITUDE, latitude);
-        values.put(RadarContract.LocationEntry.COLUMN_LOCATION_LONGITUDE, longitude);
-        values.put(RadarContract.LocationEntry.COLUMN_LOCATION_TIME, time);
-
-        Uri uri = context.getContentResolver().insert(RadarContract.LocationEntry.CONTENT_URI, values);
+    public static void addLocation(Context context, SimpleLocation simpleLocation) {
+        Uri uri = context.getContentResolver().insert(
+                RadarContract.LocationEntry.CONTENT_URI, simpleLocation.getContentValues());
         Log.i(context.getClass().getSimpleName(), "Add location success,uri: " + uri);
     }
 
@@ -112,20 +102,9 @@ public final class MainDb {
             cursor.moveToFirst();
             if (cursor.getCount() > 0) {
                 while (!cursor.isAfterLast()) {
-                    int index_id = cursor.getColumnIndex(RadarContract.LocationEntry._ID);
-                    int index_ac = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_EMAIL);
-                    int index_time = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_TIME);
-                    int index_lat = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LATITUDE);
-                    int index_lng = cursor.getColumnIndex(RadarContract.LocationEntry.COLUMN_LOCATION_LONGITUDE);
-
-                    int id = cursor.getInt(index_id);
-                    String ac = cursor.getString(index_ac);
-                    String time = cursor.getString(index_time);
-                    double lat = cursor.getDouble(index_lat);
-                    double lng = cursor.getDouble(index_lng);
-                    SimpleLocation simpleLocation = new SimpleLocation(time, lat, lng);
+                    SimpleLocation simpleLocation = new SimpleLocation(cursor);
+                    Log.i(context.getClass().toString(), simpleLocation.toString());
                     locationList.add(simpleLocation);
-                    Log.i(context.getClass().toString(), "location\n" + id + "\n" + ac + "\n" + time + "\n" + lat + "\n" + lng);
                     cursor.moveToNext();
                 }
             }
@@ -147,18 +126,7 @@ public final class MainDb {
             cursor.moveToFirst();
             if (cursor.getCount() > 0) {
                 while (!cursor.isAfterLast()) {
-                    User user = new User();
-                    int index_email = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_EMAIL);
-                    int index_password = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
-                    int index_in_use = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_IN_USE);
-                    user.setEmail(cursor.getString(index_email));
-                    user.setPassword(cursor.getString(index_password));
-                    user.setUsedFor(usedFor);
-                    user.setIn_use(cursor.getString(index_in_use));
-                    //存在帳密，已註冊
-                    if (user.getEmail() != null && user.getPassword() != null) {
-                        userList.add(user);
-                    }
+                    userList.add(new User(cursor));
                     cursor.moveToNext();
                 }
             }
@@ -214,15 +182,14 @@ public final class MainDb {
     /**
      * Delete one row in location table
      *
-     * @param email The email of target tracked
-     * @param time  The time of location
+     * @param simpleLocation The location you want to delete.
      */
-    public static int deleteLocation(Context context, String email, String time) {
+    public static int deleteLocation(Context context, SimpleLocation simpleLocation) {
         int rowDeleted = context.getContentResolver().delete(
                 RadarContract.LocationEntry.CONTENT_URI,
                 COLUMN_LOCATION_EMAIL + "=? AND " + COLUMN_LOCATION_TIME + "=? ",
-                new String[]{email, time});
-        Log.i(context.getClass().getSimpleName(), "Delete location " + time + " of " + email);
+                new String[]{simpleLocation.getEmail(), simpleLocation.getTime()});
+        Log.i(context.getClass().getSimpleName(), "Delete: " + simpleLocation.toString());
         return rowDeleted;
     }
 }

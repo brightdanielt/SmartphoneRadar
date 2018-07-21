@@ -59,8 +59,9 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.IN_USE_NO;
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.IN_USE_YES;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_GETLOCATION;
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_SENDLOCATION;
 
 public class AccountActivity extends AppCompatActivity {
@@ -159,7 +160,7 @@ public class AccountActivity extends AppCompatActivity {
         mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);
         mListView_targetTracked = findViewById(R.id.listView_targetTracked);
 
-        mTargetTrackedList.addAll(MainDb.searchUser(this, UserEntry.USED_FOR_GETLOCATION));
+        mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));
         mAdapter_targetTracked = new TargetTrackedAdapter(mTargetTrackedList);
         mListView_targetTracked.setAdapter(mAdapter_targetTracked);
 
@@ -168,7 +169,7 @@ public class AccountActivity extends AppCompatActivity {
 
     private void updateTrackList() {
         mTargetTrackedList.clear();
-        mTargetTrackedList.addAll(MainDb.searchUser(AccountActivity.this, UserEntry.USED_FOR_GETLOCATION));
+        mTargetTrackedList.addAll(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
         if (mTargetTrackedList.size() > 0) {
             mTv_hintTargetTracked.setVisibility(View.GONE);
         }
@@ -254,8 +255,8 @@ public class AccountActivity extends AppCompatActivity {
                                         //成功
                                         for (QueryDocumentSnapshot document : task.getResult()) {
                                             Log.d(TAG, document.getId() + " => " + document.getData());
-                                            MainDb.addUser(AccountActivity.this, email, password,
-                                                    UserEntry.USED_FOR_GETLOCATION, UserEntry.IN_USE_NO);
+                                            MainDb.addUser(AccountActivity.this,
+                                                    new User(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
                                             updateTrackList();
                                         }
                                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
@@ -330,9 +331,10 @@ public class AccountActivity extends AppCompatActivity {
                                     dialog.dismiss();
                                     //建立使用者成功
                                     Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
-                                    //寫入手機 datebase 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
-                                    MainDb.addUser(AccountActivity.this, user.getEmail(), password,
-                                            USED_FOR_SENDLOCATION, IN_USE_YES);
+                                    //寫入手機 database 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
+                                    MainDb.addUser(AccountActivity.this,
+                                            new User(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
+
                                     //更新使用者資訊
                                     updateAuthInfo(mAuth.getCurrentUser());
                                     //初始化座標文件
@@ -500,8 +502,8 @@ public class AccountActivity extends AppCompatActivity {
                                         && mIMEI.equals(resultImei)) {
                                     //Firestore 存在該使用者
                                     //將使用者新增至手機資料庫
-                                    MainDb.addUser(AccountActivity.this, resultEmail, resultPassword,
-                                            USED_FOR_SENDLOCATION, IN_USE_YES);
+                                    MainDb.addUser(AccountActivity.this,
+                                            new User(resultEmail, resultPassword, USED_FOR_SENDLOCATION, IN_USE_YES));
                                     updateAuthInfo(firebaseUser);
                                 } else {
                                     //可能是在非綁定的裝置登入
@@ -580,7 +582,7 @@ public class AccountActivity extends AppCompatActivity {
             }
             convertView = v;
 
-            if (usedFor.equals(UserEntry.USED_FOR_GETLOCATION)) {
+            if (usedFor.equals(USED_FOR_GETLOCATION)) {
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

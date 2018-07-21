@@ -201,10 +201,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //左右滑動後，從清單移除該項目
                 int position = viewHolder.getAdapterPosition();
                 //刪除內存資料庫的該筆資料
-                MainDb.deleteLocation(MapsActivity.this, mEmail, mLocationList.get(position).getTime());
+                MainDb.deleteLocation(MapsActivity.this,
+                        (SimpleLocation) viewHolder.itemView.getTag());
                 mLocationList.remove(position);
                 mLocationAdapter.notifyItemRemoved(position);
-
             }
         });
         //指定 RecyclerView 對象
@@ -291,10 +291,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final String time = DateFormat.getDateTimeInstance().format(dateFromServer);
 
                 //手機端資料庫新增一筆 Location
-                MainDb.addLocation(MapsActivity.this, mEmail, latitude, longitude, time);
-
+                SimpleLocation simpleLocation = new SimpleLocation(mEmail, time, latitude, longitude);
+                MainDb.addLocation(MapsActivity.this, simpleLocation);
                 //座標清單，新增一筆資料
-                mLocationAdapter.addNewLocation(new SimpleLocation(time, latitude, longitude));
+                mLocationAdapter.addNewLocation(simpleLocation);
 
                 if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -510,10 +510,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             double lat = location.getLatitude();
             double lng = location.getLongitude();
 
-            //將座標清單中的所有座標加入標記群集
-//            MyItem offsetItem = new MyItem(null, lat, lng, time, "");
-//            mClusterManager.addItem(offsetItem);
-
+            holder.itemView.setTag(location);
             holder.tv_time.setText(time);
             holder.tv_lat.setText(String.valueOf(lat));
             holder.tv_lng.setText(String.valueOf(lng));
@@ -532,9 +529,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return mLocationList.size();
         }
 
-        public void addNewLocation(SimpleLocation location) {
+        public void addNewLocation(SimpleLocation simpleLocation) {
             if (mLocationList != null) {
-                mLocationList.add(location);
+                mLocationList.add(simpleLocation);
                 //刷新座標清單
                 LocationAdapter.this.notifyDataSetChanged();
                 mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
