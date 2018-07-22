@@ -1,19 +1,10 @@
 package com.cauliflower.danielt.smartphoneradar.firebase;
 
-import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AlertDialog;
-import android.util.Log;
-import android.widget.TextView;
-
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -22,14 +13,44 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class RadarFirestore {
     private static final String TAG = RadarFirestore.class.getSimpleName();
+
+    /**
+     * <p> In user collection, there are one or more than one document:
+     * <p>
+     * <p> | collection name |    | document id |
+     * <p>        user         -  daniel@gmail.com
+     * <p>                     -  danny@gmail.com
+     * <p>                     -  david@gmail.com
+     * -------------------------------------------------------------------------------------------
+     * <p> In document of user collection, there are one collection and five fields:
+     * <p>
+     * <p> daniel@gmail.com - Collection coordinate
+     * <p>                  - field uid : 132143543654765757
+     * <p>                  - field email : daniel@gmail.com
+     * <p>                  - field password : n8nruobjeh4bvm
+     * <p>                  - field model : HTC_one
+     * <p>                  - field imei : 123456789
+     * -------------------------------------------------------------------------------------------
+     * <p> In coordinate collection, there is only one document now:
+     * <p>
+     * <p> | collection name |    | document id |
+     * <p>      coordinate     -        1
+     * -------------------------------------------------------------------------------------------
+     * <p> In document of coordinate collection, there are six fields:
+     * <p>
+     * <p>  1 - field uid : 132bgj476hj5757yio
+     * <p>    - field password : n8nruobjeh4bvm
+     * <p>    - field imei : 123456789
+     * <p>    - field latitude : 123.321
+     * <p>    - field longitude : 321.123
+     * <p>    - field time : 2018-07-08 21:10:10
+     */
 
     public static final String FIRESTORE_COLLECTION_USER = "user";
     public static final String FIRESTORE_COLLECTION_COORDINATE = "coordinate";
@@ -45,11 +66,9 @@ public class RadarFirestore {
     public static final String FIRESTORE_FIELD_TIME = "time";
 
     /**
-     * In firestore, an user is composed by email, password, imei, uid, model.
-     * <p>
      * After sign in facebook ,we create the user to firestore.
-     * Beside, firestore security rule will verify if {@link FirebaseUser#getUid()} exists,
-     * if the user didn't sign in, this create would failed.
+     * Beside, firestore security rule will verify if password, imei, uid, model are not null,
+     * if the user didn't sign in facebook, this create would failed.
      *
      * @param email    Email get from {@link FirebaseUser#getEmail()}.
      * @param password RadarUser's customized password.

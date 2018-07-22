@@ -11,9 +11,6 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
  */
 
 public class RadarLocation {
-    public static final String TIME = "time";
-    public static final String LATITUDE = "latitude";
-    public static final String LONGITUDE = "longitude";
     private String email;
     private String time;
     private double latitude;
