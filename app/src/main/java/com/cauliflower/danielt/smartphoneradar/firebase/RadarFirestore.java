@@ -71,7 +71,10 @@ public class RadarFirestore {
      * if the user didn't sign in facebook, this create would failed.
      *
      * @param email    Email get from {@link FirebaseUser#getEmail()}.
+     * @param uid      Email get from {@link FirebaseUser#getUid()}.
      * @param password RadarUser's customized password.
+     * @param model    The model of the android device.
+     * @param imei     The imei of the android device.
      */
     public static void createUser(String email, String password, String imei, String model, String uid,
                                   OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
@@ -101,7 +104,6 @@ public class RadarFirestore {
                         Log.w(TAG, "Error create document", e);
                     }
                 });*/
-
     }
 
     /**
@@ -113,6 +115,8 @@ public class RadarFirestore {
      * we must update every fields in the document.
      *
      * @param email            Email get from {@link FirebaseUser#getEmail()}.
+     * @param uid              Email get from {@link FirebaseUser#getUid()}.
+     * @param imei             The imei of the android device.
      * @param originalPassword The original password for verification.
      * @param newPassword      The new customized password.
      */
@@ -213,12 +217,14 @@ public class RadarFirestore {
      * from {@link FirebaseUser#getUid()} exists,
      * if the user didn't sign in, there would be no uid and this create would failed.
      *
-     * @param email     Email get from {@link FirebaseUser#getEmail()}.
-     * @param imei      The imei for verification.
-     * @param latitude  The latitude of the device.
-     * @param longitude The longitude of the device.
+     * @param email     From {@link FirebaseUser#getEmail()}.
+     * @param password  User's custom password.
+     * @param uid       From {@link FirebaseUser#getUid()}.
+     * @param imei      The imei of the android device
+     * @param latitude  The latitude of the android device.
+     * @param longitude The longitude of the android device.
      */
-    public static void createLocation(String coordinateId, String email, String password, String uid,
+    public static void createLocation(String docId, String email, String password, String uid,
                                       String imei, double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
@@ -233,7 +239,7 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
-                .document(coordinateId)
+                .document(docId)
                 .set(coordinate)
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
@@ -256,11 +262,11 @@ public class RadarFirestore {
      * if the imei, uid, password of the user is equal to correspond values in firebase,
      * if the verification passed ,the user can update the location.
      *
-     * @param email     Email get from {@link FirebaseUser#getEmail()}.
-     * @param uid       The uid of user for verification.
-     * @param imei      The imei of device for verification.
-     * @param latitude  The latitude of the device.
-     * @param longitude The longitude of the device.
+     * @param email     From {@link FirebaseUser#getEmail()}.
+     * @param uid       From {@link FirebaseUser#getUid()}.
+     * @param imei      The imei of the android device.
+     * @param latitude  The latitude of the android device.
+     * @param longitude The longitude of the android device.
      */
     public static void updateLocation(String coordinateId, String email, String password, String uid,
                                       String imei, double latitude, double longitude,
