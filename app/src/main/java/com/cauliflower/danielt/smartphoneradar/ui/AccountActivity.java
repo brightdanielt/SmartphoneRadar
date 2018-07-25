@@ -479,7 +479,7 @@ public class AccountActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                final FirebaseUser firebaseUser = mAuth.getCurrentUser();
                 if (!userHasEmail(firebaseUser)) {
                     showNoEmailDialog();
                     RadarAuthentication.signOut(AccountActivity.this, null);
@@ -570,14 +570,14 @@ public class AccountActivity extends AppCompatActivity {
         public View getView(final int position, View convertView, ViewGroup parent) {
 
             View v = LayoutInflater.from(AccountActivity.this).inflate(R.layout.list_view_item, null);
-            TextView tv_account = v.findViewById(R.id.ckBox_account);
-            final String account = radarUserList.get(position).getEmail();
+            TextView tv_target = v.findViewById(R.id.tv_target);
+            final String email = radarUserList.get(position).getEmail();
             final String password = radarUserList.get(position).getPassword();
             final String usedFor = radarUserList.get(position).getUsedFor();
             String in_use = radarUserList.get(position).getIn_use();
-            tv_account.setText(account);
+            tv_target.setText(email);
             if (in_use.equals(IN_USE_YES)) {
-                tv_account.append(" 追蹤對象");
+                tv_target.append("\t" + getString(R.string.tracking));
             }
             convertView = v;
 
@@ -586,19 +586,19 @@ public class AccountActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         new AlertDialog.Builder(AccountActivity.this)
-                                .setTitle("問問你～")
-                                .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + account +
+                                .setTitle(R.string.ask)
+                                .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + email +
                                         "</font> \n為目前追蹤對象嗎？"))
                                 .setCancelable(false)
-                                .setPositiveButton("是的", new DialogInterface.OnClickListener() {
+                                .setPositiveButton(getString(R.string.sure), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
-                                        MainDb.updateUser_in_use(AccountActivity.this, account);
+                                        MainDb.updateUser_in_use(AccountActivity.this, email);
                                         updateTrackList();
                                     }
                                 })
-                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                .setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                     }

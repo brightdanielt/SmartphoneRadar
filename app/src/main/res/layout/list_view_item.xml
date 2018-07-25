@@ -5,7 +5,7 @@
     android:gravity="center_horizontal|center_vertical">
 
     <TextView
-        android:id="@+id/ckBox_account"
+        android:id="@+id/tv_target"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin"
