@@ -173,8 +173,8 @@ public class RadarService extends Service {
                     return;
                 }
                 //更新位置資訊到 firestore
-                RadarFirestore.updateLocation(String.valueOf(mDocumentId), mEmail, mPassword,
-                        mAuth.getUid(), mIMEI, location.getLatitude(), location.getLongitude(),
+                RadarFirestore.updateLocation(String.valueOf(mDocumentId), mEmail,
+                        mIMEI, location.getLatitude(), location.getLongitude(),
                         new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

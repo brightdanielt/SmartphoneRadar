@@ -12,6 +12,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -110,45 +111,41 @@ public class RadarFirestore {
      * Before update password ,firestore security rule will verify
      * if the original password is equal to password in firebase,
      * if the verification passed ,the user can update the password.
-     * <p>
-     * Unfortunately!!!!! The firestore is beta version, we can not update only one field,
-     * we must update every fields in the document.
      *
      * @param email            Email get from {@link FirebaseUser#getEmail()}.
-     * @param uid              Email get from {@link FirebaseUser#getUid()}.
-     * @param imei             The imei of the android device.
      * @param originalPassword The original password for verification.
      * @param newPassword      The new customized password.
      */
-    public static void updatePassword(String email, String originalPassword, String newPassword,
-                                      String imei, String model, String uid,
-                                      OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
+    public static void updatePassword(final String email, String originalPassword, final String newPassword) {
         Map<String, Object> user = new HashMap<>();
         user.put(FIRESTORE_FIELD_EMAIL, email);
         user.put(FIRESTORE_FIELD_ORIGINAL_PASSWORD, originalPassword);
         user.put(FIRESTORE_FIELD_PASSWORD, newPassword);
-        user.put(FIRESTORE_FIELD_IMEI, imei);
-        user.put(FIRESTORE_FIELD_MODEL, model);
-        user.put(FIRESTORE_FIELD_UID, uid);
-        // Access a Cloud Firestore instance from your Activity
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        // Access a Cloud Firestore instance
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
-                .set(user)
-                .addOnSuccessListener(successListener)
-                .addOnFailureListener(failureListener);
-                /*.addOnSuccessListener(new OnSuccessListener<Void>() {
+                .set(user, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written.");
+                        //更新成功時，同時更新 coordinate 中的密碼
+                        Map<String, Object> location = new HashMap<>();
+                        location.put(FIRESTORE_FIELD_PASSWORD, newPassword);
+                        db.collection(FIRESTORE_COLLECTION_USER)
+                                .document(email)
+                                .collection(FIRESTORE_COLLECTION_COORDINATE)
+                                .document("1")
+                                .set(location, SetOptions.merge());
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
+                });
+                /*.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.w(TAG, "Error writing document", e);
                     }
                 });*/
+
     }
 
     /**
@@ -213,7 +210,7 @@ public class RadarFirestore {
     }
 
     /**
-     * Before create location ,firestore security rule will verify if the uid
+     * Before create location, firestore security rule will verify if the uid
      * from {@link FirebaseUser#getUid()} exists,
      * if the user didn't sign in, there would be no uid and this create would failed.
      *
@@ -259,31 +256,32 @@ public class RadarFirestore {
 
     /**
      * Before update location ,firestore security rule will verify
-     * if the imei, uid, password of the user is equal to correspond values in firebase,
+     * if the imei is equal to correspond values in firebase,
      * if the verification passed ,the user can update the location.
      *
+     * ˇ#$%^&* I am sorry ,there is a method {@link SetOptions#merge()} , we can use it as the
+     * second param in {@link com.google.firebase.firestore.DocumentReference#set(Object, SetOptions)}
+     * to avoid overwriting entire documents.
+     *
      * @param email     From {@link FirebaseUser#getEmail()}.
-     * @param uid       From {@link FirebaseUser#getUid()}.
      * @param imei      The imei of the android device.
      * @param latitude  The latitude of the android device.
      * @param longitude The longitude of the android device.
      */
-    public static void updateLocation(String coordinateId, String email, String password, String uid,
-                                      String imei, double latitude, double longitude,
+    public static void updateLocation(String coordinateId, String email, String imei,
+                                      double latitude, double longitude,
                                       OnSuccessListener<Void> successListener, OnFailureListener failureListener) {
         Map<String, Object> coordinate = new HashMap<>();
+        coordinate.put(FIRESTORE_FIELD_IMEI, imei);
         coordinate.put(FIRESTORE_FIELD_TIME, new Date());
-        coordinate.put(FIRESTORE_FIELD_PASSWORD, password);
         coordinate.put(FIRESTORE_FIELD_LATITUDE, latitude);
         coordinate.put(FIRESTORE_FIELD_LONGITUDE, longitude);
-        coordinate.put(FIRESTORE_FIELD_IMEI, imei);
-        coordinate.put(FIRESTORE_FIELD_UID, uid);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .collection(FIRESTORE_COLLECTION_COORDINATE)
                 .document(coordinateId)
-                .set(coordinate)
+                .set(coordinate, SetOptions.merge())
                 .addOnSuccessListener(successListener)
                 .addOnFailureListener(failureListener);
                 /*.addOnSuccessListener(new OnSuccessListener<Void>() {
