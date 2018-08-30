@@ -3,8 +3,8 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -41,14 +41,9 @@ import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,8 +74,10 @@ public class AccountActivity extends AppCompatActivity {
     private List<RadarUser> mTargetTrackedList = new ArrayList<>();
     private TargetTrackedAdapter mAdapter_targetTracked;
     private ProgressDialog mDialog_loading;
+    private boolean hasSignIn = false;
 
-    private FirebaseAuth mAuth;
+    /*private FirebaseAuth mAuth;*/
+    private MutableLiveData<FirebaseAuth> mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,29 +100,44 @@ public class AccountActivity extends AppCompatActivity {
         //要求權限、取得 IMEI、model
         getPhoneInfo();
         // Check if user is signed in (non-null) and update UI accordingly.
-        mAuth = FirebaseAuth.getInstance();
-        final FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            //已登入
-            mDialog_loading.show();
-            //檢查 firestore 有沒有建立使用者
-            RadarFirestore.checkUserExists(currentUser.getEmail(), task -> {
-                mDialog_loading.dismiss();
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
-                        if (currentUser.getEmail().equals(resultEmail)) {
-                            //使用者還已經建立，代表合法登入，更新使用者資訊
-                            updateAuthInfo(currentUser);
-                        } else {
-                            //使用者還沒建立，代表非法登入，強制登出
-                            RadarAuthentication.signOut(AccountActivity.this, null);
-                            updateAuthInfo(null);
-                        }
+        /*mAuth = FirebaseAuth.getInstance();*/
+        mAuth = new MutableLiveData<>();
+        mAuth.setValue(FirebaseAuth.getInstance());
+        /*final FirebaseUser currentUser = mAuth.getCurrentUser();*/
+        mAuth.observe(AccountActivity.this, (firebaseAuth) -> {
+            hasSignIn = firebaseAuth != null && firebaseAuth.getCurrentUser() != null;
+            updateAuthInfo(firebaseAuth.getCurrentUser());
+        });
+
+        checkUserExists(mAuth.getValue().getCurrentUser());
+
+    }
+
+    private void checkUserExists(FirebaseUser currentUser) {
+        if (currentUser == null) {
+            return;
+        }
+        //已登入
+        mDialog_loading.show();
+        //檢查 firestore 有沒有建立使用者
+        RadarFirestore.checkUserExists(currentUser.getEmail(), task -> {
+            mDialog_loading.dismiss();
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
+                    if (currentUser.getEmail().equals(resultEmail)) {
+                        //使用者已存在於 Firestore，代表合法登入，更新使用者資訊
+                        /*updateAuthInfo(currentUser);*/
+                        mAuth.postValue(FirebaseAuth.getInstance());
+                    } else {
+                        //使用者不存在於 Firestore，代表非法登入，強制登出
+                        RadarAuthentication.signOut(AccountActivity.this, null);
+                        /*updateAuthInfo(null);*/
+                        mAuth.postValue(FirebaseAuth.getInstance());
                     }
                 }
-            });
-        }
+            }
+        });
 
     }
 
@@ -173,7 +185,7 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     /**
-     * Refresh user info from FirebaseUser.
+     * Refresh user info depending on FirebaseUser.
      */
     private void updateAuthInfo(FirebaseUser firebaseUser) {
         if (firebaseUser != null) {
@@ -195,7 +207,7 @@ public class AccountActivity extends AppCompatActivity {
         switch (view.getId()) {
             //登入
             case R.id.imgView_photo: {
-                if (mAuth.getCurrentUser() != null) {
+                if (hasSignIn) {
                     new AlertDialog.Builder(AccountActivity.this)
                             .setMessage(R.string.signOut)
                             .setCancelable(true)
@@ -203,7 +215,8 @@ public class AccountActivity extends AppCompatActivity {
                                 //登出
                                 RadarAuthentication.signOut(AccountActivity.this, task -> {
                                     if (task.isSuccessful()) {
-                                        updateAuthInfo(null);
+                                        /*updateAuthInfo(null);*/
+                                        mAuth.postValue(FirebaseAuth.getInstance());
                                         if (RadarService.mInService) {
                                             //停止定位服務
                                             stopService(new Intent(AccountActivity.this, RadarService.class));
@@ -316,9 +329,9 @@ public class AccountActivity extends AppCompatActivity {
                                     new RadarUser(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
 
                             //更新使用者資訊
-                            updateAuthInfo(mAuth.getCurrentUser());
+                            /*updateAuthInfo(mAuth.getCurrentUser());*/
                             //初始化座標文件
-                            initFirestoreLocation(mAuth.getCurrentUser());
+                            initFirestoreLocation(mAuth.getValue().getCurrentUser());
                         }, e -> {
                             //建立使用者失敗
                             //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
@@ -326,7 +339,8 @@ public class AccountActivity extends AppCompatActivity {
                             //關閉對話筐
                             dialog.dismiss();
                             RadarAuthentication.signOut(AccountActivity.this, null);
-                            updateAuthInfo(null);
+                            /*updateAuthInfo(null);*/
+                            mAuth.postValue(FirebaseAuth.getInstance());
                             Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "Error create user", e);
                         });
@@ -455,14 +469,14 @@ public class AccountActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
                 // Successfully signed in
-                final FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                final FirebaseUser firebaseUser = mAuth.getValue().getCurrentUser();
                 if (!userHasEmail(firebaseUser)) {
                     showNoEmailDialog();
                     RadarAuthentication.signOut(AccountActivity.this, null);
                     return;
                 }
                 mDialog_loading.show();
-                //檢查是否第一次登入
+                //檢查是否已在 Firestore 註冊
                 RadarFirestore.checkUserExists(firebaseUser.getEmail(), task -> {
                     mDialog_loading.dismiss();
                     if (task.isSuccessful() && task.getResult().size() > 0) {
@@ -477,7 +491,8 @@ public class AccountActivity extends AppCompatActivity {
                                 //將使用者新增至手機資料庫
                                 MainDb.addUser(AccountActivity.this,
                                         new RadarUser(resultEmail, resultPassword, USED_FOR_SENDLOCATION, IN_USE_YES));
-                                updateAuthInfo(firebaseUser);
+                                /*updateAuthInfo(firebaseUser);*/
+                                mAuth.postValue(FirebaseAuth.getInstance());
                             } else {
                                 //可能是在非綁定的裝置登入
                                 Log.w(TAG, "該帳號已綁定於其他裝置.");
@@ -489,7 +504,8 @@ public class AccountActivity extends AppCompatActivity {
                                         .create().show();
                                 //強制登出
                                 RadarAuthentication.signOut(AccountActivity.this, null);
-                                updateAuthInfo(null);
+                                /*updateAuthInfo(null);*/
+                                mAuth.postValue(FirebaseAuth.getInstance());
                             }
                         }
                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
@@ -500,7 +516,8 @@ public class AccountActivity extends AppCompatActivity {
                         Log.d(TAG, "Task is not successful when checkUserExists.");
                         //強制登出
                         RadarAuthentication.signOut(AccountActivity.this, null);
-                        updateAuthInfo(null);
+                        /*updateAuthInfo(null);*/
+                        mAuth.postValue(FirebaseAuth.getInstance());
                     }
                 });
             } else {
