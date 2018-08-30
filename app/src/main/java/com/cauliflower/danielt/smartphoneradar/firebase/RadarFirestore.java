@@ -126,18 +126,15 @@ public class RadarFirestore {
         db.collection(FIRESTORE_COLLECTION_USER)
                 .document(email)
                 .set(user, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        //更新成功時，同時更新 coordinate 中的密碼
-                        Map<String, Object> location = new HashMap<>();
-                        location.put(FIRESTORE_FIELD_PASSWORD, newPassword);
-                        db.collection(FIRESTORE_COLLECTION_USER)
-                                .document(email)
-                                .collection(FIRESTORE_COLLECTION_COORDINATE)
-                                .document("1")
-                                .set(location, SetOptions.merge());
-                    }
+                .addOnSuccessListener(aVoid -> {
+                    //更新成功時，同時更新 coordinate 中的密碼
+                    Map<String, Object> location = new HashMap<>();
+                    location.put(FIRESTORE_FIELD_PASSWORD, newPassword);
+                    db.collection(FIRESTORE_COLLECTION_USER)
+                            .document(email)
+                            .collection(FIRESTORE_COLLECTION_COORDINATE)
+                            .document("1")
+                            .set(location, SetOptions.merge());
                 });
                 /*.addOnFailureListener(new OnFailureListener() {
                     @Override
@@ -213,6 +210,8 @@ public class RadarFirestore {
      * Before create location, firestore security rule will verify if the uid
      * from {@link FirebaseUser#getUid()} exists,
      * if the user didn't sign in, there would be no uid and this create would failed.
+     *
+     * 透過 security rule 的 get 功能，判斷使用者的查詢以及更新權限
      *
      * @param email     From {@link FirebaseUser#getEmail()}.
      * @param password  User's custom password.

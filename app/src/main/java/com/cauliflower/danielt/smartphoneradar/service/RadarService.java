@@ -175,24 +175,18 @@ public class RadarService extends Service {
                 //更新位置資訊到 firestore
                 RadarFirestore.updateLocation(String.valueOf(mDocumentId), mEmail,
                         mIMEI, location.getLatitude(), location.getLongitude(),
-                        new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                //更新成功
-                                Log.d(TAG, "Successfully update location");
+                        aVoid -> {
+                            //更新成功
+                            Log.d(TAG, "Successfully update location");
+                        }, e -> {
+                            //更新失敗
+                            mUpdateLocationFailedCount++;
+                            if (mUpdateLocationFailedCount > UPDATE_LOCATION_FAILED_MAXIMUM) {
+                                Toast.makeText(RadarService.this,
+                                        getString(R.string.updateLocationFailed_close_service), Toast.LENGTH_SHORT).show();
+                                RadarService.this.stopSelf();
                             }
-                        }, new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                //更新失敗
-                                mUpdateLocationFailedCount++;
-                                if (mUpdateLocationFailedCount > UPDATE_LOCATION_FAILED_MAXIMUM) {
-                                    Toast.makeText(RadarService.this,
-                                            getString(R.string.updateLocationFailed_close_service), Toast.LENGTH_SHORT).show();
-                                    RadarService.this.stopSelf();
-                                }
-                                Log.d(TAG, "Update location failed count:" + mUpdateLocationFailedCount, e);
-                            }
+                            Log.d(TAG, "Update location failed count:" + mUpdateLocationFailedCount, e);
                         });
             }
         };

@@ -119,25 +119,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //判斷是否查得正在追蹤對象
         if (mEmail != null && mPassword != null) {
             //監聽該追蹤對象的座標更新
-            mLocationListenerRg = RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, new EventListener<QuerySnapshot>() {
-                @Override
-                public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException e) {
-                    //監聽失敗
-                    if (e != null) {
-                        Log.d(TAG, "setOnLocationUpdateListener failed", e);
-                        return;
-                    }
-                    //Document has local changes that haven't been written to the backend yet
-                    /*if (value.getMetadata().hasPendingWrites()) {
-                        //代表監聽到 local 的更新，而非來自 firestore 的更新
-                        //這是延遲補償的設計所導致的，但監聽座標不需要該功能
-                        return;
-                    }*/
-                    //監聽成功
-                    if (value != null) {
-                        //處理座標資料
-                        handleLocation(value);
-                    }
+            mLocationListenerRg = RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, (value, e) -> {
+                //監聽失敗
+                if (e != null) {
+                    Log.d(TAG, "setOnLocationUpdateListener failed", e);
+                    return;
+                }
+                //Document has local changes that haven't been written to the backend yet
+                /*if (value.getMetadata().hasPendingWrites()) {
+                    //代表監聽到 local 的更新，而非來自 firestore 的更新
+                    //這是延遲補償的設計所導致的，但監聽座標不需要該功能
+                    return;
+                }*/
+                //監聽成功
+                if (value != null) {
+                    //處理座標資料
+                    handleLocation(value);
                 }
             });
         }
@@ -507,12 +504,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             holder.tv_lng.setText(String.valueOf(lng));
 
             final LatLng latLng = new LatLng(lat, lng);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                }
-            });
+            holder.itemView.setOnClickListener(v -> mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18)));
         }
 
         @Override
