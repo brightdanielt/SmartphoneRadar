@@ -77,8 +77,8 @@ public class AccountActivity extends AppCompatActivity {
     private ProgressDialog mDialog_loading;
     private boolean hasSignIn = false;
 
-    /*private FirebaseAuth mAuth;*/
     private MutableLiveData<FirebaseAuth> mAuth;
+    private MutableLiveData<QueryDocumentSnapshot> firestoreUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,22 +100,71 @@ public class AccountActivity extends AppCompatActivity {
         mDialog_loading.setCancelable(false);
         //要求權限、取得 IMEI、model
         getPhoneInfo();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        /*mAuth = FirebaseAuth.getInstance();*/
+
+        observeUserFromFirebaseAuth();
+        observeUserFromFirestore();
+
+        getUserFromFirestore(FirebaseAuth.getInstance().getCurrentUser());
+
+    }
+
+    /**
+     * 只有在 FirebaseAuth 登入成功，
+     * 並在 Firestore 新增使用者成功，或比對 Firestore 使用者成功，firebaseAuth 才不是 null
+     */
+    private void observeUserFromFirebaseAuth() {
         mAuth = new MutableLiveData<>();
-        mAuth.setValue(FirebaseAuth.getInstance());
-        /*final FirebaseUser currentUser = mAuth.getCurrentUser();*/
         mAuth.observe(AccountActivity.this, (firebaseAuth) -> {
             hasSignIn = firebaseAuth != null && firebaseAuth.getCurrentUser() != null;
             updateAuthInfo(firebaseAuth.getCurrentUser());
         });
-
-        checkUserExistsInFirestore(mAuth.getValue().getCurrentUser());
-
     }
 
-    private void checkUserExistsInFirestore(FirebaseUser currentUser) {
+    private void observeUserFromFirestore() {
+        firestoreUser = new MutableLiveData<>();
+        firestoreUser.observe(AccountActivity.this, queryDocumentSnapshot -> {
+            if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+                mAuth.postValue(FirebaseAuth.getInstance());
+                return;
+            }
+            if (queryDocumentSnapshot == null) {
+                //第一次登入，顯示對話筐，要求輸入定位密碼
+                showDialogInputLocationPassword(FirebaseAuth.getInstance().getCurrentUser());
+            } else {
+                //再次登入，比較資料是否一致
+                boolean same = compareUsers(FirebaseAuth.getInstance().getCurrentUser(), queryDocumentSnapshot);
+                if (same) {
+                    //新增使用者至內存
+                    String email = queryDocumentSnapshot.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
+                    String password = queryDocumentSnapshot.getString(RadarFirestore.FIRESTORE_FIELD_PASSWORD);
+                    MainDb.addUser(AccountActivity.this,
+                            new RadarUser(email, password, USED_FOR_SENDLOCATION, IN_USE_YES));
+                    mAuth.postValue(FirebaseAuth.getInstance());
+                } else {
+                    //可能是在非綁定的裝置登入
+                    Log.w(TAG, "該帳號已綁定於其他裝置.");
+                    //提示使用者該帳號已綁定於其他裝置
+                    new AlertDialog.Builder(AccountActivity.this)
+                            .setTitle(R.string.dialog_title_ops)
+                            .setMessage(R.string.userHasBindToOtherDevice)
+                            .setCancelable(true)
+                            .create().show();
+                    //強制登出
+                    RadarAuthentication.signOut(AccountActivity.this, null);
+                    mAuth.postValue(FirebaseAuth.getInstance());
+                }
+            }
+        });
+    }
+
+    /**
+     * 透過 FirebaseAuth 登入後，還要檢查 Firestore 有沒有這個使用者
+     * 這個方法用於查詢 Firestore 中，相同 email 的使用者
+     */
+    private void getUserFromFirestore(FirebaseUser currentUser) {
+        //連 FirebaseAuth 都還沒登入
         if (currentUser == null) {
+            mAuth.postValue(FirebaseAuth.getInstance());
             return;
         }
         //FirebaseAuth 存在使用者
@@ -126,51 +175,35 @@ public class AccountActivity extends AppCompatActivity {
             if (task.isSuccessful() && task.getResult().size() > 0) {
                 //存在同 email
                 for (QueryDocumentSnapshot document : task.getResult()) {
-                    //比較資料是否一致
-                    compareUsers(currentUser, document);
+                    firestoreUser.postValue(document);
                 }
             } else if (task.isSuccessful() && task.getResult().size() < 1) {
-                //Firestore 不存在該使用者，代表第一次登入，向 firestore 新增使用者
-                showDialogCreateUser(currentUser);
+                //Firestore 不存在該 email，代表第一次登入
+                firestoreUser.postValue(null);
             } else {
                 //不應該發生的錯誤
-                Log.d(TAG, "Task is not successful when checkUserExistsInFirestore.");
+                Log.d(TAG, "Task is not successful when getUserFromFirestore.");
                 //強制登出
                 RadarAuthentication.signOut(AccountActivity.this, null);
-                /*updateAuthInfo(null);*/
                 mAuth.postValue(FirebaseAuth.getInstance());
             }
         });
     }
 
-
-    private void compareUsers(FirebaseUser currentUser, QueryDocumentSnapshot document) {
+    /**
+     * Compare firebaseUser with the user queried from firestore
+     *
+     * @param currentUser FirebaseAuth.getInstance().getCurrentUser()
+     * @param document    Query result from checkUserExists
+     * @return true if they are the same.
+     */
+    private boolean compareUsers(FirebaseUser currentUser, QueryDocumentSnapshot document) {
         String resultEmail = document.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
         String resultPassword = document.getString(RadarFirestore.FIRESTORE_FIELD_PASSWORD);
         String resultImei = document.getString(RadarFirestore.FIRESTORE_FIELD_IMEI);
         String resultUid = document.getString(RadarFirestore.FIRESTORE_FIELD_UID);
-        if (currentUser.getUid().equals(resultUid) && currentUser.getEmail().equals(resultEmail)
-                && mIMEI.equals(resultImei)) {
-            //Firestore 存在該使用者
-            //新增使用者至內存
-            MainDb.addUser(AccountActivity.this,
-                    new RadarUser(resultEmail, resultPassword, USED_FOR_SENDLOCATION, IN_USE_YES));
-            /*updateAuthInfo(firebaseUser);*/
-            mAuth.postValue(FirebaseAuth.getInstance());
-        } else {
-            //可能是在非綁定的裝置登入
-            Log.w(TAG, "該帳號已綁定於其他裝置.");
-            //提示使用者該帳號已綁定於其他裝置
-            new AlertDialog.Builder(AccountActivity.this)
-                    .setTitle(R.string.dialog_title_ops)
-                    .setMessage(R.string.userHasBindToOtherDevice)
-                    .setCancelable(true)
-                    .create().show();
-            //強制登出
-            RadarAuthentication.signOut(AccountActivity.this, null);
-            /*updateAuthInfo(null);*/
-            mAuth.postValue(FirebaseAuth.getInstance());
-        }
+        return currentUser.getUid().equals(resultUid) && currentUser.getEmail().equals(resultEmail)
+                && mIMEI.equals(resultImei);
     }
 
     @Override
@@ -220,6 +253,7 @@ public class AccountActivity extends AppCompatActivity {
      * Refresh user info depending on FirebaseUser.
      */
     private void updateAuthInfo(FirebaseUser firebaseUser) {
+        //todo 使用 DataBinding
         if (firebaseUser != null) {
             mTv_userNickName.setText(firebaseUser.getDisplayName());
             mTv_userEmail.setText(firebaseUser.getEmail());
@@ -236,6 +270,7 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     public void clickButton(View view) {
+        //todo 這邊看來問題很大 ＸＤ
         switch (view.getId()) {
             //登入
             case R.id.imgView_photo: {
@@ -247,7 +282,6 @@ public class AccountActivity extends AppCompatActivity {
                                 //登出
                                 RadarAuthentication.signOut(AccountActivity.this, task -> {
                                     if (task.isSuccessful()) {
-                                        /*updateAuthInfo(null);*/
                                         mAuth.postValue(FirebaseAuth.getInstance());
                                         if (RadarService.mInService) {
                                             //停止定位服務
@@ -331,7 +365,7 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     //顯示對話筐，輸入定位密碼
-    private void showDialogCreateUser(final FirebaseUser user) {
+    private void showDialogInputLocationPassword(final FirebaseUser user) {
         final EditText ed_password = new EditText(AccountActivity.this);
         ed_password.setHint(R.string.fui_password_hint);
         ed_password.setMaxLines(1);
@@ -345,14 +379,14 @@ public class AccountActivity extends AppCompatActivity {
                 .setView(ed_password)
                 .setPositiveButton(R.string.ok, (dialog, which) -> {
                     //取得輸入的密碼
-                    final String password = ed_password.getText().toString().trim();
+                    String password = ed_password.getText().toString().trim();
                     //檢查密碼
                     if (!password.equals("")) {
                         mDialog_loading.show();
                         //在 firestore 建立使用者
                         createUserInFirestore(user, dialog, password);
-                    }else {
-                        showDialogCreateUser(user);
+                    } else {
+                        showDialogInputLocationPassword(user);
                     }
                 }).create().show();
     }
@@ -367,11 +401,10 @@ public class AccountActivity extends AppCompatActivity {
             //寫入手機 database 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
             MainDb.addUser(AccountActivity.this,
                     new RadarUser(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
-
-            //更新使用者資訊
-            /*updateAuthInfo(mAuth.getCurrentUser());*/
+            //因為 firestore 新增使用者成功，所以更新該值
+            mAuth.postValue(FirebaseAuth.getInstance());
             //初始化座標文件
-            initFirestoreLocation(mAuth.getValue().getCurrentUser());
+            initFirestoreLocation(user);
         }, e -> {
             //建立使用者失敗
             //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
@@ -379,7 +412,6 @@ public class AccountActivity extends AppCompatActivity {
             //關閉對話筐
             dialog.dismiss();
             RadarAuthentication.signOut(AccountActivity.this, null);
-            /*updateAuthInfo(null);*/
             mAuth.postValue(FirebaseAuth.getInstance());
             Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Error create user", e);
@@ -515,7 +547,7 @@ public class AccountActivity extends AppCompatActivity {
                 }
                 mDialog_loading.show();
                 //檢查是否已在 Firestore 註冊
-                checkUserExistsInFirestore(firebaseUser);
+                getUserFromFirestore(firebaseUser);
             } else {
                 // Sign in failed. If response is null the user canceled the
                 // sign-in flow using the back button. Otherwise check
