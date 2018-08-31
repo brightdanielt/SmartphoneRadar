@@ -141,5 +141,7 @@
         todo 15-1: 目前最不滿意的是 AccountActivity 這個 class，先試著使用 LiveData 的“可觀察”特性，
         觀察 FirebaseAuth 以減少自行檢查 FirebaseAuth 登入狀況
 
+        todo 15-2: 使用 DataBinding 修改 AccountActivity
+
 
 -->
