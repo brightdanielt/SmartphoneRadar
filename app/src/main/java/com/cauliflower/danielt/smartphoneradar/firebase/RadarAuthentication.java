@@ -3,12 +3,11 @@ package com.cauliflower.danielt.smartphoneradar.firebase;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,7 @@ public class RadarAuthentication {
     /**
      * Sign out with firebase authentication
      */
-    public static void signOut(Context context,@Nullable OnCompleteListener<Void> listener) {
+    public static void signOut(Context context, @Nullable OnCompleteListener<Void> listener) {
         AuthUI.getInstance()
                 .signOut(context)
                 .addOnCompleteListener(listener);
@@ -53,16 +52,16 @@ public class RadarAuthentication {
     /**
      * Delete user with firebase authentication
      */
-    public static void deleteUser(Context context,OnCompleteListener<Void> listener) {
+    public static void deleteUser(Context context, OnCompleteListener<Void> listener) {
         AuthUI.getInstance()
                 .delete(context)
                 .addOnCompleteListener(listener);
     }
 
-    public static Uri getDifferentPhotoSize(Uri photoUri,int height){
-        if (photoUri != null) {
+    public static Uri getDifferentPhotoSize(FirebaseUser user, int height) {
+        if (user != null && user.getPhotoUrl() != null) {
 
-            return photoUri.buildUpon().appendQueryParameter("type","large").build();
+            return user.getPhotoUrl().buildUpon().appendQueryParameter("type", "large").build();
 //            return photoUri.buildUpon().appendQueryParameter("height",String.valueOf(height)).build();
         }
         return null;

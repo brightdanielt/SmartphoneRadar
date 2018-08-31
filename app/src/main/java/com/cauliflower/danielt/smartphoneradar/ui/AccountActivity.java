@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -28,7 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -59,6 +59,8 @@ import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEnt
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_GETLOCATION;
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_SENDLOCATION;
 
+import com.cauliflower.danielt.smartphoneradar.databinding.ActivityAccountBinding;
+
 public class AccountActivity extends AppCompatActivity {
 
     public static final String TAG = AccountActivity.class.getSimpleName();
@@ -69,8 +71,7 @@ public class AccountActivity extends AppCompatActivity {
     private String mIMEI, mModel;
 
     private static final int MAX_DOCUMENT_LOCATION = 1;
-    private ImageView imgView_userPhoto;
-    private TextView mTv_userEmail, mTv_userNickName, mTv_userPhoneNumber, mTv_hintTargetTracked;
+    private TextView mTv_hintTargetTracked;
     private ListView mListView_targetTracked;
     private List<RadarUser> mTargetTrackedList = new ArrayList<>();
     private TargetTrackedAdapter mAdapter_targetTracked;
@@ -79,6 +80,8 @@ public class AccountActivity extends AppCompatActivity {
 
     private MutableLiveData<FirebaseAuth> mAuth;
     private MutableLiveData<QueryDocumentSnapshot> firestoreUser;
+
+    private ActivityAccountBinding mBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,6 +92,8 @@ public class AccountActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         makeViewWork();
+        mBinding = DataBindingUtil.setContentView(
+                AccountActivity.this, R.layout.activity_account);
     }
 
     @Override
@@ -226,10 +231,6 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void makeViewWork() {
-        imgView_userPhoto = findViewById(R.id.imgView_photo);
-        mTv_userNickName = findViewById(R.id.tv_userNickName);
-        mTv_userEmail = findViewById(R.id.tv_userEmail);
-        mTv_userPhoneNumber = findViewById(R.id.tv_userPhoneNumber);
         mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);
         mListView_targetTracked = findViewById(R.id.listView_targetTracked);
 
@@ -254,19 +255,9 @@ public class AccountActivity extends AppCompatActivity {
      */
     private void updateAuthInfo(FirebaseUser firebaseUser) {
         //todo 使用 DataBinding
-        if (firebaseUser != null) {
-            mTv_userNickName.setText(firebaseUser.getDisplayName());
-            mTv_userEmail.setText(firebaseUser.getEmail());
-            mTv_userPhoneNumber.setText(firebaseUser.getPhoneNumber());
-            new LoadBitmapFromUri().execute(
-                    RadarAuthentication.getDifferentPhotoSize(
-                            firebaseUser.getPhotoUrl(), 200));
-        } else {
-            mTv_userNickName.setText("");
-            mTv_userEmail.setText("");
-            mTv_userPhoneNumber.setText("");
-            imgView_userPhoto.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_add));
-        }
+        mBinding.setAuthUser(firebaseUser);
+        new LoadBitmapFromUri().execute(RadarAuthentication.getDifferentPhotoSize(
+                firebaseUser, 200));
     }
 
     public void clickButton(View view) {
@@ -275,27 +266,9 @@ public class AccountActivity extends AppCompatActivity {
             //登入
             case R.id.imgView_photo: {
                 if (hasSignIn) {
-                    new AlertDialog.Builder(AccountActivity.this)
-                            .setMessage(R.string.signOut)
-                            .setCancelable(true)
-                            .setPositiveButton(R.string.sure, (dialog, which) -> {
-                                //登出
-                                RadarAuthentication.signOut(AccountActivity.this, task -> {
-                                    if (task.isSuccessful()) {
-                                        mAuth.postValue(FirebaseAuth.getInstance());
-                                        if (RadarService.mInService) {
-                                            //停止定位服務
-                                            stopService(new Intent(AccountActivity.this, RadarService.class));
-                                        }
-                                    } else {
-                                        Log.d(TAG, "Error Firebase auth sign out", task.getException());
-                                    }
-                                });
-                            })
-                            .setNegativeButton(R.string.cancel, null)
-                            .create().show();
+                    showDialogSignOut();
                 } else {
-                    RadarAuthentication.signIn(AccountActivity.this, REQUEST_CODE_SIGNIN_FIREBASE_AUTH);
+                    signIn();
                 }
                 break;
             }
@@ -338,6 +311,32 @@ public class AccountActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    public void signIn() {
+        RadarAuthentication.signIn(AccountActivity.this, REQUEST_CODE_SIGNIN_FIREBASE_AUTH);
+    }
+
+    public void showDialogSignOut() {
+        new AlertDialog.Builder(AccountActivity.this)
+                .setMessage(R.string.signOut)
+                .setCancelable(true)
+                .setPositiveButton(R.string.sure, (dialog, which) -> {
+                    //登出
+                    RadarAuthentication.signOut(AccountActivity.this, task -> {
+                        if (task.isSuccessful()) {
+                            mAuth.postValue(FirebaseAuth.getInstance());
+                            if (RadarService.mInService) {
+                                //停止定位服務
+                                stopService(new Intent(AccountActivity.this, RadarService.class));
+                            }
+                        } else {
+                            Log.d(TAG, "Error Firebase auth sign out", task.getException());
+                        }
+                    });
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .create().show();
     }
 
     /**
@@ -429,7 +428,7 @@ public class AccountActivity extends AppCompatActivity {
         @Override
         protected Bitmap doInBackground(Uri... uris) {
             if (uris[0] == null) {
-                LoadBitmapFromUri.this.cancel(true);
+                return null;
             }
             Log.i(TAG, uris[0].toString());
             try {
@@ -456,8 +455,10 @@ public class AccountActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            if (bitmap != null) {
-                imgView_userPhoto.setImageBitmap(bitmap);
+            if (bitmap == null) {
+                mBinding.imgViewPhoto.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_add));
+            } else {
+                mBinding.imgViewPhoto.setImageBitmap(bitmap);
             }
             mDialog_loading.dismiss();
             super.onPostExecute(bitmap);
