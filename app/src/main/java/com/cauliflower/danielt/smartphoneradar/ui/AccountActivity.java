@@ -260,57 +260,52 @@ public class AccountActivity extends AppCompatActivity {
                 firebaseUser, 200));
     }
 
-    public void clickButton(View view) {
-        //todo 這邊看來問題很大 ＸＤ
-        switch (view.getId()) {
+    public void clickPhoto(View view) {
+        if (hasSignIn) {
+            //登出
+            showDialogSignOut();
+        } else {
             //登入
-            case R.id.imgView_photo: {
-                if (hasSignIn) {
-                    showDialogSignOut();
-                } else {
-                    signIn();
-                }
-                break;
-            }
-            //添加追蹤對象
-            case R.id.btn_addTargetTracked: {
-                //顯示對話筐，輸入追蹤對象的 email 與 password
-                final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
-                final AlertDialog dialogAddTargetTracked = builder.create();
-                dialogAddTargetTracked.show();
-                builder.setOnButtonClickListener(v -> {
-                    if (v.getId() == R.id.dialog_btn_ok) {
-                        final String email = builder.getEmail();
-                        final String password = builder.getPassword();
-                        if (email == null || password == null) {
-                            return;
-                        }
-                        mDialog_loading.show();
-                        //檢查使用者權限
-                        RadarFirestore.checkRightToReadUser(email, password, task -> {
-                            mDialog_loading.dismiss();
-                            if (task.isSuccessful() && task.getResult().size() > 0) {
-                                //成功
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, document.getId() + " => " + document.getData());
-                                    MainDb.addUser(AccountActivity.this,
-                                            new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
-                                    updateTrackList();
-                                }
-                            } else if (task.isSuccessful() && task.getResult().size() < 1) {
-                                //與 firestore 溝通成功，但找不到該使用者
-                                Toast.makeText(AccountActivity.this, R.string.wrong_user, Toast.LENGTH_SHORT).show();
-                                Log.w(TAG, "找不到該使用者，可能信箱或密碼打錯");
-                            } else {
-                                Log.d(TAG, "Error listing documents: ", task.getException());
-                            }
-                        });
-                    }
-                    dialogAddTargetTracked.dismiss();
-                });
-                break;
-            }
+            signIn();
         }
+    }
+
+    //添加追蹤對象
+    private void addTargetTracked(View view) {
+        //顯示對話筐，輸入追蹤對象的 email 與 password
+        final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
+        final AlertDialog dialogAddTargetTracked = builder.create();
+        dialogAddTargetTracked.show();
+        builder.setOnButtonClickListener(v -> {
+            if (v.getId() == R.id.dialog_btn_ok) {
+                final String email = builder.getEmail();
+                final String password = builder.getPassword();
+                if (email == null || password == null) {
+                    return;
+                }
+                mDialog_loading.show();
+                //檢查使用者權限
+                RadarFirestore.checkRightToReadUser(email, password, task -> {
+                    mDialog_loading.dismiss();
+                    if (task.isSuccessful() && task.getResult().size() > 0) {
+                        //成功
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            MainDb.addUser(AccountActivity.this,
+                                    new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
+                            updateTrackList();
+                        }
+                    } else if (task.isSuccessful() && task.getResult().size() < 1) {
+                        //與 firestore 溝通成功，但找不到該使用者
+                        Toast.makeText(AccountActivity.this, R.string.wrong_user, Toast.LENGTH_SHORT).show();
+                        Log.w(TAG, "找不到該使用者，可能信箱或密碼打錯");
+                    } else {
+                        Log.d(TAG, "Error listing documents: ", task.getException());
+                    }
+                });
+            }
+            dialogAddTargetTracked.dismiss();
+        });
     }
 
     public void signIn() {
