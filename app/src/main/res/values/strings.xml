@@ -156,6 +156,9 @@
     <string name="loading">載入中</string>
     <string name="wrong_user">帳號或密碼錯誤</string>
 
+    <!--targetTrackedItemBinding-->
+    <string name="yes">yes</string>
+
 
     <!-- Strings related to Settings -->
 
@@ -231,7 +234,6 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_settings2">Settings</string>
-
 
 
     <!-- TODO: Remove or change this placeholder text -->
