@@ -23,15 +23,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
@@ -71,8 +66,8 @@ public class AccountActivity extends AppCompatActivity {
     private String mIMEI, mModel;
 
     private static final int MAX_DOCUMENT_LOCATION = 1;
-    private TextView mTv_hintTargetTracked;
-    private ListView mListView_targetTracked;
+    /*private TextView mTv_hintTargetTracked;*/
+    /*private ListView mListView_targetTracked;*/
     private List<RadarUser> mTargetTrackedList = new ArrayList<>();
     private TargetTrackedAdapter mAdapter_targetTracked;
     private ProgressDialog mDialog_loading;
@@ -91,9 +86,9 @@ public class AccountActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        makeViewWork();
         mBinding = DataBindingUtil.setContentView(
                 AccountActivity.this, R.layout.activity_account);
+        initRecyclerView();
     }
 
     @Override
@@ -230,24 +225,41 @@ public class AccountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void makeViewWork() {
-        mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);
-        mListView_targetTracked = findViewById(R.id.listView_targetTracked);
-
+    private void initRecyclerView() {
+        /*mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);*/
+        /*mListView_targetTracked = findViewById(R.id.listView_targetTracked);*/
+        //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，我不需要重新查詢就能在畫面上顯示最新的資料
         mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));
-        mAdapter_targetTracked = new TargetTrackedAdapter(mTargetTrackedList);
-        mListView_targetTracked.setAdapter(mAdapter_targetTracked);
+        mAdapter_targetTracked = new TargetTrackedAdapter(radarUser -> {
+            new AlertDialog.Builder(AccountActivity.this)
+                    .setTitle(R.string.ask)
+                    .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + radarUser.getEmail() +
+                            "</font> \n為目前追蹤對象嗎？"))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.sure), (dialog, which) -> {
+                        //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
+                        MainDb.updateUser_in_use(AccountActivity.this, radarUser.getEmail());
+                        updateTrackList();
+                    })
+                    .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                    })
+                    .show();
+        });
 
+//        mListView_targetTracked.setAdapter(mAdapter_targetTracked);
+        mBinding.recyclerViewTargetTracked.setAdapter(mAdapter_targetTracked);
         updateTrackList();
     }
 
     private void updateTrackList() {
-        mTargetTrackedList.clear();
+        /*mTargetTrackedList.clear();
         mTargetTrackedList.addAll(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
         if (mTargetTrackedList.size() > 0) {
             mTv_hintTargetTracked.setVisibility(View.GONE);
         }
-        mAdapter_targetTracked.notifyDataSetChanged();
+        mAdapter_targetTracked.notifyDataSetChanged();*/
+        mAdapter_targetTracked.setUserList(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
+        mBinding.executePendingBindings();
     }
 
     /**
@@ -271,7 +283,7 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     //添加追蹤對象
-    private void addTargetTracked(View view) {
+    public void addTargetTracked(View view) {
         //顯示對話筐，輸入追蹤對象的 email 與 password
         final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
         final AlertDialog dialogAddTargetTracked = builder.create();
@@ -558,7 +570,7 @@ public class AccountActivity extends AppCompatActivity {
 
     }
 
-    public class TargetTrackedAdapter extends BaseAdapter {
+    /*public class TargetTrackedAdapter extends BaseAdapter {
         List<RadarUser> radarUserList;
 
         TargetTrackedAdapter(List<RadarUser> radarUserList) {
@@ -612,7 +624,7 @@ public class AccountActivity extends AppCompatActivity {
             }
             return convertView;
         }
-    }
+    }*/
 
 
 }

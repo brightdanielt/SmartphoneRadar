@@ -156,10 +156,6 @@
     <string name="loading">載入中</string>
     <string name="wrong_user">帳號或密碼錯誤</string>
 
-    <!--targetTrackedItemBinding-->
-    <string name="yes">yes</string>
-
-
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
