@@ -160,13 +160,18 @@
                     android:padding="@dimen/default_margin"
                     android:text="@string/addTargetTracked" />
 
-                <ListView
+                <!--<ListView
                     android:id="@+id/listView_targetTracked"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="@dimen/default_margin"
-                    android:foreground="?android:attr/selectableItemBackground" />
+                    android:foreground="?android:attr/selectableItemBackground" />-->
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerView_targetTracked"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
         </LinearLayout>
 
