@@ -146,6 +146,9 @@ public final class MainDb {
                 values_in_use_no, RadarContract.UserEntry.COLUMN_USER_USED_FOR + "=?",
                 new String[]{RadarContract.UserEntry.USED_FOR_GETLOCATION});
         Log.i(context.getClass().getSimpleName(), "update user column in_use,count:" + i);
+        if (email == null) {
+            return;
+        }
         //再更新指定的使用者為已登入
         ContentValues values_in_use_yes = new ContentValues();
         values_in_use_yes.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, RadarContract.UserEntry.IN_USE_YES);

@@ -31,6 +31,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
@@ -228,22 +229,28 @@ public class AccountActivity extends AppCompatActivity {
     private void initRecyclerView() {
         /*mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);*/
         /*mListView_targetTracked = findViewById(R.id.listView_targetTracked);*/
-        //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，我不需要重新查詢就能在畫面上顯示最新的資料
+        //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，
+        // 我不需要重新查詢就能在畫面上顯示最新的資料，悲慘的是，這裡連重新查詢得不到預期的新資料
         mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));
         mAdapter_targetTracked = new TargetTrackedAdapter(radarUser -> {
-            new AlertDialog.Builder(AccountActivity.this)
-                    .setTitle(R.string.ask)
-                    .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + radarUser.getEmail() +
-                            "</font> \n為目前追蹤對象嗎？"))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-                        //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
-                        MainDb.updateUser_in_use(AccountActivity.this, radarUser.getEmail());
-                        updateTrackList();
-                    })
-                    .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
-                    })
-                    .show();
+            if (radarUser.getIn_use().equals(RadarContract.UserEntry.IN_USE_YES)) {
+                MainDb.updateUser_in_use(AccountActivity.this, null);
+                updateTrackList();
+            } else {
+                new AlertDialog.Builder(AccountActivity.this)
+                        .setTitle(R.string.ask)
+                        .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + radarUser.getEmail() +
+                                "</font> \n為目前追蹤對象嗎？"))
+                        .setCancelable(false)
+                        .setPositiveButton(getString(R.string.sure), (dialog, which) -> {
+                            //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
+                            MainDb.updateUser_in_use(AccountActivity.this, radarUser.getEmail());
+                            updateTrackList();
+                        })
+                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
+                        })
+                        .show();
+            }
         });
 
 //        mListView_targetTracked.setAdapter(mAdapter_targetTracked);
@@ -285,13 +292,13 @@ public class AccountActivity extends AppCompatActivity {
     //添加追蹤對象
     public void addTargetTracked(View view) {
         //顯示對話筐，輸入追蹤對象的 email 與 password
-        final MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
-        final AlertDialog dialogAddTargetTracked = builder.create();
+        MyDialogBuilder builder = new MyDialogBuilder(AccountActivity.this, R.string.addTargetTracked);
+        AlertDialog dialogAddTargetTracked = builder.create();
         dialogAddTargetTracked.show();
         builder.setOnButtonClickListener(v -> {
             if (v.getId() == R.id.dialog_btn_ok) {
-                final String email = builder.getEmail();
-                final String password = builder.getPassword();
+                String email = builder.getEmail();
+                String password = builder.getPassword();
                 if (email == null || password == null) {
                     return;
                 }
