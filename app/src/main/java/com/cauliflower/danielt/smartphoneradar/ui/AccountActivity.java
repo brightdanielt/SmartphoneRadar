@@ -67,8 +67,6 @@ public class AccountActivity extends AppCompatActivity {
     private String mIMEI, mModel;
 
     private static final int MAX_DOCUMENT_LOCATION = 1;
-    /*private TextView mTv_hintTargetTracked;*/
-    /*private ListView mListView_targetTracked;*/
     private List<RadarUser> mTargetTrackedList = new ArrayList<>();
     private TargetTrackedAdapter mAdapter_targetTracked;
     private ProgressDialog mDialog_loading;
@@ -227,8 +225,6 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void initRecyclerView() {
-        /*mTv_hintTargetTracked = findViewById(R.id.tv_hintTargetTracked);*/
-        /*mListView_targetTracked = findViewById(R.id.listView_targetTracked);*/
         //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，
         // 我不需要重新查詢就能在畫面上顯示最新的資料，悲慘的是，這裡連重新查詢得不到預期的新資料
         mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));
@@ -252,19 +248,11 @@ public class AccountActivity extends AppCompatActivity {
                         .show();
             }
         });
-
-//        mListView_targetTracked.setAdapter(mAdapter_targetTracked);
         mBinding.recyclerViewTargetTracked.setAdapter(mAdapter_targetTracked);
         updateTrackList();
     }
 
     private void updateTrackList() {
-        /*mTargetTrackedList.clear();
-        mTargetTrackedList.addAll(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
-        if (mTargetTrackedList.size() > 0) {
-            mTv_hintTargetTracked.setVisibility(View.GONE);
-        }
-        mAdapter_targetTracked.notifyDataSetChanged();*/
         mAdapter_targetTracked.setUserList(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
         mBinding.executePendingBindings();
     }
@@ -574,64 +562,6 @@ public class AccountActivity extends AppCompatActivity {
                 Log.d(TAG, "ErrorCode: " + errorCode + "Msg: " + errorMsg);
             }
         }
-
     }
-
-    /*public class TargetTrackedAdapter extends BaseAdapter {
-        List<RadarUser> radarUserList;
-
-        TargetTrackedAdapter(List<RadarUser> radarUserList) {
-            this.radarUserList = radarUserList;
-        }
-
-        @Override
-        public int getCount() {
-            return radarUserList.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return radarUserList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-
-            View v = LayoutInflater.from(AccountActivity.this).inflate(R.layout.list_view_item, null);
-            TextView tv_target = v.findViewById(R.id.tv_target);
-            final String email = radarUserList.get(position).getEmail();
-            final String password = radarUserList.get(position).getPassword();
-            final String usedFor = radarUserList.get(position).getUsedFor();
-            String in_use = radarUserList.get(position).getIn_use();
-            tv_target.setText(email);
-            if (in_use.equals(IN_USE_YES)) {
-                tv_target.append("\t" + getString(R.string.tracking));
-            }
-            convertView = v;
-
-            if (usedFor.equals(USED_FOR_GETLOCATION)) {
-                v.setOnClickListener(v1 -> new AlertDialog.Builder(AccountActivity.this)
-                        .setTitle(R.string.ask)
-                        .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + email +
-                                "</font> \n為目前追蹤對象嗎？"))
-                        .setCancelable(false)
-                        .setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-                            //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
-                            MainDb.updateUser_in_use(AccountActivity.this, email);
-                            updateTrackList();
-                        })
-                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
-                        })
-                        .show());
-            }
-            return convertView;
-        }
-    }*/
-
 
 }
