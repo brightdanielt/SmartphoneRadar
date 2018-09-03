@@ -109,7 +109,8 @@ public class AccountActivity extends AppCompatActivity {
 
     /**
      * 只有在 FirebaseAuth 登入成功，
-     * 並在 Firestore 新增使用者成功，或比對 Firestore 使用者成功，firebaseAuth 才不是 null
+     * 並在 Firestore 新增使用者成功，或比對 Firestore 使用者成功，firebaseAuth.getCurrentUser() 才不是 null
+     * 因為此外的狀況我們強制登出 FirebaseAuth
      */
     private void observeUserFromFirebaseAuth() {
         mAuth = new MutableLiveData<>();

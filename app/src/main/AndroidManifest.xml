@@ -143,5 +143,11 @@
 
         todo 15-2: 使用 DataBinding 修改 AccountActivity
 
+        todo 15-3: 在想可不可以將 DataBinding 使用在 AccountActivity 中的 dialog，
+        但這是不是代表要在 AccountActivity 的 layout 檔中加入 Dialog，而且 DataBinding 的 dialog 似乎沒有更好用
+        這個想法先保留
+
+        todo 25-4: 是時候加入 Room 了，這個決定會更動到所有與資料庫有關的 Class
+
 
 -->
