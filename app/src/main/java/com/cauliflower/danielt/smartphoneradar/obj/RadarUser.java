@@ -1,37 +1,54 @@
 package com.cauliflower.danielt.smartphoneradar.obj;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.COLUMN_USER_EMAIL;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.COLUMN_USER_IN_USE;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.COLUMN_USER_PASSWORD;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.COLUMN_USER_USED_FOR;
+import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.TABLE_USER;
+
+@Entity(tableName = TABLE_USER, primaryKeys = {COLUMN_USER_EMAIL, COLUMN_USER_USED_FOR})
 public class RadarUser {
+
+    @ColumnInfo(name = COLUMN_USER_EMAIL)
     private String email;
+
+    @ColumnInfo(name = COLUMN_USER_PASSWORD)
     private String password;
+
+    @ColumnInfo(name = COLUMN_USER_USED_FOR)
     private String usedFor;
-    private String in_use;
+
+    @ColumnInfo(name = COLUMN_USER_IN_USE)
+    private boolean inUse;
 
     public RadarUser() {
     }
 
-    public RadarUser(String email, String password, String usedFor, String in_use) {
+    public RadarUser(String email, String password, String usedFor, boolean inUse) {
         this.email = email;
         this.password = password;
         this.usedFor = usedFor;
-        this.in_use = in_use;
+        this.inUse = inUse;
     }
 
     public RadarUser(@NonNull Cursor cursor) {
-        int index_email = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_EMAIL);
-        int index_password = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_PASSWORD);
-        int index_usedFor = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_USED_FOR);
-        int index_in_use = cursor.getColumnIndex(RadarContract.UserEntry.COLUMN_USER_IN_USE);
+        int index_email = cursor.getColumnIndex(COLUMN_USER_EMAIL);
+        int index_password = cursor.getColumnIndex(COLUMN_USER_PASSWORD);
+        int index_usedFor = cursor.getColumnIndex(COLUMN_USER_USED_FOR);
+        int index_in_use = cursor.getColumnIndex(COLUMN_USER_IN_USE);
 
         email = cursor.getString(index_email);
         password = cursor.getString(index_password);
         usedFor = cursor.getString(index_usedFor);
-        in_use = cursor.getString(index_in_use);
+        inUse = Boolean.getBoolean(cursor.getString(index_in_use));
     }
 
     public void setEmail(String email) {
@@ -46,8 +63,8 @@ public class RadarUser {
         this.usedFor = usedFor;
     }
 
-    public void setIn_use(String in_use) {
-        this.in_use = in_use;
+    public void setInUse(boolean in_use) {
+        this.inUse = in_use;
     }
 
     public String getEmail() {
@@ -63,16 +80,16 @@ public class RadarUser {
         return usedFor;
     }
 
-    public String getIn_use() {
-        return in_use;
+    public boolean getInUse() {
+        return inUse;
     }
 
     public ContentValues getContentValues() {
         ContentValues values = new ContentValues();
-        values.put(RadarContract.UserEntry.COLUMN_USER_EMAIL, email);
-        values.put(RadarContract.UserEntry.COLUMN_USER_PASSWORD, password);
-        values.put(RadarContract.UserEntry.COLUMN_USER_USED_FOR, usedFor);
-        values.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, in_use);
+        values.put(COLUMN_USER_EMAIL, email);
+        values.put(COLUMN_USER_PASSWORD, password);
+        values.put(COLUMN_USER_USED_FOR, usedFor);
+        values.put(COLUMN_USER_IN_USE, inUse);
         return values;
     }
 
@@ -82,6 +99,6 @@ public class RadarUser {
                 email + "\t" +
                 password + "\t" +
                 usedFor + "\t" +
-                in_use;
+                inUse;
     }
 }
