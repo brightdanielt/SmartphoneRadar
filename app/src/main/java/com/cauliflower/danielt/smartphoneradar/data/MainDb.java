@@ -6,9 +6,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-import com.cauliflower.danielt.smartphoneradar.obj.RadarLocation;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
-
 import java.util.ArrayList;
 import java.util.List;
 

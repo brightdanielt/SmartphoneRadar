@@ -22,8 +22,8 @@ import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarLocation;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
+import com.cauliflower.danielt.smartphoneradar.data.RadarLocation;
+import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -34,8 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -48,8 +46,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_LATITUDE;
 import static com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore.FIRESTORE_FIELD_LONGITUDE;

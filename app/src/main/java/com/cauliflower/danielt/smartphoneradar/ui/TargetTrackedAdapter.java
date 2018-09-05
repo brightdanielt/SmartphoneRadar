@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.databinding.TargetTrackedItemBinding;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
+import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 
 import java.util.List;
 

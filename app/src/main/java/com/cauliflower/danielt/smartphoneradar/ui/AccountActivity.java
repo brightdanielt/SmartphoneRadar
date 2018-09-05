@@ -34,7 +34,7 @@ import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
+import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.firebase.ui.auth.IdpResponse;

@@ -23,7 +23,7 @@ import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.obj.RadarUser;
+import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;

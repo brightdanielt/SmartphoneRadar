@@ -7,7 +7,7 @@
 
         <variable
             name="targetTracked"
-            type="com.cauliflower.danielt.smartphoneradar.obj.RadarUser" />
+            type="com.cauliflower.danielt.smartphoneradar.data.RadarUser" />
 
         <!--點擊該 item 的事件-->
         <variable
