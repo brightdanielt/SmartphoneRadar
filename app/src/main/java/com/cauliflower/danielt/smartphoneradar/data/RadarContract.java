@@ -5,6 +5,8 @@ import android.provider.BaseColumns;
 
 public class RadarContract {
 
+    public static final String DATABASE_NAME = "SmartphoneRadar.db";
+
     public static final String CONTENT_AUTHORITY = "com.cauliflower.danielt.smartphoneradar";
 
     /*
