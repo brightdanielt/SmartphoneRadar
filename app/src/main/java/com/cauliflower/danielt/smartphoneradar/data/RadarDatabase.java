@@ -21,7 +21,7 @@ public abstract class RadarDatabase extends RoomDatabase {
         if (sInstance == null) {
             synchronized (RadarDatabase.class) {
                 if (sInstance == null) {
-                    return buildDatabase(context.getApplicationContext());
+                    sInstance = buildDatabase(context.getApplicationContext());
                 }
             }
         }
