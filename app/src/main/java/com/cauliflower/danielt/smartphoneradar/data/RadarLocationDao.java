@@ -20,12 +20,12 @@ public interface RadarLocationDao {
     RadarLocation getLatestLocation(String email);
 
     @Insert
-    void insertLocation(RadarLocation... locations);
+    void insertLocations(RadarLocation... locations);
 
     //位置是已發生的事實，不大可能要更新這筆位置，所以註解掉
     /*@Update
     void update();*/
 
     @Delete
-    void deleteLocation();
+    void deleteLocations(RadarLocation... locations);
 }
