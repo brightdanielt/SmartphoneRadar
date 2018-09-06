@@ -149,6 +149,8 @@
         這個想法先保留
 
         todo 25-4: 是時候加入 Room 了，這個決定會更動到所有與資料庫有關的 Class
+            我想更改個功能，原本在 AccountActivity 可以選擇要追蹤哪個對象，
+            改成在 MapsActivity 的 menu 選擇追蹤對象
 
 
 -->
