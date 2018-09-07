@@ -226,30 +226,9 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void subscribeToUserModel() {
-        //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，
-        // 我不需要重新查詢就能在畫面上顯示最新的資料，悲慘的是，這裡連重新查詢得不到預期的新資料
-        /*mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));*/
         mAdapter_targetTracked = new TargetTrackedAdapter(radarUser -> {
             radarUser.setInUse(!radarUser.getInUse());
             mUserViewModel.updateUsers(radarUser);
-            /*if (radarUser.getInUse()) {
-                MainDb.updateUser_in_use(AccountActivity.this, null);
-                updateTrackList();
-            } else {
-                new AlertDialog.Builder(AccountActivity.this)
-                        .setTitle(R.string.ask)
-                        .setMessage(Html.fromHtml("選擇 <font color=\"blue\">" + radarUser.getEmail() +
-                                "</font> \n為目前追蹤對象嗎？"))
-                        .setCancelable(false)
-                        .setPositiveButton(getString(R.string.sure), (dialog, which) -> {
-                            //要求 RadarDbHelper 更改該 RadarUser 的 in_use 為 yes
-                            MainDb.updateUser_in_use(AccountActivity.this, radarUser.getEmail());
-                            updateTrackList();
-                        })
-                        .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
-                        })
-                        .show();
-            }*/
         });
         mBinding.recyclerViewTargetTracked.setAdapter(mAdapter_targetTracked);
         mUserViewModel.getTargetsTracked().observe(AccountActivity.this,
@@ -260,13 +239,7 @@ public class AccountActivity extends AppCompatActivity {
                     }
                 }
         );
-        /*updateTrackList();*/
     }
-
-    /*private void updateTrackList() {
-        mAdapter_targetTracked.setUserList(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
-        mBinding.executePendingBindings();
-    }*/
 
     /**
      * Refresh user info depending on FirebaseUser.
