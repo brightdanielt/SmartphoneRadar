@@ -35,10 +35,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <provider
+        <!--<provider
             android:name=".data.RadarProvider"
             android:authorities="@string/content_authority"
-            android:exported="false" />
+            android:exported="false" />-->
 
         <activity
             android:name=".ui.SettingsActivity"
@@ -151,6 +151,14 @@
         todo 25-4: 是時候加入 Room 了，這個決定會更動到所有與資料庫有關的 Class
             我想更改個功能，原本在 AccountActivity 可以選擇要追蹤哪個對象，
             改成在 MapsActivity 的 menu 選擇追蹤對象
+
+        todo 25-4-1: 突然冒出很多想法，得整理一下...
+            1.使用者的帳號資訊，不儲存在手機內存
+                目的有兩個:  1.增加個資安全
+                            2.資料庫的設計更好理解，因為過去的 user 其實有兩種類型，一種是使用者本人，
+                              一種是使用者在追蹤的對象，現在改成都是 追蹤對象
+                如何實作：先登入 firebaseAuth，再根據 email 取得 firestore 資料
+                         （取得 firestore 資料之前需要驗證 email 與 IMEI）
 
 
 -->
