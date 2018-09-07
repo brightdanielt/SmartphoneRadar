@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -21,7 +22,6 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.telephony.TelephonyManager;
-import android.text.Html;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,12 +31,12 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
+import com.cauliflower.danielt.smartphoneradar.viewmodel.UserViewModel;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -50,8 +50,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.IN_USE_NO;
-import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.IN_USE_YES;
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_GETLOCATION;
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_SENDLOCATION;
 
@@ -76,6 +74,7 @@ public class AccountActivity extends AppCompatActivity {
     private MutableLiveData<QueryDocumentSnapshot> firestoreUser;
 
     private ActivityAccountBinding mBinding;
+    private UserViewModel mUserViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +86,8 @@ public class AccountActivity extends AppCompatActivity {
         }
         mBinding = DataBindingUtil.setContentView(
                 AccountActivity.this, R.layout.activity_account);
-        initRecyclerView();
+        mUserViewModel = ViewModelProviders.of(AccountActivity.this).get(UserViewModel.class);
+        subscribeToUserModel();
     }
 
     @Override
@@ -137,8 +137,8 @@ public class AccountActivity extends AppCompatActivity {
                     //新增使用者至內存
                     String email = queryDocumentSnapshot.getString(RadarFirestore.FIRESTORE_FIELD_EMAIL);
                     String password = queryDocumentSnapshot.getString(RadarFirestore.FIRESTORE_FIELD_PASSWORD);
-                    MainDb.addUser(AccountActivity.this,
-                            new RadarUser(email, password, USED_FOR_SENDLOCATION, IN_USE_YES));
+                    /*MainDb.addUser(AccountActivity.this,
+                            new RadarUser(email, password, USED_FOR_SENDLOCATION, IN_USE_YES));*/
                     mAuth.postValue(FirebaseAuth.getInstance());
                 } else {
                     //可能是在非綁定的裝置登入
@@ -225,12 +225,14 @@ public class AccountActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void initRecyclerView() {
+    private void subscribeToUserModel() {
         //todo 這邊若能使用 Room 跟 LiveData 會很方便，因為內存的 RadarUser 資料更新時，
         // 我不需要重新查詢就能在畫面上顯示最新的資料，悲慘的是，這裡連重新查詢得不到預期的新資料
-        mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));
+        /*mTargetTrackedList.addAll(MainDb.searchUser(this, USED_FOR_GETLOCATION));*/
         mAdapter_targetTracked = new TargetTrackedAdapter(radarUser -> {
-            if (radarUser.getIn_use().equals(RadarContract.UserEntry.IN_USE_YES)) {
+            radarUser.setInUse(!radarUser.getInUse());
+            mUserViewModel.updateUsers(radarUser);
+            /*if (radarUser.getInUse()) {
                 MainDb.updateUser_in_use(AccountActivity.this, null);
                 updateTrackList();
             } else {
@@ -247,16 +249,24 @@ public class AccountActivity extends AppCompatActivity {
                         .setNegativeButton(getString(R.string.cancel), (dialog, which) -> {
                         })
                         .show();
-            }
+            }*/
         });
         mBinding.recyclerViewTargetTracked.setAdapter(mAdapter_targetTracked);
-        updateTrackList();
+        mUserViewModel.getTargetsTracked().observe(AccountActivity.this,
+                radarUsers -> {
+                    if (radarUsers != null) {
+                        mAdapter_targetTracked.setUserList(radarUsers);
+                        mBinding.executePendingBindings();
+                    }
+                }
+        );
+        /*updateTrackList();*/
     }
 
-    private void updateTrackList() {
+    /*private void updateTrackList() {
         mAdapter_targetTracked.setUserList(MainDb.searchUser(AccountActivity.this, USED_FOR_GETLOCATION));
         mBinding.executePendingBindings();
-    }
+    }*/
 
     /**
      * Refresh user info depending on FirebaseUser.
@@ -299,9 +309,10 @@ public class AccountActivity extends AppCompatActivity {
                         //成功
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            MainDb.addUser(AccountActivity.this,
-                                    new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));
-                            updateTrackList();
+                            /*MainDb.addUser(AccountActivity.this,
+                                    new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));*/
+                            mUserViewModel.insertUsers(new RadarUser(email, password, USED_FOR_GETLOCATION, false));
+                            /*updateTrackList();*/
                         }
                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
                         //與 firestore 溝通成功，但找不到該使用者
@@ -401,8 +412,8 @@ public class AccountActivity extends AppCompatActivity {
             //建立使用者成功
             Toast.makeText(AccountActivity.this, R.string.createUser_success, Toast.LENGTH_SHORT).show();
             //寫入手機 database 使用者信箱、密碼 ，日後用於新建、查詢、更新位置
-            MainDb.addUser(AccountActivity.this,
-                    new RadarUser(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));
+            /*MainDb.addUser(AccountActivity.this,
+                    new RadarUser(user.getEmail(), password, USED_FOR_SENDLOCATION, IN_USE_YES));*/
             //因為 firestore 新增使用者成功，所以更新該值
             mAuth.postValue(FirebaseAuth.getInstance());
             //初始化座標文件
