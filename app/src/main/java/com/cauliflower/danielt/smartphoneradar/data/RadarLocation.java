@@ -19,9 +19,11 @@ import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.Locatio
 @Entity(tableName = RadarContract.LocationEntry.TABLE_LOCATION,primaryKeys = {COLUMN_LOCATION_EMAIL,COLUMN_LOCATION_TIME})
 public class RadarLocation {
 
+    @NonNull
     @ColumnInfo(name = COLUMN_LOCATION_EMAIL)
     private String email;
 
+    @NonNull
     @TypeConverters(RoomConverter.class)
     @ColumnInfo(name = COLUMN_LOCATION_TIME)
     private String time;

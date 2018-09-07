@@ -87,7 +87,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         List<RadarUser> trackingList = MainDb.searchUser(MapsActivity.this, RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (RadarUser targetTracked : trackingList) {
             //找出正在追蹤的對象
-            if (targetTracked.getIn_use().equals(RadarContract.UserEntry.IN_USE_YES)) {
+            if (targetTracked.getInUse()) {
                 //取得信箱與密碼
                 mEmail = targetTracked.getEmail().trim();
                 mPassword = targetTracked.getPassword().trim();

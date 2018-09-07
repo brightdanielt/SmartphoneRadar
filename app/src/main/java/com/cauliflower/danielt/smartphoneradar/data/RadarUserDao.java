@@ -24,7 +24,7 @@ public interface RadarUserDao {
 
     //回傳值若依照 SQLite 的規則，新增失敗應該回傳 -1
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    int insertUsers(RadarUser... users);
+    long[] insertUsers(RadarUser... users);
 
     @Update
     void updateUsers(RadarUser... users);

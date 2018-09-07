@@ -8,14 +8,14 @@ import java.util.Date;
 
 public class RoomConverter {
     @TypeConverter
-    String timestampToString(long timestamp) {
+    public String timestampToString(long timestamp) {
         final DateFormat format = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
         final Date date = new Date(timestamp);
         return format.format(date);
     }
 
     @TypeConverter
-    long dateToTimestamp(Date date) {
+    public long dateToTimestamp(Date date) {
         return date.getTime();
     }
 }

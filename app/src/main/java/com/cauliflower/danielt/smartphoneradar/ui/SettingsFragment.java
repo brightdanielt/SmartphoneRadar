@@ -161,8 +161,7 @@ public class SettingsFragment extends PreferenceFragment implements
         List<RadarUser> radarUserList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
         for (RadarUser targetTracked : radarUserList_targetTracked) {
             //存在追蹤目標
-            String in_use = targetTracked.getIn_use();
-            if (in_use.equals(RadarContract.UserEntry.IN_USE_YES)) {
+            if (targetTracked.getInUse()) {
                 mEmail_targetTracked = targetTracked.getEmail();
                 mPassword_targetTracked = targetTracked.getPassword();
                 mapsActivity.setEnabled(true);

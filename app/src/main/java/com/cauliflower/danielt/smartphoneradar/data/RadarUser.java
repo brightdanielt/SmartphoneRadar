@@ -18,6 +18,7 @@ public class RadarUser {
 
     //過去允許追蹤自己的位置，是為了測試方便，現在要禁止了，所以 PrimaryKey 只有 email
     @PrimaryKey
+    @NonNull
     @ColumnInfo(name = COLUMN_USER_EMAIL)
     private String email;
 
