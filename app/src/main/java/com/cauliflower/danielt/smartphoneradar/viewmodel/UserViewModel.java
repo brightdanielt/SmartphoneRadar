@@ -13,11 +13,13 @@ import java.util.List;
 
 public class UserViewModel extends AndroidViewModel {
     private DataRepository mRepository;
+    private LiveData<List<RadarUser>> trackingList;
 
     public UserViewModel(@NonNull Application application) {
         super(application);
         RadarApp app = ((RadarApp) application);
         mRepository = app.getRepository();
+        trackingList = mRepository.getTargetsTracked();
     }
 
     public void insertUsers(RadarUser... users) {
@@ -29,7 +31,7 @@ public class UserViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<RadarUser>> getTargetsTracked() {
-        return mRepository.getTargetsTracked();
+        return trackingList;
     }
 
     public void updateUsers(RadarUser... users) {
