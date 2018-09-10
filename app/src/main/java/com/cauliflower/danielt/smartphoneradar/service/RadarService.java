@@ -7,6 +7,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarDatabase;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
@@ -35,8 +37,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.List;
-
 public class RadarService extends Service {
 
     private String TAG = RadarService.class.getSimpleName();
@@ -47,7 +47,7 @@ public class RadarService extends Service {
     private LocationRequest mLocationRequest;
     private LocationCallback mLocationCallback;
 
-    private String mEmail, mPassword;
+    private String mEmail;
     private String mIMEI;
     //在 firebase 的座標文件數量
     private int mDocumentId = 1;
@@ -83,7 +83,7 @@ public class RadarService extends Service {
         }
         getUserIdentity();
 
-        if (mEmail != null && !mPassword.trim().equals("") && mIMEI != null) {
+        if (mEmail != null && mIMEI != null) {
             mInService = true;
             if (debug) {
                 showServiceStatus();
@@ -128,15 +128,6 @@ public class RadarService extends Service {
         if (firebaseUser != null) {
             mEmail = firebaseUser.getEmail();
         }
-
-        //根據 email 取得使用者 password
-        List<RadarUser> radarUserList = MainDb.searchUser(RadarService.this, RadarContract.UserEntry.USED_FOR_SENDLOCATION);
-        for (RadarUser radarUser : radarUserList) {
-            if (radarUser.getEmail().equals(mEmail)) {
-                mPassword = radarUser.getPassword();
-            }
-        }
-
     }
 
     /**
@@ -254,6 +245,14 @@ public class RadarService extends Service {
         PendingIntent contentIntent = PendingIntent.getActivity(
                 RadarService.this, 0, intent, 0);
 
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.pref_positioning))
+//                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.))
+                .setSmallIcon(R.drawable.ic_hat_notify)
+                .setWhen(System.currentTimeMillis())
+                .setContentIntent(contentIntent);
+
         //android O need a channel for notification
         NotificationChannel radarChannel = null;
         String channelId = "AndroidChannel";
@@ -263,17 +262,10 @@ public class RadarService extends Service {
             radarChannel.setBypassDnd(true);
             radarChannel.enableLights(false);
             radarChannel.enableVibration(true);
-        }
-
-        Notification.Builder builder = new Notification.Builder(getApplicationContext())
-                .setContentTitle(getString(R.string.app_name))
-                .setContentText(getString(R.string.pref_positioning))
-//                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.drawable.))
-                .setSmallIcon(R.drawable.ic_hat_notify)
-                .setWhen(System.currentTimeMillis())
-                .setContentIntent(contentIntent);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId(channelId);
+
+            NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            manager.createNotificationChannel(radarChannel);
         }
         RadarService.this.startForeground(333, builder.build());
     }
