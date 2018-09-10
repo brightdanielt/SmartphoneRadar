@@ -15,6 +15,20 @@ import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 
 public final class RadarPreferences {
 
+    public static void setTrackingTargetEmail(Context context, String email) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        String key_trackingTarget = context.getString(R.string.pref_key_trackingTarget);
+        editor.putString(key_trackingTarget, email);
+        editor.apply();
+    }
+
+    public static String getTrackingTargetEmail(Context context) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String key_trackingTarget = context.getString(R.string.pref_key_trackingTarget);
+        return preferences.getString(key_trackingTarget, "");
+    }
+
     //Get value of PositionEnable preference
     public static Boolean getPositionEnable(Context context) {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
