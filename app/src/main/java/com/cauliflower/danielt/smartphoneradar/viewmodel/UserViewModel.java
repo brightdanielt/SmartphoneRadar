@@ -31,11 +31,11 @@ public class UserViewModel extends AndroidViewModel {
         mFirestoreUser = new MutableLiveData<>();
     }
 
-    public MutableLiveData<FirebaseUser> getObservableAuthUser(){
+    public MutableLiveData<FirebaseUser> getObservableAuthUser() {
         return mAuthUser;
     }
 
-    public MutableLiveData<QueryDocumentSnapshot> getObservableFirestoreUser(){
+    public MutableLiveData<QueryDocumentSnapshot> getObservableFirestoreUser() {
         return mFirestoreUser;
     }
 
