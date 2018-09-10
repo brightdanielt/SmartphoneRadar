@@ -14,35 +14,24 @@ import java.util.List;
 
 public class LocationViewModel extends AndroidViewModel {
     private DataRepository mDataRepository;
-    private String mEmail;
-    private MediatorLiveData<List<RadarLocation>> observableData;
 
     public LocationViewModel(@NonNull Application application) {
         super(application);
         this.mDataRepository = ((RadarApp) application).getRepository();
-        /*this.mEmail = email;*/
-        observableData = new MediatorLiveData<>();
-    }
-
-    //If you start to track a target or change the target, call this method.
-    public void loadLocations(String email) {
-        mEmail = email;
-        observableData.addSource(getLocations(),
-                radarLocations -> observableData.postValue(radarLocations));
     }
 
     public void insertLocations(RadarLocation... locations) {
         mDataRepository.insertLocations(locations);
     }
 
-    private LiveData<List<RadarLocation>> getLocations() {
-        return mDataRepository.getLocations(mEmail);
+    public LiveData<List<RadarLocation>> getLocations(String email) {
+        return mDataRepository.getLocations(email);
     }
 
     //可能用不到～因為 getLocations 就夠用了
-    public RadarLocation getLatestLocation() {
+    /*public RadarLocation getLatestLocation() {
         return mDataRepository.getLatestLocation(mEmail);
-    }
+    }*/
 
     public void deleteLocations(RadarLocation... locations) {
         mDataRepository.deleteLocations(locations);

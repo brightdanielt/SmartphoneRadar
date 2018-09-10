@@ -1,5 +1,6 @@
 package com.cauliflower.danielt.smartphoneradar.ui;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -18,12 +19,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.data.MainDb;
-import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.data.RadarLocation;
-import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
+import com.cauliflower.danielt.smartphoneradar.viewmodel.LocationViewModel;
+import com.cauliflower.danielt.smartphoneradar.viewmodel.UserViewModel;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -62,10 +62,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LinearLayout mLinearLayout_wrapRecyclerView;
     private ListenerRegistration mLocationListenerRg;
 
-    //用於手機 DB
+    //內存的使用者位置清單
     private List<RadarLocation> mLocationList = new ArrayList<>();
 
     private String mEmail, mPassword;
+    private LocationViewModel mLocationViewModel;
+    private UserViewModel mUserViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,22 +80,74 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        mUserViewModel = ViewModelProviders.of(MapsActivity.this).get(UserViewModel.class);
+        mLocationViewModel = ViewModelProviders.of(MapsActivity.this).get(LocationViewModel.class);
+
+        subscribeToUserModel(RadarPreferences.getTrackingTargetEmail(MapsActivity.this));
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //查詢所有追蹤對象
-        List<RadarUser> trackingList = MainDb.searchUser(MapsActivity.this, RadarContract.UserEntry.USED_FOR_GETLOCATION);
-        for (RadarUser targetTracked : trackingList) {
-            //找出正在追蹤的對象
-            if (targetTracked.getInUse()) {
-                //取得信箱與密碼
-                mEmail = targetTracked.getEmail().trim();
-                mPassword = targetTracked.getPassword().trim();
-                break;
+    /**
+     * 取得追蹤目標的信箱跟密碼
+     */
+    private void subscribeToUserModel(String email) {
+        mUserViewModel.getUser(email).observe(this, trackingTarget -> {
+            if (trackingTarget != null) {
+                mEmail = trackingTarget.getEmail();
+                mPassword = trackingTarget.getPassword();
+
+                subscribeToLocationModel(trackingTarget.getEmail());
+
+                listenToFirestoreLocationUpdate();
             }
+        });
+    }
+
+    /**
+     * 觀察追蹤目標的座標
+     */
+    private void subscribeToLocationModel(String email) {
+        mLocationViewModel.getLocations(email).observe(MapsActivity.this, locations -> {
+            mLocationList = locations;
+            mLocationAdapter.notifyDataSetChanged();
+        });
+    }
+
+    /**
+     * 監聽追蹤目標的座標更新
+     */
+    private void listenToFirestoreLocationUpdate() {
+        mLocationListenerRg = RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, (value, e) -> {
+            //監聽失敗
+            if (e != null) {
+                Log.d(TAG, "setOnLocationUpdateListener failed", e);
+                return;
+            }
+            //Document has local changes that haven't been written to the backend yet
+        /*if (value.getMetadata().hasPendingWrites()) {
+            //代表監聽到 local 的更新，而非來自 firestore 的更新
+            //這是延遲補償的設計所導致的，但監聽座標不需要該功能
+            return;
+        }*/
+            //監聽成功
+            if (value != null) {
+                //處理座標資料
+                handleLocation(value);
+            }
+        });
+    }
+
+    /**
+     * When user change tracking target, call this method
+     */
+    private void changeTrackingTarget(String newTargetEmail) {
+        if (mLocationListenerRg != null) {
+            mLocationListenerRg.remove();
         }
+        if (mEmail != null) {
+            mLocationViewModel.getLocations(mEmail).removeObservers(MapsActivity.this);
+            mUserViewModel.getUser(mEmail).removeObservers(MapsActivity.this);
+        }
+        subscribeToUserModel(newTargetEmail);
     }
 
     /**
@@ -110,30 +164,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         mMap.setMyLocationEnabled(true);
         mMap.setOnMyLocationButtonClickListener(this);
-        makeViewWork();
 
-        //判斷是否查得正在追蹤對象
-        if (mEmail != null && mPassword != null) {
-            //監聽該追蹤對象的座標更新
-            mLocationListenerRg = RadarFirestore.setOnLocationUpdateListener(mEmail, mPassword, (value, e) -> {
-                //監聽失敗
-                if (e != null) {
-                    Log.d(TAG, "setOnLocationUpdateListener failed", e);
-                    return;
-                }
-                //Document has local changes that haven't been written to the backend yet
-                /*if (value.getMetadata().hasPendingWrites()) {
-                    //代表監聽到 local 的更新，而非來自 firestore 的更新
-                    //這是延遲補償的設計所導致的，但監聽座標不需要該功能
-                    return;
-                }*/
-                //監聽成功
-                if (value != null) {
-                    //處理座標資料
-                    handleLocation(value);
-                }
-            });
-        }
+        makeViewWork();
     }
 
     private void makeViewWork() {
@@ -143,8 +175,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRecyclerView_location = findViewById(R.id.recycler_locationList);
         mLinearLayout_wrapRecyclerView = findViewById(R.id.linearLayout_wrapRecyclerView);
 
-        //為避免 adapter 的觀察對象變更，導致 notify 失效，使用 addAll() 防止 locationList 記憶體位置更改
-        mLocationList.addAll(MainDb.searchAllLocation(MapsActivity.this, mEmail));
         mLocationAdapter = new LocationAdapter();
         //item 大小固定
         mRecyclerView_location.setHasFixedSize(true);
@@ -183,12 +213,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 //左右滑動後，從清單移除該項目
-                int position = viewHolder.getAdapterPosition();
                 //刪除內存資料庫的該筆資料
-                MainDb.deleteLocation(MapsActivity.this,
-                        (RadarLocation) viewHolder.itemView.getTag());
-                mLocationList.remove(position);
-                mLocationAdapter.notifyItemRemoved(position);
+                mLocationViewModel.deleteLocations((RadarLocation) viewHolder.itemView.getTag());
             }
         });
         //指定 RecyclerView 對象
@@ -276,9 +302,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 //手機端資料庫新增一筆 Location
                 RadarLocation radarLocation = new RadarLocation(mEmail, time, latitude, longitude);
-                MainDb.addLocation(MapsActivity.this, radarLocation);
-                //座標清單，新增一筆資料
-                mLocationAdapter.addNewLocation(radarLocation);
+                mLocationViewModel.insertLocations(radarLocation);
 
                 if (RadarPreferences.getShowNewMarkOnly(MapsActivity.this)) {
                     //移除所有標記，因為得到新標記後，前一個新標即視為舊標記
@@ -315,14 +339,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * 所以要就統一格式化，若不格式化，也可以 milliseconds 為判斷基礎，最不容易出錯
      */
     private boolean isExpiredDateFromServer(Date dateFromServer) {
-        String dateFromDbStr = MainDb.searchNewTime(MapsActivity.this, mEmail);
-        if (dateFromDbStr == null) {
+        if (mLocationList.size() == 0) {
             //尚無資料可比較
             return false;
         }
+        String dateFromList = mLocationList.get(mLocationList.size() - 1).getTime();
         try {
             String dateFromServerStr = DateFormat.getDateTimeInstance().format(dateFromServer);
-            Date dateFromDb = DateFormat.getDateTimeInstance().parse(dateFromDbStr);
+            Date dateFromDb = DateFormat.getDateTimeInstance().parse(dateFromList);
             dateFromServer = DateFormat.getDateTimeInstance().parse(dateFromServerStr);
 
             /*int j = dateFromDb.compareTo(dateFromServer);
@@ -445,6 +469,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 showNewMarkOnly(newChecked);
                 break;
             }
+            //todo add new item for changing target tracked
         }
         return super.onOptionsItemSelected(item);
     }
@@ -506,15 +531,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         public int getItemCount() {
             return mLocationList.size();
-        }
-
-        public void addNewLocation(RadarLocation radarLocation) {
-            if (mLocationList != null) {
-                mLocationList.add(radarLocation);
-                //刷新座標清單
-                LocationAdapter.this.notifyDataSetChanged();
-                mRecyclerView_location.scrollToPosition(mLocationList.size() - 1);
-            }
         }
     }
 }
