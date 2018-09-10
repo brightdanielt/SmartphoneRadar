@@ -29,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.data.MainDb;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
@@ -89,7 +89,6 @@ public class AccountActivity extends AppCompatActivity {
 
         getPhoneInfo();
 
-
         mUserViewModel = ViewModelProviders.of(AccountActivity.this).get(UserViewModel.class);
 
         subscribeToUserModel();
@@ -110,7 +109,9 @@ public class AccountActivity extends AppCompatActivity {
 
         mTargetTrackedAdapter = new TargetTrackedAdapter(radarUser -> {
             radarUser.setInUse(!radarUser.getInUse());
-            mUserViewModel.updateUsers(radarUser);
+            //todo 這個功能應該由偏好設定達成，而且要放在 MapsActivity
+            //RadarUser.inUse 欄位可以去掉
+            RadarPreferences.setTrackingTargetEmail(AccountActivity.this, radarUser.getEmail());
         });
         mBinding.recyclerViewTargetTracked.setAdapter(mTargetTrackedAdapter);
     }
@@ -294,7 +295,7 @@ public class AccountActivity extends AppCompatActivity {
             //因為 firestore 新增使用者成功，完成所有登入與驗證，所以更新該值
             mUserViewModel.getObservableAuthUser().postValue(FirebaseAuth.getInstance().getCurrentUser());
             //初始化座標文件
-            initFirestoreLocation(user);
+            initFirestoreLocation(user, password);
         }, e -> {
             //建立使用者失敗
             //以資料結構設計正確為前提，不會建立失敗，除非是網路或 firestore 有問題
@@ -311,26 +312,18 @@ public class AccountActivity extends AppCompatActivity {
     /**
      * 建立使用者成功後，為使用者初始化 firestore 座標文件
      */
-    private void initFirestoreLocation(FirebaseUser firebaseUser) {
-        String email;
-        String password = "";
+    private void initFirestoreLocation(FirebaseUser firebaseUser, String password) {
         if (firebaseUser == null) {
             RadarAuthentication.signOut(AccountActivity.this, null);
             return;
         }
-        email = firebaseUser.getEmail();
-        if (email == null || email.trim().equals("")) {
+        String email = firebaseUser.getEmail();
+        if (email == null || email.equals("")) {
             showNoEmailDialog();
             RadarAuthentication.signOut(AccountActivity.this, null);
             return;
         }
-        List<RadarUser> radarUserList = MainDb.searchUser(AccountActivity.this, USED_FOR_SENDLOCATION);
-        for (RadarUser radarUser : radarUserList) {
-            if (radarUser.getEmail().equals(firebaseUser.getEmail())) {
-                password = radarUser.getPassword();
-            }
-        }
-        if (!password.trim().equals("")) {
+        if (!password.equals("")) {
             //初始化 1 個座標
             for (int documentId = 1; documentId <= MAX_DOCUMENT_LOCATION; documentId++) {
                 RadarFirestore.createLocation(String.valueOf(documentId), email, password,
@@ -344,6 +337,11 @@ public class AccountActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (mUserViewModel.getObservableFirestoreUser().getValue() == null) {
+            //activity 銷毀時，如果 UserViewModel.getObservableFirestoreUser() 值是 null，代表驗證失敗
+            // 登出 FirebaseAuth
+            RadarAuthentication.signOut(AccountActivity.this, null);
+        }
         if (mDialog_loading != null && mDialog_loading.isShowing()) {
             mDialog_loading.dismiss();
         }
@@ -542,10 +540,7 @@ public class AccountActivity extends AppCompatActivity {
                         //成功
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            /*MainDb.addUser(AccountActivity.this,
-                                    new RadarUser(email, password, USED_FOR_GETLOCATION, IN_USE_NO));*/
                             mUserViewModel.insertUsers(new RadarUser(email, password, USED_FOR_GETLOCATION, false));
-                            /*updateTrackList();*/
                         }
                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
                         //與 firestore 溝通成功，但找不到該使用者
