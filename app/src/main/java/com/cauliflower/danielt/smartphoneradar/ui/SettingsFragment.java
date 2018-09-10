@@ -20,17 +20,12 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.data.MainDb;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
-import com.cauliflower.danielt.smartphoneradar.data.RadarContract;
-import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.List;
 
 // Create SettingsFragment and extend PreferenceFragment
 public class SettingsFragment extends PreferenceFragment implements
@@ -38,7 +33,7 @@ public class SettingsFragment extends PreferenceFragment implements
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
     private FirebaseAuth mAuth;
-    String mEmail_targetTracked, mPassword_targetTracked;
+    private String mTrackingTargetEmail;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,7 +106,7 @@ public class SettingsFragment extends PreferenceFragment implements
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
         String key = preference.getKey();
         if (key.equals(getString(R.string.pref_key_MapsActivity))) {
-            if (mEmail_targetTracked != null) {
+            if (mTrackingTargetEmail != null) {
                 Intent i = new Intent();
                 i.setClass(getActivity(), MapsActivity.class);
                 startActivity(i);
@@ -157,17 +152,12 @@ public class SettingsFragment extends PreferenceFragment implements
         //MapsActivity preference
         setPreferenceSummary(mapsActivity, "");
         mapsActivity.setEnabled(false);
-        //向資料庫查詢追蹤目標
-        List<RadarUser> radarUserList_targetTracked = MainDb.searchUser(getActivity(), RadarContract.UserEntry.USED_FOR_GETLOCATION);
-        for (RadarUser targetTracked : radarUserList_targetTracked) {
-            //存在追蹤目標
-            if (targetTracked.getInUse()) {
-                mEmail_targetTracked = targetTracked.getEmail();
-                mPassword_targetTracked = targetTracked.getPassword();
-                mapsActivity.setEnabled(true);
-                setPreferenceSummary(mapsActivity, mEmail_targetTracked);
-                break;
-            }
+
+        //向偏好設定查詢追蹤目標
+        mTrackingTargetEmail = RadarPreferences.getTrackingTargetEmail(getActivity());
+        if (!mTrackingTargetEmail.equals("")) {
+            mapsActivity.setEnabled(true);
+            setPreferenceSummary(mapsActivity, mTrackingTargetEmail);
         }
 
         //取得使用者資訊
