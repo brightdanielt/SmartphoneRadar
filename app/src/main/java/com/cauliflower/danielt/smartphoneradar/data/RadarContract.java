@@ -83,26 +83,10 @@ public class RadarContract {
         public final static String COLUMN_USER_USED_FOR = "userFor";
 
         /**
-         * To tell if the user is using.
-         * <p>
-         * The only possible value are {@link #IN_USE_YES},{@link #IN_USE_NO}
-         * <p>
-         * Type: TEXT
-         */
-        public final static String COLUMN_USER_IN_USE = "inUse";
-
-        /**
          * Possible values for the usedFor of the user.
          */
         public static final String USED_FOR_SENDLOCATION = "usedFor_sendLocation";
         public static final String USED_FOR_GETLOCATION = "usedFor_getLocation";
-
-        /**
-         * Possible values for the inUse of the user.
-         */
-        public static final String IN_USE_YES = "in_use_yes";
-        public static final String IN_USE_NO = "in_use_no";
-
     }
 
     /**

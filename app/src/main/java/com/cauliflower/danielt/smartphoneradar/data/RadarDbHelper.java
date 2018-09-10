@@ -31,7 +31,6 @@ public class RadarDbHelper extends SQLiteOpenHelper {
                 UserEntry.COLUMN_USER_EMAIL + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_PASSWORD + " TEXT NOT NULL, " +
                 UserEntry.COLUMN_USER_USED_FOR + " TEXT NOT NULL, " +
-                UserEntry.COLUMN_USER_IN_USE + " TEXT NOT NULL, " +
                 " UNIQUE( " + UserEntry.COLUMN_USER_EMAIL + " , " + UserEntry.COLUMN_USER_USED_FOR + " ) " +
                 " ) "
         );

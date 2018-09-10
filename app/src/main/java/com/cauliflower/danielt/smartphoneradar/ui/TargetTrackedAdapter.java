@@ -67,8 +67,7 @@ public class TargetTrackedAdapter extends RecyclerView.Adapter<TargetTrackedAdap
                     //todo 不知怎麼搞的，mUserList 比對前，已經更新成新的值，所以這個方法每次都回傳 true😠😠😠🔥🔥🔥
                     /*return oldUser.getEmail().equals(newUser.getEmail()) &&
                             oldUser.getPassword().equals(newUser.getPassword()) &&
-                            oldUser.getUsedFor().equals(newUser.getUsedFor()) &&
-                            oldUser.getInUse() == newUser.getInUse();*/
+                            oldUser.getUsedFor().equals(newUser.getUsedFor());*/
                     return false;
                 }
             });

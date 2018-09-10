@@ -132,30 +132,6 @@ public final class MainDb {
         return radarUserList;
     }
 
-    //更新使用者為已登入
-
-    public static void updateUser_in_use(Context context, String email) {
-        //先更新所有 getLocation 帳號為未登入
-        ContentValues values_in_use_no = new ContentValues();
-        values_in_use_no.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, RadarContract.UserEntry.IN_USE_NO);
-        int i = context.getContentResolver().update(
-                RadarContract.UserEntry.CONTENT_URI,
-                values_in_use_no, RadarContract.UserEntry.COLUMN_USER_USED_FOR + "=?",
-                new String[]{RadarContract.UserEntry.USED_FOR_GETLOCATION});
-        Log.i(context.getClass().getSimpleName(), "update user column in_use,count:" + i);
-        if (email == null) {
-            return;
-        }
-        //再更新指定的使用者為已登入
-        ContentValues values_in_use_yes = new ContentValues();
-        values_in_use_yes.put(RadarContract.UserEntry.COLUMN_USER_IN_USE, RadarContract.UserEntry.IN_USE_YES);
-        int j = context.getContentResolver().update(RadarContract.UserEntry.CONTENT_URI,
-                values_in_use_yes,
-                RadarContract.UserEntry.COLUMN_USER_EMAIL + "=?",
-                new String[]{email});
-        Log.i(context.getClass().getSimpleName(), "update user column in_use,count:" + j);
-    }
-
     public static void updatePassword(Context context, String email, String password) {
         Cursor c = context.getContentResolver().query(
                 RadarContract.UserEntry.CONTENT_URI,

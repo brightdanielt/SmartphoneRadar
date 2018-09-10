@@ -108,7 +108,6 @@ public class AccountActivity extends AppCompatActivity {
                 AccountActivity.this, R.layout.activity_account);
 
         mTargetTrackedAdapter = new TargetTrackedAdapter(radarUser -> {
-            radarUser.setInUse(!radarUser.getInUse());
             //todo 這個功能應該由偏好設定達成，而且要放在 MapsActivity
             //RadarUser.inUse 欄位可以去掉
             RadarPreferences.setTrackingTargetEmail(AccountActivity.this, radarUser.getEmail());
@@ -540,7 +539,7 @@ public class AccountActivity extends AppCompatActivity {
                         //成功
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            mUserViewModel.insertUsers(new RadarUser(email, password, USED_FOR_GETLOCATION, false));
+                            mUserViewModel.insertUsers(new RadarUser(email, password, USED_FOR_GETLOCATION));
                         }
                     } else if (task.isSuccessful() && task.getResult().size() < 1) {
                         //與 firestore 溝通成功，但找不到該使用者

@@ -34,9 +34,6 @@ public class RadarLocation {
     @ColumnInfo(name = COLUMN_LOCATION_LONGITUDE)
     private double longitude;
 
-    public RadarLocation() {
-    }
-
     public RadarLocation(String email, String time, double latitude, double longitude) {
         this.email = email;
         this.time = time;
