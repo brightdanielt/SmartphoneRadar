@@ -17,4 +17,10 @@
         android:title="@string/showNewMarkOnly"
         app:actionViewClass="android.widget.CheckBox"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_changeTarget"
+        android:orderInCategory="3"
+        android:title="@string/changeTrackingTarget"
+        app:showAsAction="never" />
 </menu>

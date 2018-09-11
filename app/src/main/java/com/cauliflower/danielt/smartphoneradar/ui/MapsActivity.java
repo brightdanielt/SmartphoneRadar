@@ -2,6 +2,7 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
+import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.data.RadarLocation;
 import com.cauliflower.danielt.smartphoneradar.viewmodel.LocationViewModel;
@@ -140,6 +142,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      * When user change tracking target, call this method
      */
     private void changeTrackingTarget(String newTargetEmail) {
+        if (newTargetEmail == null) {
+            return;
+        }
         if (mLocationListenerRg != null) {
             mLocationListenerRg.remove();
         }
@@ -148,6 +153,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mUserViewModel.getUser(mEmail).removeObservers(MapsActivity.this);
         }
         subscribeToUserModel(newTargetEmail);
+        Log.i(TAG, "Change target tracked");
     }
 
     /**
@@ -470,6 +476,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             }
             //todo add new item for changing target tracked
+            case R.id.action_changeTarget: {
+                //Show the dialog for choosing target.
+                ChooseTargetDialog dialog = new ChooseTargetDialog();
+                List<RadarUser> targets = mUserViewModel.getTargetsSync();
+                CharSequence[] targetsSequences = new CharSequence[targets.size()];
+                for (int i = 0; i < targets.size(); i++) {
+                    targetsSequences[i] = targets.get(i).getEmail();
+                }
+                dialog.setItemCharSequences(targetsSequences);
+                dialog.setListener(new ChooseTargetDialog.DialogListener() {
+                    @Override
+                    public void onPositiveClick(DialogInterface dialogInterface, String selectValue) {
+                        changeTrackingTarget(selectValue);
+                        Log.i(TAG, "Select item: " + selectValue);
+                    }
+
+                    @Override
+                    public void onNegativeClick(DialogInterface dialogInterface) {
+                        //nothing
+                    }
+                });
+                dialog.show(getSupportFragmentManager(), "ChooseTargetDialog");
+            }
         }
         return super.onOptionsItemSelected(item);
     }
