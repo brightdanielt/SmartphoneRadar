@@ -160,6 +160,8 @@
                 如何實作：先登入 firebaseAuth，再根據 email 取得 firestore 資料
                          （取得 firestore 資料之後需要驗證 uid、email 與 IMEI）
 
+                後續：User 資料表已經不需要欄位：USED_FOR，可以移除
+
             2.當有多個追蹤對象時，應該選擇在 MapsActivity 顯示哪一個追蹤對象。
                 如何實作：在 MapsActivity 加新的 Menu item，點擊後顯示 DialogFragment，
                 顯示追蹤對象(單選)，再將選則結果儲存到 Preference;
