@@ -33,8 +33,12 @@ public class DataRepository {
         executor.execute(() -> mDatabase.radarUserDao().insertUsers(users));
     }
 
-    public LiveData<List<RadarUser>> getTargetsTracked() {
+    public LiveData<List<RadarUser>> getTargets() {
         return mDatabase.radarUserDao().getUsers(RadarContract.UserEntry.USED_FOR_GETLOCATION);
+    }
+
+    public List<RadarUser> getTargetsSync() {
+        return mDatabase.radarUserDao().getUsersSync(RadarContract.UserEntry.USED_FOR_GETLOCATION);
     }
 
     public LiveData<RadarUser> getUser(String email) {

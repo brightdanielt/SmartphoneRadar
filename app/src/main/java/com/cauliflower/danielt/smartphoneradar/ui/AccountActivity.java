@@ -46,10 +46,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_GETLOCATION;
-import static com.cauliflower.danielt.smartphoneradar.data.RadarContract.UserEntry.USED_FOR_SENDLOCATION;
 
 import com.cauliflower.danielt.smartphoneradar.databinding.ActivityAccountBinding;
 
@@ -141,7 +139,7 @@ public class AccountActivity extends AppCompatActivity {
 
     private void subscribeToUserModel() {
         //內存
-        mUserViewModel.getTargetsTracked().observe(AccountActivity.this,
+        mUserViewModel.getTargets().observe(AccountActivity.this,
                 radarUsers -> {
                     if (radarUsers != null) {
                         mTargetTrackedAdapter.setUserList(radarUsers);

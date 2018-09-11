@@ -30,7 +30,7 @@ public abstract class RadarDatabase extends RoomDatabase {
     @NonNull
     private static RadarDatabase buildDatabase(Context applicationContext) {
         return Room.databaseBuilder(applicationContext, RadarDatabase.class, DATABASE_NAME)
-                /*.allowMainThreadQueries()*/
+                .allowMainThreadQueries()
                 //終於不用製造假資料了！通常假資料會在 addCallback 時，加入資料庫
                 /*.addCallback(new Callback() {
                     @Override

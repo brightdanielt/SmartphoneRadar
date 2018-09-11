@@ -3,6 +3,7 @@ package com.cauliflower.danielt.smartphoneradar.viewmodel;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class UserViewModel extends AndroidViewModel {
     private DataRepository mRepository;
-    private LiveData<List<RadarUser>> trackingList;
+    private MediatorLiveData<List<RadarUser>> targetList;
 
     private MutableLiveData<FirebaseUser> mAuthUser;
     private MutableLiveData<QueryDocumentSnapshot> mFirestoreUser;
@@ -25,7 +26,9 @@ public class UserViewModel extends AndroidViewModel {
         super(application);
         RadarApp app = ((RadarApp) application);
         mRepository = app.getRepository();
-        trackingList = mRepository.getTargetsTracked();
+        targetList = new MediatorLiveData<>();
+        targetList.addSource(mRepository.getTargets(),
+                radarUsers -> targetList.setValue(radarUsers));
 
         mAuthUser = new MutableLiveData<>();
         mFirestoreUser = new MutableLiveData<>();
@@ -47,8 +50,12 @@ public class UserViewModel extends AndroidViewModel {
         return mRepository.getUser(email);
     }
 
-    public LiveData<List<RadarUser>> getTargetsTracked() {
-        return trackingList;
+    public LiveData<List<RadarUser>> getTargets() {
+        return targetList;
+    }
+
+    public List<RadarUser> getTargetsSync() {
+        return mRepository.getTargetsSync();
     }
 
     public void updateUsers(RadarUser... users) {

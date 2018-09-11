@@ -22,6 +22,9 @@ public interface RadarUserDao {
     @Query("SELECT * FROM user WHERE userFor = :usedFor")
     LiveData<List<RadarUser>> getUsers(String usedFor);
 
+    @Query("SELECT * FROM user WHERE userFor = :usedFor")
+    List<RadarUser> getUsersSync(String usedFor);
+
     //回傳值若依照 SQLite 的規則，新增失敗應該回傳 -1
     @Insert(onConflict = OnConflictStrategy.ABORT)
     long[] insertUsers(RadarUser... users);
