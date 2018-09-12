@@ -29,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
-import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
 import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
@@ -105,11 +104,7 @@ public class AccountActivity extends AppCompatActivity {
         mBinding = DataBindingUtil.setContentView(
                 AccountActivity.this, R.layout.activity_account);
 
-        mTargetTrackedAdapter = new TargetTrackedAdapter(radarUser -> {
-            //todo 這個功能應該由偏好設定達成，而且要放在 MapsActivity
-            //RadarUser.inUse 欄位可以去掉
-            RadarPreferences.setTrackingTargetEmail(AccountActivity.this, radarUser.getEmail());
-        });
+        mTargetTrackedAdapter = new TargetTrackedAdapter(null);
         mBinding.recyclerViewTargetTracked.setAdapter(mTargetTrackedAdapter);
     }
 

@@ -142,7 +142,7 @@
         todo 15-1: 目前最不滿意的是 AccountActivity 這個 class，先試著使用 LiveData 的“可觀察”特性，
         觀察 FirebaseAuth 以減少自行檢查 FirebaseAuth 登入狀況
 
-        todo 15-2: 使用 DataBinding 修改 AccountActivity
+        todo 15-2: 使用 DataBinding 修改 AccountActivity done
 
         todo 15-3: 在想可不可以將 DataBinding 使用在 AccountActivity 中的 dialog，
         但這是不是代表要在 AccountActivity 的 layout 檔中加入 Dialog，而且 DataBinding 的 dialog 似乎沒有更好用
@@ -150,7 +150,7 @@
 
         todo 25-4: 是時候加入 Room 了，這個決定會更動到所有與資料庫有關的 Class
             我想更改個功能，原本在 AccountActivity 可以選擇要追蹤哪個對象，
-            改成在 MapsActivity 的 menu 選擇追蹤對象
+            改成在 MapsActivity 的 menu 選擇追蹤對象 done
 
         todo 25-4-1: 突然冒出很多想法，得整理一下...
             1.使用者的帳號資訊，不儲存在手機內存
@@ -158,14 +158,18 @@
                             2.資料庫的設計更好理解，因為過去的 user 其實有兩種類型，一種是使用者本人，
                               一種是使用者在追蹤的對象，現在改成都是 追蹤對象
                 如何實作：先登入 firebaseAuth，再根據 email 取得 firestore 資料
-                         （取得 firestore 資料之後需要驗證 uid、email 與 IMEI）
+                         （取得 firestore 資料之後需要驗證 uid、email 與 IMEI）done
 
                 後續：User 資料表已經不需要欄位：USED_FOR，可以移除
 
             2.當有多個追蹤對象時，應該選擇在 MapsActivity 顯示哪一個追蹤對象。
                 如何實作：在 MapsActivity 加新的 Menu item，點擊後顯示 DialogFragment，
                 顯示追蹤對象(單選)，再將選則結果儲存到 Preference;
-                而 MapsActivity 開啟時需要讀取 Preference ，得知應該顯示哪一個追蹤對象的位置
+                而 MapsActivity 開啟時需要讀取 Preference ，得知應該顯示哪一個追蹤對象的位置 done
+
+            3.新增追蹤目標時，Dialog 中需要輸入對象的 Email 與密碼，而這個Dialog 能使用 DialogFragment 製作，
+                不用綁在任一個 Activity，較為靈活。 MapsActivity 即有此需求，因為目前是轉跳到 AccountActivity
+                比較 low ~
 
 
 -->

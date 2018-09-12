@@ -3,6 +3,7 @@ package com.cauliflower.danielt.smartphoneradar.ui;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,7 +19,7 @@ public class TargetTrackedAdapter extends RecyclerView.Adapter<TargetTrackedAdap
     private List<RadarUser> mUserList;
     private TargetTrackedClickCallback clickCallback;
 
-    public TargetTrackedAdapter(TargetTrackedClickCallback callback) {
+    public TargetTrackedAdapter(@Nullable TargetTrackedClickCallback callback) {
         clickCallback = callback;
     }
 
