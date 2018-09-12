@@ -118,7 +118,7 @@
 
     <!--MyDialog-->
     <string name="no_internet">請檢查網路是否已連線</string>
-    <string name="ok">好了</string>
+    <string name="ok">好</string>
     <string name="sure">確定</string>
     <string name="cancel">取消</string>
     <string name="title_signUp">註冊</string>
@@ -231,7 +231,11 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_settings2">Settings</string>
     <string name="pref_key_trackingTarget">trackingTarget</string>
+
+    <!--ChooseTargetDialog-->
+    <string name="QQ">QQ&#8230;</string>
     <string name="changeTrackingTarget">更改對象</string>
+    <string name="pleaseAddTargetFirst">請先到帳號畫面新增追蹤對象</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->

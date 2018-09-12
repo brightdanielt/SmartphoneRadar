@@ -9,7 +9,7 @@
 
     <PreferenceCategory android:title="@string/pref_category_title_MapsActivity">
         <Preference
-            android:enabled="false"
+            android:enabled="true"
             android:key="@string/pref_key_MapsActivity"
             android:title="@string/pref_title_MapsActivity" />
     </PreferenceCategory>

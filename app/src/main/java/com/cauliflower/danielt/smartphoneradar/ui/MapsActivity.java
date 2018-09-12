@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -91,7 +92,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * 取得追蹤目標的信箱跟密碼
      */
-    private void subscribeToUserModel(String email) {
+    private void subscribeToUserModel(@NonNull String email) {
+        if (email.equals("")) {
+            showChooseTargetDialog();
+            return;
+        }
         mUserViewModel.getUser(email).observe(this, trackingTarget -> {
             if (trackingTarget != null) {
                 mEmail = trackingTarget.getEmail();
@@ -477,30 +482,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             //todo add new item for changing target tracked
             case R.id.action_changeTarget: {
-                //Show the dialog for choosing target.
-                ChooseTargetDialog dialog = new ChooseTargetDialog();
-                List<RadarUser> targets = mUserViewModel.getTargetsSync();
-                CharSequence[] targetsSequences = new CharSequence[targets.size()];
-                for (int i = 0; i < targets.size(); i++) {
-                    targetsSequences[i] = targets.get(i).getEmail();
-                }
-                dialog.setItemCharSequences(targetsSequences);
-                dialog.setListener(new ChooseTargetDialog.DialogListener() {
-                    @Override
-                    public void onPositiveClick(DialogInterface dialogInterface, String selectValue) {
-                        changeTrackingTarget(selectValue);
-                        Log.i(TAG, "Select item: " + selectValue);
-                    }
-
-                    @Override
-                    public void onNegativeClick(DialogInterface dialogInterface) {
-                        //nothing
-                    }
-                });
-                dialog.show(getSupportFragmentManager(), "ChooseTargetDialog");
+                showChooseTargetDialog();
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Show the dialog for choosing target.
+     */
+    private void showChooseTargetDialog() {
+        ChooseTargetDialog dialog = new ChooseTargetDialog();
+        dialog.setCancelable(false);
+        List<RadarUser> targets = mUserViewModel.getTargetsSync();
+        CharSequence[] targetsSequences = new CharSequence[targets.size()];
+        for (int i = 0; i < targets.size(); i++) {
+            targetsSequences[i] = targets.get(i).getEmail();
+        }
+        dialog.setItemCharSequences(targetsSequences);
+        dialog.setListener(new ChooseTargetDialog.DialogListener() {
+            @Override
+            public void onPositiveClick(DialogInterface dialogInterface, String email) {
+                RadarPreferences.setTrackingTargetEmail(MapsActivity.this, email);
+                changeTrackingTarget(email);
+                Log.i(TAG, "Select item: " + email);
+            }
+
+            @Override
+            public void onNegativeClick(DialogInterface dialogInterface) {
+                //nothing
+            }
+        });
+        dialog.show(getSupportFragmentManager(), "ChooseTargetDialog");
     }
 
     @Override

@@ -151,12 +151,10 @@ public class SettingsFragment extends PreferenceFragment implements
 
         //MapsActivity preference
         setPreferenceSummary(mapsActivity, "");
-        mapsActivity.setEnabled(false);
 
         //向偏好設定查詢追蹤目標
         mTrackingTargetEmail = RadarPreferences.getTrackingTargetEmail(getActivity());
         if (!mTrackingTargetEmail.equals("")) {
-            mapsActivity.setEnabled(true);
             setPreferenceSummary(mapsActivity, mTrackingTargetEmail);
         }
 
