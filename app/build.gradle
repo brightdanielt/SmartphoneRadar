@@ -14,8 +14,8 @@ android {
         applicationId "com.cauliflower.danielt.smartphoneradar"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 16
-        versionName "1.1.0.3"
+        versionCode 17
+        versionName "1.2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         // Enabling multidex support.
