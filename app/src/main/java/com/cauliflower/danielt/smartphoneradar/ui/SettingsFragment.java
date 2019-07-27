@@ -21,24 +21,23 @@ import android.util.Log;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
+import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
 import com.cauliflower.danielt.smartphoneradar.service.NetWatcherJob;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
-import com.cauliflower.danielt.smartphoneradar.network.NetworkUtils;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 // Create SettingsFragment and extend PreferenceFragment
 public class SettingsFragment extends PreferenceFragment implements
         // Implement OnSharedPreferenceChangeListener from SettingsFragment
         SharedPreferences.OnSharedPreferenceChangeListener {
     private static final String TAG = SettingsFragment.class.getSimpleName();
-    private FirebaseAuth mAuth;
     private String mTrackingTargetEmail;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.pref_general);
+
     }
 
     // Unregister SettingsFragment (this) as a SharedPreferenceChangedListener in onStop
@@ -54,7 +53,6 @@ public class SettingsFragment extends PreferenceFragment implements
     @Override
     public void onStart() {
         super.onStart();
-        mAuth = FirebaseAuth.getInstance();
         /* Register the preference change listener */
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -159,14 +157,14 @@ public class SettingsFragment extends PreferenceFragment implements
         }
 
         //取得使用者資訊
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        if (firebaseUser != null) {
+        final String userEmail = RadarPreferences.getUserEmail(getActivity());
+        if (userEmail != null && !userEmail.equals("")) {
             //以登入
-            String email = firebaseUser.getEmail().trim();
+
 
             //position preference
             position.setEnabled(true);
-            setPreferenceSummary(position, email);
+            setPreferenceSummary(position, userEmail);
 
             //updateFrequency preference
             frequency.setEnabled(true);

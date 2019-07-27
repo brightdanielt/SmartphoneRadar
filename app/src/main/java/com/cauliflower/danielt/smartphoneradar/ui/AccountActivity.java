@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.RadarApp;
+import com.cauliflower.danielt.smartphoneradar.data.RadarPreferences;
 import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.databinding.ActivityAccountBinding;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
@@ -85,7 +86,7 @@ public class AccountActivity extends AppCompatActivity {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 if (currentAccessToken == null) {
-                    updateUI(null, null);
+                    logout();
                 }
             }
         };
@@ -203,7 +204,7 @@ public class AccountActivity extends AppCompatActivity {
                 boolean verifiedUser = compareUsers(Profile.getCurrentProfile(), email, snapshot);
                 if (verifiedUser) {
                     //驗證成功，更新ＵＩ
-                    updateUI(Profile.getCurrentProfile(), email);
+                    verifiedSuccess(Profile.getCurrentProfile(), email);
                 } else {
                     //驗證失敗
                     Log.w(TAG, "該帳號已綁定於其他裝置.");
@@ -279,7 +280,7 @@ public class AccountActivity extends AppCompatActivity {
             /*MainDb.addUser(AccountActivity.this,
                     new RadarUser(user.emailFromFb(), password, USED_FOR_SENDLOCATION, IN_USE_YES));*/
             //因為 firestore 新增使用者成功，完成所有登入與驗證，所以更新該值
-            updateUI(Profile.getCurrentProfile(), email);
+            verifiedSuccess(Profile.getCurrentProfile(), email);
             //初始化座標文件
             initFirestoreLocation(profile, email, password);
         }, e -> {
@@ -329,6 +330,9 @@ public class AccountActivity extends AppCompatActivity {
         if (mDialog_loading != null && mDialog_loading.isShowing()) {
             mDialog_loading.dismiss();
         }
+        if (mBinding.tvUserEmail.getText().equals("")) {
+            logout();
+        }
         mTokenTracker.stopTracking();
         mTokenTracker = null;
         mBinding.btnLoginFb.unregisterCallback(mCallbackManager);
@@ -343,6 +347,20 @@ public class AccountActivity extends AppCompatActivity {
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void verifiedSuccess(Profile profile, String email) {
+        updateUI(profile, email);
+        RadarPreferences.setUserEmail(AccountActivity.this, email);
+    }
+
+    private void verifiedFailed() {
+        logout();
+    }
+
+    private void logout() {
+        updateUI(null, null);
+        RadarPreferences.setUserEmail(AccountActivity.this, "");
     }
 
     /**

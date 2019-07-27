@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.preference.SwitchPreference;
 
 import com.cauliflower.danielt.smartphoneradar.R;
 import com.cauliflower.danielt.smartphoneradar.service.RadarService;
@@ -14,6 +13,20 @@ import com.cauliflower.danielt.smartphoneradar.service.RadarService;
  */
 
 public final class RadarPreferences {
+
+    public static void setUserEmail(Context context, String email) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        String key_userEmail = context.getString(R.string.pref_key_userEmail);
+        editor.putString(key_userEmail, email);
+        editor.apply();
+    }
+
+    public static String getUserEmail(Context context) {
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String userEmail = context.getString(R.string.pref_key_userEmail);
+        return preferences.getString(userEmail, "");
+    }
 
     public static void setTrackingTargetEmail(Context context, String email) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
