@@ -7,11 +7,11 @@ import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
+import com.cauliflower.danielt.smartphoneradar.fb.FbRepository;
 import com.cauliflower.danielt.smartphoneradar.RadarApp;
 import com.cauliflower.danielt.smartphoneradar.data.DataRepository;
 import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.facebook.AccessToken;
 
 import java.util.List;
 
@@ -19,27 +19,26 @@ public class UserViewModel extends AndroidViewModel {
     private DataRepository mRepository;
     private MediatorLiveData<List<RadarUser>> targetList;
 
-    private MutableLiveData<FirebaseUser> mAuthUser;
-    private MutableLiveData<QueryDocumentSnapshot> mFirestoreUser;
+    private MutableLiveData<String> mEmail;
+    private FbRepository mFbRepository;
 
     public UserViewModel(@NonNull Application application) {
         super(application);
         RadarApp app = ((RadarApp) application);
         mRepository = app.getRepository();
+        mFbRepository = app.getFbRepository();
         targetList = new MediatorLiveData<>();
         targetList.addSource(mRepository.getTargets(),
                 radarUsers -> targetList.setValue(radarUsers));
 
-        mAuthUser = new MutableLiveData<>();
-        mFirestoreUser = new MutableLiveData<>();
+        mEmail = new MutableLiveData<>();
+        if (AccessToken.isCurrentAccessTokenActive()) {
+            mEmail = mFbRepository.getEmail(AccessToken.getCurrentAccessToken());
+        }
     }
 
-    public MutableLiveData<FirebaseUser> getObservableAuthUser() {
-        return mAuthUser;
-    }
-
-    public MutableLiveData<QueryDocumentSnapshot> getObservableFirestoreUser() {
-        return mFirestoreUser;
+    public MutableLiveData<String> emailFromFb(){
+        return mEmail;
     }
 
     public void insertUsers(RadarUser... users) {

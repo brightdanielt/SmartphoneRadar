@@ -102,7 +102,7 @@
     <string name="give_me_read_phone_state_permission">無法註冊，請授權電話資訊</string>
     <string name="signIn_failed">登入失敗</string>
     <string name="createUser_success">登入成功</string>
-    <string name="userFbHasNoEmail">您的Facebook帳號尚未設定Email</string>
+    <string name="userFbHasNoEmail">請先設定您在Facebook的Email</string>
     <string name="dialogTitle_positionSafe">定位安全</string>
     <string name="dialogMsg_pleaseSetPassword">請設定一組密碼，任何人皆需要該密碼，才能追蹤您的位置</string>
     <string name="addTargetTracked_success">新增追蹤目標成功</string>

@@ -7,12 +7,8 @@
     <data>
 
         <variable
-            name="authUser"
-            type="com.google.firebase.auth.FirebaseUser" />
-
-        <variable
-            name="photo"
-            type="android.graphics.drawable.Drawable" />
+            name="facebookProfile"
+            type="com.facebook.Profile" />
 
     </data>
 
@@ -27,6 +23,13 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/btn_loginFb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/small_margin" />
+
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -35,18 +38,18 @@
                     android:id="@+id/imgView_photo"
                     android:layout_width="@dimen/userPhoto_width"
                     android:layout_height="@dimen/userPhoto_height"
-                    android:layout_marginBottom="@dimen/small_margin"
                     android:layout_marginLeft="@dimen/small_margin"
                     android:layout_marginTop="@dimen/small_margin"
-                    android:background="@drawable/btn_bg_custom"
-                    android:onClick="clickPhoto"
-                    android:src="@{photo}" />
+                    android:layout_marginBottom="@dimen/small_margin"
+                    android:background="@drawable/com_facebook_button_icon"
+                    app:imageUrl="@{facebookProfile.getProfilePictureUri(100,100)}"
+                    app:error="@{@drawable/btn_bg_custom}"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/userPhoto_height"
-                    android:layout_marginLeft="@dimen/userPhoto_width"
                     android:layout_marginStart="@dimen/userPhoto_width"
+                    android:layout_marginLeft="@dimen/userPhoto_width"
                     android:gravity="center_vertical"
                     android:orientation="vertical"
                     android:paddingLeft="@dimen/small_margin">
@@ -70,7 +73,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.8"
-                            android:text="@{authUser.displayName}"
+                            android:text="@{facebookProfile.name}"
                             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
                     </LinearLayout>
 
@@ -93,7 +96,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.8"
-                            android:text="@{authUser.email}"
                             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
                     </LinearLayout>
 
@@ -116,7 +118,6 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="0.8"
-                            android:text="@{authUser.phoneNumber}"
                             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
                     </LinearLayout>
                 </LinearLayout>
