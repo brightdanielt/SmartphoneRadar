@@ -31,6 +31,7 @@ import com.cauliflower.danielt.smartphoneradar.data.RadarUser;
 import com.cauliflower.danielt.smartphoneradar.databinding.ActivityAccountBinding;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarAuthentication;
 import com.cauliflower.danielt.smartphoneradar.firebase.RadarFirestore;
+import com.cauliflower.danielt.smartphoneradar.service.RadarService;
 import com.cauliflower.danielt.smartphoneradar.tool.MyDialogBuilder;
 import com.cauliflower.danielt.smartphoneradar.viewmodel.UserViewModel;
 import com.facebook.AccessToken;
@@ -86,7 +87,7 @@ public class AccountActivity extends AppCompatActivity {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
                 if (currentAccessToken == null) {
-                    logout();
+                    logOut();
                 }
             }
         };
@@ -121,7 +122,7 @@ public class AccountActivity extends AppCompatActivity {
                                 getUserFromFirestoreAndVerify(Profile.getCurrentProfile(), email);
                             } else {
                                 showNoEmailDialog();
-                                LoginManager.getInstance().logOut();
+                                logOut();
                             }
                         });
             }
@@ -215,13 +216,13 @@ public class AccountActivity extends AppCompatActivity {
                             .setCancelable(true)
                             .create().show();
                     //強制登出
-                    LoginManager.getInstance().logOut();
+                    verifiedFailed();
                 }
             } else {
                 //不應該發生的錯誤
                 Log.d(TAG, "Task: checkUserExists failed.");
                 //強制登出
-                LoginManager.getInstance().logOut();
+                verifiedFailed();
             }
         });
     }
@@ -289,7 +290,7 @@ public class AccountActivity extends AppCompatActivity {
             mDialog_loading.dismiss();
             //關閉對話筐
             dialog.dismiss();
-            LoginManager.getInstance().logOut();
+            verifiedFailed();
             Toast.makeText(AccountActivity.this, R.string.signIn_failed, Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Error create user", e);
         });
@@ -300,7 +301,7 @@ public class AccountActivity extends AppCompatActivity {
      */
     private void initFirestoreLocation(Profile profile, String email, String password) {
         if (profile == null) {
-            LoginManager.getInstance().logOut();
+            logOut();
             return;
         }
         if (email == null || email.equals("")) {
@@ -322,16 +323,13 @@ public class AccountActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mBinding.tvUserEmail.getText() == null) {
+        if (mBinding.tvUserEmail.getText() == null ||mBinding.tvUserEmail.getText().equals("") ) {
             //activity 銷毀時，如果 ui 的 email 是 null，代表驗證失敗或尚未成功
             // 登出 FB
-            LoginManager.getInstance().logOut();
+            logOut();
         }
         if (mDialog_loading != null && mDialog_loading.isShowing()) {
             mDialog_loading.dismiss();
-        }
-        if (mBinding.tvUserEmail.getText().equals("")) {
-            logout();
         }
         mTokenTracker.stopTracking();
         mTokenTracker = null;
@@ -355,12 +353,17 @@ public class AccountActivity extends AppCompatActivity {
     }
 
     private void verifiedFailed() {
-        logout();
+        logOut();
     }
 
-    private void logout() {
+    private void logOut() {
+        LoginManager.getInstance().logOut();
         updateUI(null, null);
         RadarPreferences.setUserEmail(AccountActivity.this, "");
+        //登出後關閉定位功能
+        if (RadarService.mInService) {
+            RadarPreferences.stopRadarService(this);
+        }
     }
 
     /**
