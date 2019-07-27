@@ -45,7 +45,6 @@ public class RadarService extends Service {
     private String mIMEI;
     //在 firebase 的座標文件數量
     private int mDocumentId = 1;
-    private FirebaseAuth mAuth;
     private Location mLastValidLocation;
     private static final float VALID_DISTANCE = 50;
 
@@ -112,16 +111,12 @@ public class RadarService extends Service {
             Log.w(TAG, "Null IMEI");
             this.stopSelf();
         }
-        mAuth = FirebaseAuth.getInstance();
 
         //取得使用者 IMEI
         mIMEI = telephonyManager.getDeviceId();
 
         //取得使用者 email
-        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-        if (firebaseUser != null) {
-            mEmail = firebaseUser.getEmail();
-        }
+        mEmail = RadarPreferences.getUserEmail(this);
     }
 
     /**
