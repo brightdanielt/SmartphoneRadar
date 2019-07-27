@@ -34,6 +34,26 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+        <!--For facebook login-->
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_application_id" />
+
+        <activity
+            android:name="com.facebook.FacebookActivity"
+            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+            android:label="@string/app_name" />
+        <activity
+            android:name="com.facebook.CustomTabActivity"
+            android:exported="true">
+            <intent-filter><action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/facebook_login_protocol_scheme" />
+            </intent-filter>
+        </activity>
 
         <!--<provider
             android:name=".data.RadarProvider"
@@ -171,5 +191,10 @@
                 不用綁在任一個 Activity，較為靈活。 MapsActivity 即有此需求，因為目前是轉跳到 AccountActivity
                 比較 low ~
 
+        todo Facebook 官方通知， 登入FB圖案不符合樣式，必須改正，方法有兩個：
+        1. 自行模仿 fb 按鈕樣式，較省工，但也可能被退件
+        2. 使用 Facebook api 提供的 com.facebook.login.widget.LoginButton 內建標準按鈕，
+           但需使用 Facebook api，因為現有登入方法是 Firebase Authentication
 
+        當然是勇敢的選擇 Facebook api！
 -->
